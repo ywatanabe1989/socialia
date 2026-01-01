@@ -31,6 +31,8 @@ scitex/
 | Twitter/X | Concise, visual | #OpenScience #ResearchTools #LaTeX |
 | Reddit | Technical depth | r/LaTeX, r/PhD, r/AcademicPhilosophy |
 | Hacker News | Technical, clear value | Wait until polished release |
+| Note | Long-form, Japanese | JP tech community, tutorials, SEO |
+| Medium | Long-form articles | International reach, deep-dives |
 
 ## Content Ideas
 
