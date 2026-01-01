@@ -41,3 +41,4 @@ YYYY-MMDD-platform/
 | Project   | Status | Platforms |
 |-----------|--------|-----------|
 | figrecipe | Active | Reddit, LinkedIn |
+| scitex    | Active | LinkedIn, Twitter |
