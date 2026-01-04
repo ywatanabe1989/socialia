@@ -55,6 +55,12 @@ Manage SNS outreach for open-source projects (SciTeX ecosystem, FigRecipe, etc.)
 | figrecipe | Data visualization library  | Reddit, LinkedIn                 |
 | scitex    | Research workflow ecosystem | LinkedIn, Twitter, Note, Medium  |
 
+## Analytics
+
+| Project   | Platform         | Account          | Dashboard URL                                                                                        |
+|-----------|------------------|------------------|------------------------------------------------------------------------------------------------------|
+| scitex    | Google Analytics | social@scitex.ai | https://analytics.google.com/analytics/web/#/p518230835/reports/intelligenthome |
+
 ## Accounts
 
 | Platform  | Username/Handle | Email (Now)       | Email (Should be) | URL                                        | Env Var          |
