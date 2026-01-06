@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-01 14:31:22
+!-- Timestamp: 2026-01-06 11:52:43
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/social/CLAUDE.md
 !-- --- -->
@@ -111,5 +111,13 @@ TEL JA: +81-80-4022-3567
 
 Linkedin -> Personal
 https://www.linkedin.com/in/yusuke-watanabe-870953170/
+
+## User Requests
+### Screenshots
+Store screenshots/images in appropriate places (create if needed).
+The user will request to create drafts using them.
+### Automation
+Find the way how to automate posting in the social services such as X (twitter)
+Organize in `./automation/` directory
 
 <!-- EOF -->
