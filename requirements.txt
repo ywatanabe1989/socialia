@@ -1,0 +1,8 @@
+# Social Project Dependencies
+
+# PyPoster - unified social media posting
+# Install from local development:
+-e /home/ywatanabe/proj/pyposter[all,analytics]
+
+# Or install from PyPI (when published):
+# pyposter[all,analytics]
