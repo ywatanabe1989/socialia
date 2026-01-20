@@ -23,6 +23,7 @@ from ._commands import (
     cmd_analytics,
     cmd_status,
     cmd_mcp,
+    cmd_setup,
 )
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
@@ -188,6 +189,20 @@ Environment Variables:
         description="Display MCP server information",
     )
 
+    # setup command
+    setup_parser = subparsers.add_parser(
+        "setup",
+        help="Show platform setup instructions",
+        description="Display API setup guide for platforms",
+    )
+    setup_parser.add_argument(
+        "platform",
+        nargs="?",
+        choices=["twitter", "linkedin", "reddit", "youtube", "analytics", "all"],
+        default="all",
+        help="Platform to show setup for (default: all)",
+    )
+
     return parser
 
 
@@ -237,6 +252,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_status(output_json=args.json)
     elif args.command == "mcp":
         return cmd_mcp(args)
+    elif args.command == "setup":
+        return cmd_setup(args)
     else:
         parser.print_help()
         return 1
