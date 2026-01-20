@@ -65,4 +65,4 @@ jobs:
           socialia --help
           socialia post twitter "CI test" --dry-run
           socialia post linkedin "CI test" --dry-run
-          socialia help-recursive
+          socialia --help-recursive
