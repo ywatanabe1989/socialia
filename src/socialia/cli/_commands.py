@@ -2,6 +2,7 @@
 """CLI command handlers for socialia."""
 
 import json
+import os
 import sys
 
 from .. import __version__
@@ -10,6 +11,11 @@ from ..linkedin import LinkedInPoster
 from ..reddit import RedditPoster
 from ..analytics import GoogleAnalytics
 from ..youtube import YouTubePoster
+
+
+def _get_env(key: str, prefix: str = "SCITEX_") -> str | None:
+    """Get env var with SCITEX_ prefix fallback."""
+    return os.environ.get(f"{prefix}{key}") or os.environ.get(key)
 
 
 def get_poster(platform: str):
@@ -214,37 +220,31 @@ def cmd_analytics(args, output_json: bool = False) -> int:
 
 def cmd_status(output_json: bool = False) -> int:
     """Show configuration and environment status."""
-    import os
-
     env_vars = {
         "twitter": {
-            "SCITEX_X_CONSUMER_KEY": os.environ.get("SCITEX_X_CONSUMER_KEY"),
-            "SCITEX_X_CONSUMER_KEY_SECRET": os.environ.get(
-                "SCITEX_X_CONSUMER_KEY_SECRET"
-            ),
-            "SCITEX_X_ACCESSTOKEN": os.environ.get("SCITEX_X_ACCESSTOKEN"),
-            "SCITEX_X_ACCESSTOKEN_SECRET": os.environ.get(
-                "SCITEX_X_ACCESSTOKEN_SECRET"
-            ),
+            "SCITEX_X_CONSUMER_KEY": _get_env("X_CONSUMER_KEY"),
+            "SCITEX_X_CONSUMER_KEY_SECRET": _get_env("X_CONSUMER_KEY_SECRET"),
+            "SCITEX_X_ACCESSTOKEN": _get_env("X_ACCESSTOKEN"),
+            "SCITEX_X_ACCESSTOKEN_SECRET": _get_env("X_ACCESSTOKEN_SECRET"),
         },
         "linkedin": {
-            "LINKEDIN_ACCESS_TOKEN": os.environ.get("LINKEDIN_ACCESS_TOKEN"),
+            "SCITEX_LINKEDIN_ACCESS_TOKEN": _get_env("LINKEDIN_ACCESS_TOKEN"),
         },
         "reddit": {
-            "REDDIT_CLIENT_ID": os.environ.get("REDDIT_CLIENT_ID"),
-            "REDDIT_CLIENT_SECRET": os.environ.get("REDDIT_CLIENT_SECRET"),
-            "REDDIT_USERNAME": os.environ.get("REDDIT_USERNAME"),
-            "REDDIT_PASSWORD": os.environ.get("REDDIT_PASSWORD"),
+            "SCITEX_REDDIT_CLIENT_ID": _get_env("REDDIT_CLIENT_ID"),
+            "SCITEX_REDDIT_CLIENT_SECRET": _get_env("REDDIT_CLIENT_SECRET"),
+            "SCITEX_REDDIT_USERNAME": _get_env("REDDIT_USERNAME"),
+            "SCITEX_REDDIT_PASSWORD": _get_env("REDDIT_PASSWORD"),
         },
         "youtube": {
-            "YOUTUBE_CLIENT_SECRETS_FILE": os.environ.get(
+            "SCITEX_YOUTUBE_CLIENT_SECRETS_FILE": _get_env(
                 "YOUTUBE_CLIENT_SECRETS_FILE"
             ),
         },
         "analytics": {
-            "GA_MEASUREMENT_ID": os.environ.get("GA_MEASUREMENT_ID"),
-            "GA_API_SECRET": os.environ.get("GA_API_SECRET"),
-            "GA_PROPERTY_ID": os.environ.get("GA_PROPERTY_ID"),
+            "SCITEX_GA_MEASUREMENT_ID": _get_env("GA_MEASUREMENT_ID"),
+            "SCITEX_GA_API_SECRET": _get_env("GA_API_SECRET"),
+            "SCITEX_GA_PROPERTY_ID": _get_env("GA_PROPERTY_ID"),
         },
     }
 
@@ -315,3 +315,121 @@ def cmd_mcp(args) -> int:
     else:
         print("Error: Specify mcp subcommand (run, info)", file=sys.stderr)
         return 1
+
+
+SETUP_GUIDES = {
+    "twitter": """
+TWITTER/X SETUP
+===============
+
+1. Go to https://developer.x.com
+2. Create app with Read+Write permissions
+3. Generate API keys and access tokens
+
+Environment Variables:
+  export SCITEX_X_CONSUMER_KEY="..."
+  export SCITEX_X_CONSUMER_KEY_SECRET="..."
+  export SCITEX_X_ACCESSTOKEN="..."
+  export SCITEX_X_ACCESSTOKEN_SECRET="..."
+
+Test:
+  socialia post twitter "Test" --dry-run
+""",
+    "linkedin": """
+LINKEDIN SETUP
+==============
+
+1. Go to https://www.linkedin.com/developers/
+2. Create app, request 'Share on LinkedIn' product
+3. Generate token at Token Generator
+
+Environment Variables:
+  export SCITEX_LINKEDIN_ACCESS_TOKEN="..."
+
+Note: Tokens expire after 60 days.
+
+Test:
+  socialia post linkedin "Test" --dry-run
+""",
+    "reddit": """
+REDDIT SETUP
+============
+
+1. Go to https://www.reddit.com/prefs/apps
+2. Create 'script' type app
+
+Environment Variables:
+  export SCITEX_REDDIT_CLIENT_ID="..."
+  export SCITEX_REDDIT_CLIENT_SECRET="..."
+  export SCITEX_REDDIT_USERNAME="..."
+  export SCITEX_REDDIT_PASSWORD="..."
+
+Test:
+  socialia post reddit "Test" --subreddit test --dry-run
+""",
+    "youtube": """
+YOUTUBE SETUP
+=============
+
+1. Go to https://console.cloud.google.com/
+2. Enable YouTube Data API v3
+3. Create OAuth 2.0 credentials
+4. Download client_secrets.json
+
+Environment Variables:
+  export SCITEX_YOUTUBE_CLIENT_SECRETS_FILE="/path/to/client_secrets.json"
+
+Test:
+  socialia post youtube "Test" --video test.mp4 --dry-run
+""",
+    "analytics": """
+GOOGLE ANALYTICS SETUP
+======================
+
+PART 1: Send Events (Measurement Protocol)
+------------------------------------------
+1. Go to https://analytics.google.com/
+2. Admin > Data Streams > Select your stream
+3. Measurement Protocol API secrets > Create
+
+Environment Variables:
+  export SCITEX_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+  export SCITEX_GA_API_SECRET="..."
+
+Test:
+  socialia analytics track test_event
+
+PART 2: Read Data (Data API) - Optional
+---------------------------------------
+1. Get Property ID: GA Admin > Property Settings (numeric, e.g., 379172597)
+2. Go to https://console.cloud.google.com/
+3. Enable "Google Analytics Data API"
+4. IAM & Admin > Service Accounts > Create
+   - Name: socialia-analytics
+   - Create key > JSON > Download
+5. In GA: Admin > Property access management
+   - Add service account email with Viewer role
+
+Environment Variables:
+  export SCITEX_GA_PROPERTY_ID="379172597"
+  export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+
+Test:
+  socialia analytics realtime
+  socialia analytics pageviews
+  socialia analytics sources
+""",
+}
+
+
+def cmd_setup(args) -> int:
+    """Show platform setup instructions."""
+    platform = getattr(args, "platform", "all") or "all"
+
+    if platform == "all":
+        for name in ["twitter", "linkedin", "reddit", "youtube", "analytics"]:
+            print(SETUP_GUIDES[name])
+    else:
+        print(SETUP_GUIDES[platform])
+
+    return 0
