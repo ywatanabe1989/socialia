@@ -1,7 +1,6 @@
 """Tests for socialia CLI."""
 
 import pytest
-from unittest.mock import patch, MagicMock
 from socialia.cli import create_parser, main
 
 
@@ -83,8 +82,8 @@ class TestCLIMain:
         assert "usage:" in captured.out.lower() or "socialia" in captured.out.lower()
 
     def test_help_recursive(self, capsys):
-        """Test help-recursive command."""
-        result = main(["help-recursive"])
+        """Test --help-recursive option."""
+        result = main(["--help-recursive"])
         assert result == 0
         captured = capsys.readouterr()
         assert "SOCIALIA" in captured.out
@@ -97,3 +96,19 @@ class TestCLIMain:
         assert result == 1
         captured = capsys.readouterr()
         assert "error" in captured.err.lower()
+
+    def test_status_command(self, capsys):
+        """Test status command."""
+        result = main(["status"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "Socialia" in captured.out
+        assert "TWITTER" in captured.out or "twitter" in captured.out.lower()
+
+    def test_mcp_info_command(self, capsys):
+        """Test mcp info command."""
+        result = main(["mcp", "info"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "MCP" in captured.out
+        assert "social_post" in captured.out
