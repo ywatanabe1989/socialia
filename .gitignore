@@ -653,3 +653,9 @@ slurm_logs
 
 ### Project-specific overrides ###
 !CLAUDE.md
+
+### Ruff ###
+.ruff_cache/
+
+### Project artifacts ###
+GITIGNORED/
