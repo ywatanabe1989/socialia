@@ -34,14 +34,20 @@ class GoogleAnalytics:
             api_secret: Measurement Protocol API secret
             property_id: GA4 Property ID (numeric, for Data API)
         """
-        self.measurement_id = measurement_id or os.environ.get(
-            "SCITEX_GA_MEASUREMENT_ID", os.environ.get("GA_MEASUREMENT_ID")
+        self.measurement_id = measurement_id or (
+            os.environ.get("SOCIALIA_GA_MEASUREMENT_ID")
+            or os.environ.get("SCITEX_GA_MEASUREMENT_ID")
+            or os.environ.get("GA_MEASUREMENT_ID")
         )
-        self.api_secret = api_secret or os.environ.get(
-            "SCITEX_GA_API_SECRET", os.environ.get("GA_API_SECRET")
+        self.api_secret = api_secret or (
+            os.environ.get("SOCIALIA_GA_API_SECRET")
+            or os.environ.get("SCITEX_GA_API_SECRET")
+            or os.environ.get("GA_API_SECRET")
         )
-        self.property_id = property_id or os.environ.get(
-            "SCITEX_GA_PROPERTY_ID", os.environ.get("GA_PROPERTY_ID")
+        self.property_id = property_id or (
+            os.environ.get("SOCIALIA_GA_PROPERTY_ID")
+            or os.environ.get("SCITEX_GA_PROPERTY_ID")
+            or os.environ.get("GA_PROPERTY_ID")
         )
 
         # Measurement Protocol endpoint
@@ -89,15 +95,18 @@ class GoogleAnalytics:
         # Generate client_id if not provided
         if not client_id:
             import uuid
+
             client_id = str(uuid.uuid4())
 
         # Build payload
         payload = {
             "client_id": client_id,
-            "events": [{
-                "name": name,
-                "params": params or {},
-            }],
+            "events": [
+                {
+                    "name": name,
+                    "params": params or {},
+                }
+            ],
         }
 
         if user_id:
@@ -145,21 +154,27 @@ class GoogleAnalytics:
         Returns:
             dict with tracking result
         """
-        return self.track_event("social_post", {
-            "platform": platform,
-            "post_id": post_id,
-            "content_type": content_type,
-            "success": str(success).lower(),
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        return self.track_event(
+            "social_post",
+            {
+                "platform": platform,
+                "post_id": post_id,
+                "content_type": content_type,
+                "success": str(success).lower(),
+                "timestamp": datetime.utcnow().isoformat(),
+            },
+        )
 
     def track_social_delete(self, platform: str, post_id: str) -> dict:
         """Track a social media delete event."""
-        return self.track_event("social_delete", {
-            "platform": platform,
-            "post_id": post_id,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        return self.track_event(
+            "social_delete",
+            {
+                "platform": platform,
+                "post_id": post_id,
+                "timestamp": datetime.utcnow().isoformat(),
+            },
+        )
 
     def get_realtime_users(self) -> dict:
         """
@@ -267,12 +282,14 @@ class GoogleAnalytics:
 
             pages = []
             for row in response.rows:
-                pages.append({
-                    "path": row.dimension_values[0].value,
-                    "page_views": int(row.metric_values[0].value),
-                    "sessions": int(row.metric_values[1].value),
-                    "users": int(row.metric_values[2].value),
-                })
+                pages.append(
+                    {
+                        "path": row.dimension_values[0].value,
+                        "page_views": int(row.metric_values[0].value),
+                        "sessions": int(row.metric_values[1].value),
+                        "users": int(row.metric_values[2].value),
+                    }
+                )
 
             return {
                 "success": True,
@@ -315,27 +332,31 @@ class GoogleAnalytics:
             )
 
             client = BetaAnalyticsDataClient()
-            response = client.run_report(RunReportRequest(
-                property=f"properties/{self.property_id}",
-                date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
-                metrics=[
-                    Metric(name="sessions"),
-                    Metric(name="totalUsers"),
-                ],
-                dimensions=[
-                    Dimension(name="sessionSource"),
-                    Dimension(name="sessionMedium"),
-                ],
-            ))
+            response = client.run_report(
+                RunReportRequest(
+                    property=f"properties/{self.property_id}",
+                    date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
+                    metrics=[
+                        Metric(name="sessions"),
+                        Metric(name="totalUsers"),
+                    ],
+                    dimensions=[
+                        Dimension(name="sessionSource"),
+                        Dimension(name="sessionMedium"),
+                    ],
+                )
+            )
 
             sources = []
             for row in response.rows:
-                sources.append({
-                    "source": row.dimension_values[0].value,
-                    "medium": row.dimension_values[1].value,
-                    "sessions": int(row.metric_values[0].value),
-                    "users": int(row.metric_values[1].value),
-                })
+                sources.append(
+                    {
+                        "source": row.dimension_values[0].value,
+                        "medium": row.dimension_values[1].value,
+                        "sessions": int(row.metric_values[0].value),
+                        "users": int(row.metric_values[1].value),
+                    }
+                )
 
             # Sort by sessions descending
             sources.sort(key=lambda x: x["sessions"], reverse=True)
