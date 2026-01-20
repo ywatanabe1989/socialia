@@ -33,11 +33,11 @@ TWITTER/X SETUP
 2. Create app with Read+Write permissions
 3. Generate API keys and access tokens
 
-Environment Variables:
-  export SCITEX_X_CONSUMER_KEY="..."
-  export SCITEX_X_CONSUMER_KEY_SECRET="..."
-  export SCITEX_X_ACCESSTOKEN="..."
-  export SCITEX_X_ACCESSTOKEN_SECRET="..."
+Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+  export SOCIALIA_X_CONSUMER_KEY="..."
+  export SOCIALIA_X_CONSUMER_KEY_SECRET="..."
+  export SOCIALIA_X_ACCESSTOKEN="..."
+  export SOCIALIA_X_ACCESSTOKEN_SECRET="..."
 
 Test:
   socialia post twitter "Test" --dry-run
@@ -55,8 +55,8 @@ LINKEDIN SETUP
 2. Create app, request 'Share on LinkedIn' product
 3. Generate token at Token Generator
 
-Environment Variables:
-  export LINKEDIN_ACCESS_TOKEN="..."
+Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+  export SOCIALIA_LINKEDIN_ACCESS_TOKEN="..."
 
 Note: Tokens expire after 60 days.
 
@@ -75,11 +75,11 @@ REDDIT SETUP
 1. Go to https://www.reddit.com/prefs/apps
 2. Create 'script' type app
 
-Environment Variables:
-  export REDDIT_CLIENT_ID="..."
-  export REDDIT_CLIENT_SECRET="..."
-  export REDDIT_USERNAME="..."
-  export REDDIT_PASSWORD="..."
+Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+  export SOCIALIA_REDDIT_CLIENT_ID="..."
+  export SOCIALIA_REDDIT_CLIENT_SECRET="..."
+  export SOCIALIA_REDDIT_USERNAME="..."
+  export SOCIALIA_REDDIT_PASSWORD="..."
 
 Test:
   socialia post reddit "Test" --subreddit test --dry-run
@@ -98,8 +98,8 @@ YOUTUBE SETUP
 3. Create OAuth 2.0 credentials
 4. Download client_secrets.json
 
-Environment Variables:
-  export YOUTUBE_CLIENT_SECRETS_FILE="/path/to/client_secrets.json"
+Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+  export SOCIALIA_YOUTUBE_CLIENT_SECRETS_FILE="/path/to/client_secrets.json"
 
 Test:
   socialia post youtube "Test" --video test.mp4 --dry-run
@@ -119,9 +119,9 @@ PART 1: Send Events (Measurement Protocol)
 2. Admin > Data Streams > Select your stream
 3. Measurement Protocol API secrets > Create
 
-Environment Variables:
-  export SCITEX_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
-  export SCITEX_GA_API_SECRET="..."
+Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+  export SOCIALIA_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+  export SOCIALIA_GA_API_SECRET="..."
 
 Test:
   socialia analytics track test_event
@@ -138,7 +138,7 @@ PART 2: Read Data (Data API) - Optional
    - Add service account email with Viewer role
 
 Environment Variables:
-  export SCITEX_GA_PROPERTY_ID="379172597"
+  export SOCIALIA_GA_PROPERTY_ID="379172597"
   export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
 
 Test:
