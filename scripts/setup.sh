@@ -113,18 +113,38 @@ setup_analytics() {
 GOOGLE ANALYTICS SETUP
 ======================
 
+PART 1: Send Events (Measurement Protocol)
+------------------------------------------
 1. Go to https://analytics.google.com/
-2. Admin > Data Streams > Measurement Protocol API secrets
+2. Admin > Data Streams > Select your stream
+3. Measurement Protocol API secrets > Create
 
 Environment Variables:
-  export GA_MEASUREMENT_ID="G-XXXXXXXXXX"
-  export GA_API_SECRET="..."
-  export GA_PROPERTY_ID="..." (optional, for Data API)
+  export SCITEX_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+  export SCITEX_GA_API_SECRET="..."
 
 Test:
   socialia analytics track test_event
 
-Full guide: docs/SETUP.md
+PART 2: Read Data (Data API) - Optional
+---------------------------------------
+1. Get Property ID: GA Admin > Property Settings (numeric, e.g., 379172597)
+2. Go to https://console.cloud.google.com/
+3. Enable "Google Analytics Data API"
+4. IAM & Admin > Service Accounts > Create
+   - Name: socialia-analytics
+   - Create key > JSON > Download
+5. In GA: Admin > Property access management
+   - Add service account email with Viewer role
+
+Environment Variables:
+  export SCITEX_GA_PROPERTY_ID="379172597"
+  export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+
+Test:
+  socialia analytics realtime
+  socialia analytics pageviews
+  socialia analytics sources
 EOF
 }
 
