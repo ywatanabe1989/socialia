@@ -1,9 +1,8 @@
 """Google Analytics integration for tracking and metrics."""
 
 import os
-import json
 import requests
-from typing import Optional, Any
+from typing import Optional
 from datetime import datetime
 
 
@@ -35,9 +34,15 @@ class GoogleAnalytics:
             api_secret: Measurement Protocol API secret
             property_id: GA4 Property ID (numeric, for Data API)
         """
-        self.measurement_id = measurement_id or os.environ.get("GA_MEASUREMENT_ID")
-        self.api_secret = api_secret or os.environ.get("GA_API_SECRET")
-        self.property_id = property_id or os.environ.get("GA_PROPERTY_ID")
+        self.measurement_id = measurement_id or os.environ.get(
+            "SCITEX_GA_MEASUREMENT_ID", os.environ.get("GA_MEASUREMENT_ID")
+        )
+        self.api_secret = api_secret or os.environ.get(
+            "SCITEX_GA_API_SECRET", os.environ.get("GA_API_SECRET")
+        )
+        self.property_id = property_id or os.environ.get(
+            "SCITEX_GA_PROPERTY_ID", os.environ.get("GA_PROPERTY_ID")
+        )
 
         # Measurement Protocol endpoint
         self.mp_endpoint = "https://www.google-analytics.com/mp/collect"
