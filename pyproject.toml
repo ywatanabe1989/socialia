@@ -8,16 +8,16 @@ version = "0.1.0"
 description = "Unified social media management - posting, analytics, and insights"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0"}
 authors = [
-    {name = "SciTeX Team", email = "social@scitex.ai"}
+    {name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai"}
 ]
 keywords = ["social-media", "twitter", "cli", "automation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

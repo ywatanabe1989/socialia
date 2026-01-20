@@ -1,8 +1,10 @@
 # Socialia
 
-Unified social media management - posting, analytics, and insights.
+**Unified social media management — posting, analytics, and insights**
 
-Part of the [SciTeX](https://scitex.ai) ecosystem for scientific research automation.
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+Part of [**SciTeX™**](https://scitex.ai) for scientific research automation.
 
 ## Installation
 
@@ -194,6 +196,10 @@ def share_results(twitter=stx.INJECTED):
     twitter.post("New research results!")
 ```
 
-## License
+---
 
-MIT
+<p align="center">
+  <a href="https://scitex.ai" target="_blank"><img src="docs/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
+  <br>
+  AGPL-3.0 · social@scitex.ai
+</p>
