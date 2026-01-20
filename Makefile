@@ -58,33 +58,26 @@ install-all:
 
 # Setup
 setup:
-	@cat docs/SETUP.md
+	@./scripts/setup.sh all
 
 setup-twitter:
-	@echo "Twitter Setup"
-	@echo "============="
-	@echo "1. Go to https://developer.x.com"
-	@echo "2. Create app with Read+Write permissions"
-	@echo "3. Generate tokens"
-	@echo "4. Add to .env:"
-	@echo "   export SCITEX_X_CONSUMER_KEY=..."
-	@echo "   export SCITEX_X_CONSUMER_KEY_SECRET=..."
-	@echo "   export SCITEX_X_ACCESSTOKEN=..."
-	@echo "   export SCITEX_X_ACCESSTOKEN_SECRET=..."
-	@echo ""
-	@echo "Full guide: make setup | less"
+	@./scripts/setup.sh twitter
 
 setup-linkedin:
-	@echo "LinkedIn Setup"
-	@echo "=============="
-	@echo "1. Go to https://www.linkedin.com/developers/"
-	@echo "2. Create app, request 'Share on LinkedIn' product"
-	@echo "3. Generate token at Token Generator"
-	@echo "4. Add to .env:"
-	@echo "   export LINKEDIN_ACCESS_TOKEN=..."
-	@echo ""
-	@echo "Note: LinkedIn tokens expire after 60 days"
-	@echo "Full guide: make setup | less"
+	@./scripts/setup.sh linkedin
+
+setup-reddit:
+	@./scripts/setup.sh reddit
+
+setup-youtube:
+	@./scripts/setup.sh youtube
+
+setup-analytics:
+	@./scripts/setup.sh analytics
+
+# Status (calls CLI)
+status:
+	@socialia status
 
 # Check credentials
 check:
