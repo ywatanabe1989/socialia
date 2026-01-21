@@ -237,6 +237,12 @@ def create_parser() -> argparse.ArgumentParser:
     feed_parser.add_argument(
         "-m", "--mentions", action="store_true", help="Show mentions instead of posts"
     )
+    feed_parser.add_argument(
+        "-d",
+        "--detail",
+        action="store_true",
+        help="Show detailed output with full text",
+    )
     feed_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # check command - verify connections

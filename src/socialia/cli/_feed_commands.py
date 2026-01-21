@@ -36,6 +36,7 @@ def cmd_feed(args, output_json: bool = False) -> int:
 
     limit = getattr(args, "limit", 5)
     mentions_only = getattr(args, "mentions", False)
+    detail = getattr(args, "detail", False)
     results = {}
 
     for platform in platforms:
@@ -74,10 +75,13 @@ def cmd_feed(args, output_json: bool = False) -> int:
                 continue
 
             for i, item in enumerate(items[:limit]):
-                text = item.get("text", item.get("title", ""))[:80]
-                text = text.replace("\n", " ")
-                if len(text) > 77:
-                    text = text[:77] + "..."
+                full_text = item.get("text", item.get("title", ""))
+                if detail:
+                    text = full_text.replace("\n", "\n    ")
+                else:
+                    text = full_text[:80].replace("\n", " ")
+                    if len(full_text) > 77:
+                        text = text[:77] + "..."
                 likes = item.get("likes", item.get("score", ""))
                 retweets = item.get("retweets", "")
                 created = (
@@ -93,6 +97,10 @@ def cmd_feed(args, output_json: bool = False) -> int:
                     metrics.append(f"🔁 {retweets}")
                 if metrics:
                     print(f"    {' · '.join(metrics)}")
+                if detail:
+                    url = item.get("url", "")
+                    if url:
+                        print(f"    🔗 {url}")
                 if i < len(items[:limit]) - 1:
                     print()  # Blank line between posts
 
