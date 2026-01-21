@@ -10,8 +10,13 @@ from ._branding import get_env
 class Twitter(BasePoster):
     """Twitter/X API v2 client using OAuth 1.0a."""
 
+    platform_name = "twitter"
+
     POST_ENDPOINT = "https://api.x.com/2/tweets"
     DELETE_ENDPOINT = "https://api.x.com/2/tweets/{tweet_id}"
+    ME_ENDPOINT = "https://api.x.com/2/users/me"
+    USER_TWEETS_ENDPOINT = "https://api.x.com/2/users/{user_id}/tweets"
+    USER_MENTIONS_ENDPOINT = "https://api.x.com/2/users/{user_id}/mentions"
 
     def __init__(
         self,
@@ -144,3 +149,134 @@ class Twitter(BasePoster):
                 }
 
         return {"success": True, "ids": ids, "urls": urls}
+
+    def me(self) -> dict:
+        """
+        Get authenticated user information.
+
+        Returns:
+            dict with 'success', 'id', 'username', 'name' or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        oauth = self._get_session()
+        response = oauth.get(
+            self.ME_ENDPOINT,
+            params={"user.fields": "id,name,username,public_metrics,profile_image_url"},
+        )
+
+        if response.status_code == 200:
+            data = response.json()["data"]
+            return {
+                "success": True,
+                "id": data["id"],
+                "username": data["username"],
+                "name": data["name"],
+                "followers": data.get("public_metrics", {}).get("followers_count", 0),
+                "following": data.get("public_metrics", {}).get("following_count", 0),
+                "tweets": data.get("public_metrics", {}).get("tweet_count", 0),
+                "url": f"https://x.com/{data['username']}",
+            }
+        return {"success": False, "error": f"{response.status_code}: {response.text}"}
+
+    def feed(self, limit: int = 10) -> dict:
+        """
+        Get user's recent tweets.
+
+        Args:
+            limit: Maximum number of tweets to return (max 100)
+
+        Returns:
+            dict with 'success', 'tweets' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        # First get user ID
+        user_info = self.me()
+        if not user_info.get("success"):
+            return user_info
+
+        oauth = self._get_session()
+        url = self.USER_TWEETS_ENDPOINT.format(user_id=user_info["id"])
+        response = oauth.get(
+            url,
+            params={
+                "max_results": max(5, min(limit, 100)),  # Twitter API requires 5-100
+                "tweet.fields": "created_at,public_metrics,text",
+            },
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            tweets = []
+            for tweet in data.get("data", []):
+                metrics = tweet.get("public_metrics", {})
+                tweets.append(
+                    {
+                        "id": tweet["id"],
+                        "text": tweet["text"],
+                        "created_at": tweet.get("created_at"),
+                        "likes": metrics.get("like_count", 0),
+                        "retweets": metrics.get("retweet_count", 0),
+                        "replies": metrics.get("reply_count", 0),
+                        "url": f"https://x.com/i/web/status/{tweet['id']}",
+                    }
+                )
+            return {"success": True, "tweets": tweets, "count": len(tweets)}
+        return {"success": False, "error": f"{response.status_code}: {response.text}"}
+
+    def mentions(self, limit: int = 10) -> dict:
+        """
+        Get recent mentions of the user.
+
+        Args:
+            limit: Maximum number of mentions to return (max 100)
+
+        Returns:
+            dict with 'success', 'mentions' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        # First get user ID
+        user_info = self.me()
+        if not user_info.get("success"):
+            return user_info
+
+        oauth = self._get_session()
+        url = self.USER_MENTIONS_ENDPOINT.format(user_id=user_info["id"])
+        response = oauth.get(
+            url,
+            params={
+                "max_results": max(5, min(limit, 100)),  # Twitter API requires 5-100
+                "tweet.fields": "created_at,public_metrics,text,author_id",
+                "expansions": "author_id",
+                "user.fields": "username,name",
+            },
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            # Build user lookup
+            users = {}
+            for user in data.get("includes", {}).get("users", []):
+                users[user["id"]] = user
+
+            mentions = []
+            for tweet in data.get("data", []):
+                author = users.get(tweet.get("author_id"), {})
+                mentions.append(
+                    {
+                        "id": tweet["id"],
+                        "text": tweet["text"],
+                        "created_at": tweet.get("created_at"),
+                        "author_id": tweet.get("author_id"),
+                        "author_username": author.get("username"),
+                        "author_name": author.get("name"),
+                        "url": f"https://x.com/i/web/status/{tweet['id']}",
+                    }
+                )
+            return {"success": True, "mentions": mentions, "count": len(mentions)}
+        return {"success": False, "error": f"{response.status_code}: {response.text}"}

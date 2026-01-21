@@ -10,11 +10,14 @@ from ._branding import get_env
 class LinkedIn(BasePoster):
     """LinkedIn API client using OAuth 2.0."""
 
+    platform_name = "linkedin"
+
     BASE_URL = "https://api.linkedin.com/v2"
     ME_ENDPOINT = f"{BASE_URL}/me"
     USERINFO_ENDPOINT = f"{BASE_URL}/userinfo"  # OpenID Connect endpoint
     UGC_POSTS_ENDPOINT = f"{BASE_URL}/ugcPosts"
     POSTS_ENDPOINT = f"{BASE_URL}/posts"
+    SHARES_ENDPOINT = f"{BASE_URL}/shares"
 
     def __init__(
         self,
@@ -158,3 +161,99 @@ class LinkedIn(BasePoster):
             return {"valid": True, "user": response.json()}
         else:
             return {"valid": False, "error": response.text}
+
+    def me(self) -> dict:
+        """
+        Get authenticated user information.
+
+        Returns:
+            dict with 'success', user info or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing access token"}
+
+        # Try userinfo endpoint first
+        response = requests.get(
+            self.USERINFO_ENDPOINT,
+            headers={"Authorization": f"Bearer {self.access_token}"},
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "success": True,
+                "id": data.get("sub"),
+                "name": data.get("name"),
+                "email": data.get("email"),
+                "picture": data.get("picture"),
+                "url": f"https://www.linkedin.com/in/{data.get('sub', '')}",
+            }
+
+        # Fallback to /me endpoint
+        response = requests.get(self.ME_ENDPOINT, headers=self._get_headers())
+        if response.status_code == 200:
+            data = response.json()
+            name = f"{data.get('localizedFirstName', '')} {data.get('localizedLastName', '')}".strip()
+            return {
+                "success": True,
+                "id": data.get("id"),
+                "name": name,
+                "url": f"https://www.linkedin.com/in/{data.get('vanityName', data.get('id', ''))}",
+            }
+
+        return {"success": False, "error": f"{response.status_code}: {response.text}"}
+
+    def feed(self, limit: int = 10) -> dict:
+        """
+        Get user's recent posts/shares.
+
+        Note: LinkedIn API has limited support for reading posts.
+        Requires r_organization_social or w_member_social scopes.
+
+        Args:
+            limit: Maximum number of posts to return
+
+        Returns:
+            dict with 'success', 'posts' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing access token"}
+
+        author_urn = self._get_user_urn()
+        if not author_urn:
+            return {"success": False, "error": "Could not get user URN"}
+
+        # Try to get shares
+        params = {
+            "q": "owners",
+            "owners": author_urn,
+            "count": limit,
+        }
+
+        response = requests.get(
+            self.SHARES_ENDPOINT,
+            headers=self._get_headers(),
+            params=params,
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            posts = []
+            for element in data.get("elements", []):
+                post_id = element.get("id", "")
+                text = element.get("text", {}).get("text", "")
+                posts.append(
+                    {
+                        "id": post_id,
+                        "text": text[:200] + "..." if len(text) > 200 else text,
+                        "created_at": element.get("created", {}).get("time"),
+                        "url": f"https://www.linkedin.com/feed/update/{post_id}/",
+                    }
+                )
+            return {"success": True, "posts": posts, "count": len(posts)}
+
+        # API may not support this with current scopes
+        return {
+            "success": False,
+            "error": f"Feed access requires additional scopes: {response.status_code}",
+        }

@@ -25,6 +25,11 @@ from ._commands import (
     cmd_mcp,
     cmd_setup,
 )
+from ._feed_commands import (
+    cmd_feed,
+    cmd_check,
+    cmd_me,
+)
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
 
@@ -212,6 +217,46 @@ def create_parser() -> argparse.ArgumentParser:
         help="Platform to show setup for (default: all)",
     )
 
+    # feed command - READ recent posts
+    feed_parser = subparsers.add_parser(
+        "feed",
+        help="Get recent posts from platforms",
+        description="Fetch and display recent posts from configured platforms",
+    )
+    feed_parser.add_argument(
+        "platform",
+        nargs="?",
+        choices=PLATFORMS,
+        help="Platform to check (default: all configured)",
+    )
+    feed_parser.add_argument(
+        "-l", "--limit", type=int, default=5, help="Number of posts per platform"
+    )
+    feed_parser.add_argument(
+        "-m", "--mentions", action="store_true", help="Show mentions instead of posts"
+    )
+
+    # check command - verify connections
+    check_parser = subparsers.add_parser(
+        "check",
+        help="Verify connections to all platforms",
+        description="Test API connections and show account info",
+    )
+    check_parser.add_argument(
+        "platform",
+        nargs="?",
+        choices=PLATFORMS,
+        help="Platform to check (default: all)",
+    )
+
+    # me command - get user info
+    me_parser = subparsers.add_parser(
+        "me",
+        help="Get authenticated user info",
+        description="Display user profile information for a platform",
+    )
+    me_parser.add_argument("platform", choices=PLATFORMS, help="Target platform")
+
     return parser
 
 
@@ -263,6 +308,12 @@ def main(argv: list[str] = None) -> int:
         return cmd_mcp(args)
     elif args.command == "setup":
         return cmd_setup(args)
+    elif args.command == "feed":
+        return cmd_feed(args, output_json=args.json)
+    elif args.command == "check":
+        return cmd_check(args, output_json=args.json)
+    elif args.command == "me":
+        return cmd_me(args, output_json=args.json)
     else:
         parser.print_help()
         return 1

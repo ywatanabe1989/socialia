@@ -16,6 +16,8 @@ except ImportError:
 class Reddit(BasePoster):
     """Reddit API client using PRAW (Python Reddit API Wrapper)."""
 
+    platform_name = "reddit"
+
     def __init__(
         self,
         client_id: Optional[str] = None,
@@ -192,6 +194,154 @@ class Reddit(BasePoster):
                 "success": True,
                 "id": comment.id,
                 "url": f"https://reddit.com{comment.permalink}",
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def me(self) -> dict:
+        """
+        Get authenticated user information.
+
+        Returns:
+            dict with 'success', user info or 'error'
+        """
+        if not HAS_PRAW:
+            return {"success": False, "error": "PRAW not installed"}
+
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        reddit = self._get_client()
+        if not reddit:
+            return {"success": False, "error": "Could not create Reddit client"}
+
+        try:
+            user = reddit.user.me()
+            return {
+                "success": True,
+                "id": user.id,
+                "username": user.name,
+                "name": user.name,
+                "karma": user.link_karma + user.comment_karma,
+                "link_karma": user.link_karma,
+                "comment_karma": user.comment_karma,
+                "created_utc": user.created_utc,
+                "url": f"https://reddit.com/user/{user.name}",
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def feed(self, limit: int = 10) -> dict:
+        """
+        Get user's recent submissions.
+
+        Args:
+            limit: Maximum number of posts to return
+
+        Returns:
+            dict with 'success', 'posts' list or 'error'
+        """
+        if not HAS_PRAW:
+            return {"success": False, "error": "PRAW not installed"}
+
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        reddit = self._get_client()
+        if not reddit:
+            return {"success": False, "error": "Could not create Reddit client"}
+
+        try:
+            posts = []
+            for submission in reddit.user.me().submissions.new(limit=limit):
+                posts.append(
+                    {
+                        "id": submission.id,
+                        "title": submission.title,
+                        "text": (submission.selftext[:200] + "...")
+                        if len(submission.selftext) > 200
+                        else submission.selftext,
+                        "subreddit": submission.subreddit.display_name,
+                        "score": submission.score,
+                        "upvote_ratio": submission.upvote_ratio,
+                        "num_comments": submission.num_comments,
+                        "created_utc": submission.created_utc,
+                        "url": f"https://reddit.com{submission.permalink}",
+                    }
+                )
+            return {"success": True, "posts": posts, "count": len(posts)}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def mentions(self, limit: int = 10) -> dict:
+        """
+        Get recent inbox mentions.
+
+        Args:
+            limit: Maximum number of mentions to return
+
+        Returns:
+            dict with 'success', 'mentions' list or 'error'
+        """
+        if not HAS_PRAW:
+            return {"success": False, "error": "PRAW not installed"}
+
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        reddit = self._get_client()
+        if not reddit:
+            return {"success": False, "error": "Could not create Reddit client"}
+
+        try:
+            mentions = []
+            for item in reddit.inbox.mentions(limit=limit):
+                mentions.append(
+                    {
+                        "id": item.id,
+                        "text": item.body[:200] + "..."
+                        if len(item.body) > 200
+                        else item.body,
+                        "author": item.author.name if item.author else "[deleted]",
+                        "subreddit": item.subreddit.display_name
+                        if item.subreddit
+                        else None,
+                        "created_utc": item.created_utc,
+                        "context": item.context,
+                    }
+                )
+            return {"success": True, "mentions": mentions, "count": len(mentions)}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def update(self, post_id: str, text: str) -> dict:
+        """
+        Edit a Reddit post.
+
+        Args:
+            post_id: Reddit submission ID
+            text: New text content
+
+        Returns:
+            dict with 'success' or 'error'
+        """
+        if not HAS_PRAW:
+            return {"success": False, "error": "PRAW not installed"}
+
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        reddit = self._get_client()
+        if not reddit:
+            return {"success": False, "error": "Could not create Reddit client"}
+
+        try:
+            submission = reddit.submission(id=post_id)
+            submission.edit(text)
+            return {
+                "success": True,
+                "id": post_id,
+                "url": f"https://reddit.com{submission.permalink}",
             }
         except Exception as e:
             return {"success": False, "error": str(e)}

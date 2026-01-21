@@ -41,6 +41,8 @@ class YouTube(BasePoster):
         YOUTUBE_TOKEN_FILE: Path to store OAuth tokens (default: ~/.youtube_token.json)
     """
 
+    platform_name = "youtube"
+
     def __init__(
         self,
         client_secrets_file: Optional[str] = None,
@@ -469,3 +471,32 @@ class YouTube(BasePoster):
 
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def me(self) -> dict:
+        """
+        Get authenticated user's channel information.
+
+        Returns:
+            dict with 'success', channel info or 'error'
+        """
+        return self.get_channel_info()
+
+    def feed(self, limit: int = 10) -> dict:
+        """
+        Get user's recent videos.
+
+        Args:
+            limit: Maximum number of videos to return
+
+        Returns:
+            dict with 'success', 'posts' (videos) list or 'error'
+        """
+        result = self.list_videos(max_results=limit)
+        if result.get("success"):
+            # Rename 'videos' to 'posts' for consistency
+            return {
+                "success": True,
+                "posts": result.get("videos", []),
+                "count": result.get("count", 0),
+            }
+        return result
