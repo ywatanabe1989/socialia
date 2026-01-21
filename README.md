@@ -97,6 +97,12 @@ socialia --help-recursive
 
 # JSON output
 socialia feed --json
+
+# Shell completion
+socialia completion bash      # Print bash completion script
+socialia completion zsh       # Print zsh completion script
+socialia completion install   # Auto-install to shell config
+socialia completion status    # Check installation status
 ```
 
 </details>
