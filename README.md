@@ -40,6 +40,18 @@ ga.track_event("page_view", {"page": "/docs"})
 <summary><b>CLI Usage</b></summary>
 
 ```bash
+# Check all platform connections at once
+socialia check
+
+# Get recent posts from all platforms
+socialia feed
+
+# Get mentions/notifications
+socialia feed --mentions
+
+# Get user profile info
+socialia me twitter
+
 # Post to Twitter
 socialia post twitter "Hello World!"
 
@@ -71,7 +83,7 @@ socialia thread twitter --file thread.txt
 socialia post twitter "Test" --dry-run
 
 # Show all commands
-socialia help-recursive
+socialia --help-recursive
 
 # JSON output
 socialia --json post twitter "Hello"
@@ -85,22 +97,35 @@ socialia --json post twitter "Hello"
 ```python
 from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics
 
-# Twitter
+# Check connection and get user info
 twitter = Twitter()
-result = twitter.post("Hello World!")
+twitter.check()      # Verify connection
+twitter.me()         # Get user profile
+twitter.feed()       # Get recent tweets
+twitter.mentions()   # Get mentions
+
+# Post content
+twitter.post("Hello World!")
 twitter.post_thread(["First", "Second", "Third"])
+twitter.delete("1234567890")
 
 # LinkedIn
 linkedin = LinkedIn()
 linkedin.post("Professional update!")
+linkedin.me()        # Get user info
 
 # Reddit (requires: pip install socialia[reddit])
 reddit = Reddit()
 reddit.post("Post body", subreddit="test", title="Title")
+reddit.feed()        # Get recent posts
+reddit.mentions()    # Get inbox mentions
+reddit.update("post_id", "Updated text")  # Edit post
 
 # YouTube (requires: pip install socialia[youtube])
 youtube = YouTube()
 youtube.post("Description", video_path="video.mp4", title="My Video")
+youtube.feed()       # Get recent videos
+youtube.update("video_id", title="New Title")
 
 # Google Analytics (requires: pip install socialia[analytics])
 ga = GoogleAnalytics()
