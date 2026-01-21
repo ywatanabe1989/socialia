@@ -26,9 +26,9 @@ SCOPES = [
 ]
 
 
-class YouTubePoster(BasePoster):
+class YouTube(BasePoster):
     """
-    YouTube API poster for video uploads and management.
+    YouTube API client for video uploads and management.
 
     Supports:
     - Video uploads with metadata

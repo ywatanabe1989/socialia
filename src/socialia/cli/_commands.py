@@ -5,23 +5,23 @@ import json
 import sys
 
 from .. import __version__
-from ..twitter import TwitterPoster
-from ..linkedin import LinkedInPoster
-from ..reddit import RedditPoster
+from ..twitter import Twitter
+from ..linkedin import LinkedIn
+from ..reddit import Reddit
 from ..analytics import GoogleAnalytics
-from ..youtube import YouTubePoster
+from ..youtube import YouTube
 
 
-def get_poster(platform: str):
-    """Get poster instance for platform."""
+def get_client(platform: str):
+    """Get platform client instance."""
     if platform == "twitter":
-        return TwitterPoster()
+        return Twitter()
     elif platform == "linkedin":
-        return LinkedInPoster()
+        return LinkedIn()
     elif platform == "reddit":
-        return RedditPoster()
+        return Reddit()
     elif platform == "youtube":
-        return YouTubePoster()
+        return YouTube()
     else:
         raise ValueError(f"Unsupported platform: {platform}")
 
@@ -58,15 +58,15 @@ def cmd_post(args, output_json: bool = False) -> int:
         )
         return 0
 
-    poster = get_poster(args.platform)
+    client = get_client(args.platform)
     if args.platform == "twitter":
-        result = poster.post(
+        result = client.post(
             text,
             reply_to=getattr(args, "reply_to", None),
             quote_tweet_id=getattr(args, "quote", None),
         )
     elif args.platform == "reddit":
-        result = poster.post(
+        result = client.post(
             text,
             subreddit=getattr(args, "subreddit", "test"),
             title=getattr(args, "title", None),
@@ -74,7 +74,7 @@ def cmd_post(args, output_json: bool = False) -> int:
     elif args.platform == "youtube":
         video_path = getattr(args, "video", None)
         tags = getattr(args, "tags", None)
-        result = poster.post(
+        result = client.post(
             text,
             video_path=str(video_path) if video_path else None,
             title=getattr(args, "title", None),
@@ -85,7 +85,7 @@ def cmd_post(args, output_json: bool = False) -> int:
             else None,
         )
     else:
-        result = poster.post(text)
+        result = client.post(text)
 
     if output_json:
         print(json.dumps(result, indent=2))
@@ -102,8 +102,8 @@ def cmd_post(args, output_json: bool = False) -> int:
 
 def cmd_delete(args, output_json: bool = False) -> int:
     """Handle delete command."""
-    poster = get_poster(args.platform)
-    result = poster.delete(args.post_id)
+    client = get_client(args.platform)
+    result = client.delete(args.post_id)
 
     if output_json:
         print(json.dumps(result, indent=2))
@@ -138,8 +138,8 @@ def cmd_thread(args, output_json: bool = False) -> int:
             print(t[:200] + ("..." if len(t) > 200 else ""))
         return 0
 
-    poster = get_poster(args.platform)
-    result = poster.post_thread(tweets)
+    client = get_client(args.platform)
+    result = client.post_thread(tweets)
 
     if output_json:
         print(json.dumps(result, indent=2))

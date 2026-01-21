@@ -1,4 +1,4 @@
-"""LinkedIn API poster."""
+"""LinkedIn API client."""
 
 from typing import Optional
 import requests
@@ -7,8 +7,8 @@ from .base import BasePoster
 from ._branding import get_env
 
 
-class LinkedInPoster(BasePoster):
-    """LinkedIn API poster using OAuth 2.0."""
+class LinkedIn(BasePoster):
+    """LinkedIn API client using OAuth 2.0."""
 
     BASE_URL = "https://api.linkedin.com/v2"
     ME_ENDPOINT = f"{BASE_URL}/me"

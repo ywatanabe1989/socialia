@@ -12,16 +12,19 @@ Usage:
     python 02_post_linkedin.py             # Real post (requires token)
 
 Environment:
-    LINKEDIN_ACCESS_TOKEN
+    SOCIALIA_LINKEDIN_ACCESS_TOKEN
 """
 
 import argparse
-from socialia import LinkedInPoster
+
+from socialia import LinkedIn
 
 
 def main():
     parser = argparse.ArgumentParser(description="Post to LinkedIn")
-    parser.add_argument("--dry-run", action="store_true", help="Preview without posting")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview without posting"
+    )
     parser.add_argument(
         "--visibility",
         choices=["PUBLIC", "CONNECTIONS"],
@@ -30,14 +33,14 @@ def main():
     )
     args = parser.parse_args()
 
-    # Create poster
-    linkedin = LinkedInPoster()
+    # Create client
+    linkedin = LinkedIn()
 
     # Check credentials
     if not linkedin.validate_credentials():
         print("ERROR: LinkedIn credentials not configured")
         print("Set environment variable:")
-        print("  LINKEDIN_ACCESS_TOKEN")
+        print("  SOCIALIA_LINKEDIN_ACCESS_TOKEN")
         return 1
 
     # Content to post
@@ -49,7 +52,7 @@ Testing the LinkedIn API integration. This tool helps automate social media mana
 
     if args.dry_run:
         print("=== DRY RUN ===")
-        print(f"Platform: LinkedIn")
+        print("Platform: LinkedIn")
         print(f"Visibility: {args.visibility}")
         print(f"Text ({len(text)} chars):")
         print(text[:200] + "..." if len(text) > 200 else text)
@@ -60,7 +63,7 @@ Testing the LinkedIn API integration. This tool helps automate social media mana
     result = linkedin.post(text, visibility=args.visibility)
 
     if result["success"]:
-        print(f"Posted successfully!")
+        print("Posted successfully!")
         print(f"ID: {result['id']}")
         print(f"URL: {result['url']}")
         return 0

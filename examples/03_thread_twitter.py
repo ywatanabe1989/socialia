@@ -12,23 +12,26 @@ Usage:
     python 03_thread_twitter.py             # Real post (requires credentials)
 
 Environment:
-    SCITEX_X_CONSUMER_KEY
-    SCITEX_X_CONSUMER_KEY_SECRET
-    SCITEX_X_ACCESSTOKEN
-    SCITEX_X_ACCESSTOKEN_SECRET
+    SOCIALIA_X_CONSUMER_KEY
+    SOCIALIA_X_CONSUMER_KEY_SECRET
+    SOCIALIA_X_ACCESSTOKEN
+    SOCIALIA_X_ACCESSTOKEN_SECRET
 """
 
 import argparse
-from socialia import TwitterPoster
+
+from socialia import Twitter
 
 
 def main():
     parser = argparse.ArgumentParser(description="Post a Twitter thread")
-    parser.add_argument("--dry-run", action="store_true", help="Preview without posting")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview without posting"
+    )
     args = parser.parse_args()
 
-    # Create poster
-    twitter = TwitterPoster()
+    # Create client
+    twitter = Twitter()
 
     # Check credentials
     if not twitter.validate_credentials():
@@ -44,7 +47,7 @@ def main():
 
     if args.dry_run:
         print("=== DRY RUN (Thread) ===")
-        print(f"Platform: Twitter")
+        print("Platform: Twitter")
         print(f"Posts: {len(tweets)}")
         for i, tweet in enumerate(tweets, 1):
             print(f"\n--- Tweet {i} ({len(tweet)} chars) ---")

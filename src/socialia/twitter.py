@@ -7,8 +7,8 @@ from .base import BasePoster
 from ._branding import get_env
 
 
-class TwitterPoster(BasePoster):
-    """Twitter/X API v2 poster using OAuth 1.0a."""
+class Twitter(BasePoster):
+    """Twitter/X API v2 client using OAuth 1.0a."""
 
     POST_ENDPOINT = "https://api.x.com/2/tweets"
     DELETE_ENDPOINT = "https://api.x.com/2/tweets/{tweet_id}"

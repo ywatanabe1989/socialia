@@ -4,7 +4,7 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-Part of [**SciTeX™**](https://scitex.ai) for scientific research automation.
+Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
 ## Installation
 
@@ -18,7 +18,26 @@ pip install socialia[analytics]   # Google Analytics Data API
 pip install socialia[all]         # Everything
 ```
 
-## CLI Usage
+## Quick Start
+
+```python
+from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics
+
+# Post to Twitter
+twitter = Twitter()
+twitter.post("Hello World!")
+
+# Post to LinkedIn
+linkedin = LinkedIn()
+linkedin.post("Professional update!")
+
+# Track analytics
+ga = GoogleAnalytics()
+ga.track_event("page_view", {"page": "/docs"})
+```
+
+<details>
+<summary><b>CLI Usage</b></summary>
 
 ```bash
 # Post to Twitter
@@ -58,37 +77,29 @@ socialia help-recursive
 socialia --json post twitter "Hello"
 ```
 
-## Quick Start with Make
+</details>
 
-```bash
-make install                    # Install package
-make check                      # Verify credentials
-make twitter MSG='Hello!'       # Post to Twitter
-make linkedin MSG='Update'      # Post to LinkedIn
-make dry-run P=twitter MSG='Test'  # Preview
-make setup                      # View setup guide
-```
-
-## Python API
+<details>
+<summary><b>Python API</b></summary>
 
 ```python
-from socialia import TwitterPoster, LinkedInPoster, RedditPoster, GoogleAnalytics, YouTubePoster
+from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics
 
 # Twitter
-twitter = TwitterPoster()
+twitter = Twitter()
 result = twitter.post("Hello World!")
 twitter.post_thread(["First", "Second", "Third"])
 
 # LinkedIn
-linkedin = LinkedInPoster()
+linkedin = LinkedIn()
 linkedin.post("Professional update!")
 
 # Reddit (requires: pip install socialia[reddit])
-reddit = RedditPoster()
+reddit = Reddit()
 reddit.post("Post body", subreddit="test", title="Title")
 
 # YouTube (requires: pip install socialia[youtube])
-youtube = YouTubePoster()
+youtube = YouTube()
 youtube.post("Description", video_path="video.mp4", title="My Video")
 
 # Google Analytics (requires: pip install socialia[analytics])
@@ -97,7 +108,10 @@ ga.track_event("social_post", {"platform": "twitter", "post_id": "123"})
 ga.get_page_views(start_date="7daysAgo", end_date="today")
 ```
 
-## MCP Server
+</details>
+
+<details>
+<summary><b>MCP Server</b></summary>
 
 Add to Claude Code settings:
 
@@ -108,51 +122,70 @@ Add to Claude Code settings:
       "command": "python",
       "args": ["-m", "socialia.mcp_server"],
       "env": {
-        "SCITEX_X_CONSUMER_KEY": "...",
-        "SCITEX_X_CONSUMER_KEY_SECRET": "...",
-        "SCITEX_X_ACCESSTOKEN": "...",
-        "SCITEX_X_ACCESSTOKEN_SECRET": "..."
+        "SOCIALIA_X_CONSUMER_KEY": "...",
+        "SOCIALIA_X_CONSUMER_KEY_SECRET": "...",
+        "SOCIALIA_X_ACCESSTOKEN": "...",
+        "SOCIALIA_X_ACCESSTOKEN_SECRET": "..."
       }
     }
   }
 }
 ```
 
-## Environment Variables
+</details>
+
+<details>
+<summary><b>Environment Variables</b></summary>
 
 ```bash
 # Twitter/X
-export SCITEX_X_CONSUMER_KEY="your_consumer_key"
-export SCITEX_X_CONSUMER_KEY_SECRET="your_consumer_secret"
-export SCITEX_X_ACCESSTOKEN="your_access_token"
-export SCITEX_X_ACCESSTOKEN_SECRET="your_access_token_secret"
+export SOCIALIA_X_CONSUMER_KEY="your_consumer_key"
+export SOCIALIA_X_CONSUMER_KEY_SECRET="your_consumer_secret"
+export SOCIALIA_X_ACCESSTOKEN="your_access_token"
+export SOCIALIA_X_ACCESSTOKEN_SECRET="your_access_token_secret"
 
 # LinkedIn
-export LINKEDIN_ACCESS_TOKEN="your_access_token"
+export SOCIALIA_LINKEDIN_ACCESS_TOKEN="your_access_token"
 
 # Reddit
-export REDDIT_CLIENT_ID="your_client_id"
-export REDDIT_CLIENT_SECRET="your_client_secret"
-export REDDIT_USERNAME="your_username"
-export REDDIT_PASSWORD="your_password"
+export SOCIALIA_REDDIT_CLIENT_ID="your_client_id"
+export SOCIALIA_REDDIT_CLIENT_SECRET="your_client_secret"
+export SOCIALIA_REDDIT_USERNAME="your_username"
+export SOCIALIA_REDDIT_PASSWORD="your_password"
 
 # YouTube
-export YOUTUBE_CLIENT_SECRETS_FILE="path/to/client_secrets.json"
+export SOCIALIA_YOUTUBE_CLIENT_SECRETS_FILE="path/to/client_secrets.json"
 
 # Google Analytics
-export GA_MEASUREMENT_ID="G-XXXXXXXXXX"
-export GA_API_SECRET="your_api_secret"
-export GA_PROPERTY_ID="123456789"  # Optional, for Data API
+export SOCIALIA_GOOGLE_ANALYTICS_MEASUREMENT_ID="G-XXXXXXXXXX"
+export SOCIALIA_GOOGLE_ANALYTICS_API_SECRET="your_api_secret"
+export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data API
 ```
 
-**Detailed setup guide:** `make setup` or see [docs/SETUP.md](docs/SETUP.md)
+**Detailed setup guide:** `socialia setup` or see [docs/SETUP.md](docs/SETUP.md)
 
-## Project Structure
+</details>
+
+<details>
+<summary><b>Supported Platforms</b></summary>
+
+| Platform | Status | API | Install |
+|----------|--------|-----|---------|
+| Twitter/X | Ready | v2 OAuth 1.0a | `pip install socialia` |
+| LinkedIn | Ready | v2 OAuth 2.0 | `pip install socialia` |
+| Reddit | Ready | PRAW | `pip install socialia[reddit]` |
+| YouTube | Ready | Data API v3 | `pip install socialia[youtube]` |
+| Google Analytics | Ready | GA4 + Data API | `pip install socialia[analytics]` |
+
+</details>
+
+<details>
+<summary><b>Project Structure</b></summary>
 
 ```
 socialia/
 ├── src/socialia/         # Python package
-│   ├── cli.py            # CLI with argparse
+│   ├── cli/              # CLI with argparse
 │   ├── twitter.py        # Twitter/X API
 │   ├── linkedin.py       # LinkedIn API
 │   ├── reddit.py         # Reddit API (PRAW)
@@ -163,22 +196,16 @@ socialia/
 ├── docs/
 │   ├── platforms/        # Platform API documentation
 │   └── SETUP.md          # Step-by-step setup guide
+├── examples/             # Usage examples
 ├── Makefile              # Command dispatcher
 ├── pyproject.toml
 └── .env                  # Credentials (gitignored)
 ```
 
-## Supported Platforms
+</details>
 
-| Platform | Status | API | Install |
-|----------|--------|-----|---------|
-| Twitter/X | Ready | v2 OAuth 1.0a | `pip install socialia` |
-| LinkedIn | Ready | v2 OAuth 2.0 | `pip install socialia` |
-| Reddit | Ready | PRAW | `pip install socialia[reddit]` |
-| YouTube | Ready | Data API v3 | `pip install socialia[youtube]` |
-| Google Analytics | Ready | GA4 + Data API | `pip install socialia[analytics]` |
-
-## SciTeX Integration
+<details>
+<summary><b>SciTeX Integration</b></summary>
 
 Socialia is part of the SciTeX ecosystem:
 
@@ -188,7 +215,7 @@ pip install scitex[social]
 
 # Use in research workflows
 import scitex as stx
-from socialia import TwitterPoster
+from socialia import Twitter
 
 @stx.session
 def share_results(twitter=stx.INJECTED):
@@ -196,10 +223,12 @@ def share_results(twitter=stx.INJECTED):
     twitter.post("New research results!")
 ```
 
+</details>
+
 ---
 
 <p align="center">
   <a href="https://scitex.ai" target="_blank"><img src="docs/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
   <br>
-  AGPL-3.0 · social@scitex.ai
+  AGPL-3.0
 </p>

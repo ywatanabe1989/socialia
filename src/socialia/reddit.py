@@ -1,19 +1,20 @@
-"""Reddit API poster using PRAW."""
+"""Reddit API client using PRAW."""
 
-import os
 from typing import Optional
 
+from ._branding import get_env
 from .base import BasePoster
 
 try:
     import praw
+
     HAS_PRAW = True
 except ImportError:
     HAS_PRAW = False
 
 
-class RedditPoster(BasePoster):
-    """Reddit API poster using PRAW (Python Reddit API Wrapper)."""
+class Reddit(BasePoster):
+    """Reddit API client using PRAW (Python Reddit API Wrapper)."""
 
     def __init__(
         self,
@@ -23,12 +24,12 @@ class RedditPoster(BasePoster):
         password: Optional[str] = None,
         user_agent: Optional[str] = None,
     ):
-        self.client_id = client_id or os.environ.get("REDDIT_CLIENT_ID")
-        self.client_secret = client_secret or os.environ.get("REDDIT_CLIENT_SECRET")
-        self.username = username or os.environ.get("REDDIT_USERNAME")
-        self.password = password or os.environ.get("REDDIT_PASSWORD")
-        self.user_agent = user_agent or os.environ.get(
-            "REDDIT_USER_AGENT", "SciTeX Social Poster v0.1"
+        self.client_id = client_id or get_env("REDDIT_CLIENT_ID")
+        self.client_secret = client_secret or get_env("REDDIT_CLIENT_SECRET")
+        self.username = username or get_env("REDDIT_USERNAME")
+        self.password = password or get_env("REDDIT_PASSWORD")
+        self.user_agent = user_agent or (
+            get_env("REDDIT_USER_AGENT") or "Socialia v0.1"
         )
         self._reddit: Optional["praw.Reddit"] = None
 
@@ -56,12 +57,14 @@ class RedditPoster(BasePoster):
         """Check if all credentials are set."""
         if not HAS_PRAW:
             return False
-        return all([
-            self.client_id,
-            self.client_secret,
-            self.username,
-            self.password,
-        ])
+        return all(
+            [
+                self.client_id,
+                self.client_secret,
+                self.username,
+                self.password,
+            ]
+        )
 
     def post(
         self,
@@ -85,7 +88,10 @@ class RedditPoster(BasePoster):
             dict with 'success', 'id', 'url' or 'error'
         """
         if not HAS_PRAW:
-            return {"success": False, "error": "PRAW not installed. Run: pip install praw"}
+            return {
+                "success": False,
+                "error": "PRAW not installed. Run: pip install praw",
+            }
 
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}

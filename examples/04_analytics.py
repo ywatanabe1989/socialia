@@ -11,9 +11,9 @@ Usage:
     python 04_analytics.py
 
 Environment:
-    GA_MEASUREMENT_ID    - Required for tracking
-    GA_API_SECRET        - Required for tracking
-    GA_PROPERTY_ID       - Optional, for Data API queries
+    SOCIALIA_GOOGLE_ANALYTICS_MEASUREMENT_ID  - Required for tracking
+    SOCIALIA_GOOGLE_ANALYTICS_API_SECRET      - Required for tracking
+    SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID     - Optional, for Data API queries
 """
 
 from socialia import GoogleAnalytics
@@ -61,7 +61,9 @@ def main():
         if sources:
             print("   Top sources:")
             for src in sources[:5]:
-                print(f"     {src['source']}/{src['medium']}: {src['sessions']} sessions")
+                print(
+                    f"     {src['source']}/{src['medium']}: {src['sessions']} sessions"
+                )
         else:
             print("   No source data available")
     else:

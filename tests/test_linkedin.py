@@ -1,16 +1,17 @@
-"""Tests for LinkedIn poster."""
+"""Tests for LinkedIn client."""
 
 from unittest.mock import MagicMock, patch
-from socialia.linkedin import LinkedInPoster
+
+from socialia.linkedin import LinkedIn
 
 
-class TestLinkedInPoster:
-    """Test LinkedInPoster class."""
+class TestLinkedIn:
+    """Test LinkedIn class."""
 
     def test_init_with_token(self, linkedin_credentials):
         """Test initialization with explicit token."""
-        poster = LinkedInPoster(**linkedin_credentials)
-        assert poster.access_token == "test_linkedin_token"
+        client = LinkedIn(**linkedin_credentials)
+        assert client.access_token == "test_linkedin_token"
 
     def test_init_from_environment(self, monkeypatch):
         """Test initialization from environment variables."""
@@ -18,29 +19,29 @@ class TestLinkedInPoster:
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.setenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", "env_token")
-        poster = LinkedInPoster()
-        assert poster.access_token == "env_token"
+        client = LinkedIn()
+        assert client.access_token == "env_token"
 
     def test_validate_credentials_valid(self, linkedin_credentials):
         """Test credential validation with valid token."""
-        poster = LinkedInPoster(**linkedin_credentials)
-        assert poster.validate_credentials() is True
+        client = LinkedIn(**linkedin_credentials)
+        assert client.validate_credentials() is True
 
     def test_validate_credentials_missing(self, monkeypatch):
         """Test credential validation with missing token."""
         # Clear environment variables that might be set
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
-        poster = LinkedInPoster()
-        assert poster.validate_credentials() is False
+        client = LinkedIn()
+        assert client.validate_credentials() is False
 
     def test_post_missing_credentials(self, monkeypatch):
         """Test post fails with missing credentials."""
         # Clear environment variables that might be set
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
-        poster = LinkedInPoster()
-        result = poster.post("Test")
+        client = LinkedIn()
+        result = client.post("Test")
         assert result["success"] is False
         assert "token" in result["error"].lower()
 
@@ -52,8 +53,8 @@ class TestLinkedInPoster:
         mock_response.json.return_value = {"id": "user123"}
         mock_requests.get.return_value = mock_response
 
-        poster = LinkedInPoster(**linkedin_credentials)
-        user_urn = poster._get_user_urn()
+        client = LinkedIn(**linkedin_credentials)
+        user_urn = client._get_user_urn()
 
         assert user_urn == "urn:li:person:user123"
 
@@ -74,8 +75,8 @@ class TestLinkedInPoster:
         mock_requests.get.return_value = mock_user_response
         mock_requests.post.return_value = mock_post_response
 
-        poster = LinkedInPoster(**linkedin_credentials)
-        result = poster.post("Hello LinkedIn!")
+        client = LinkedIn(**linkedin_credentials)
+        result = client.post("Hello LinkedIn!")
 
         assert result["success"] is True
         assert result["id"] == "share123"
@@ -96,8 +97,8 @@ class TestLinkedInPoster:
         mock_requests.get.return_value = mock_user_response
         mock_requests.post.return_value = mock_post_response
 
-        poster = LinkedInPoster(**linkedin_credentials)
-        result = poster.post("Test post")
+        client = LinkedIn(**linkedin_credentials)
+        result = client.post("Test post")
 
         assert result["success"] is False
         assert "401" in result["error"]
@@ -110,8 +111,8 @@ class TestLinkedInPoster:
 
         mock_requests.delete.return_value = mock_response
 
-        poster = LinkedInPoster(**linkedin_credentials)
-        result = poster.delete("share123")
+        client = LinkedIn(**linkedin_credentials)
+        result = client.delete("share123")
 
         assert result["success"] is True
         assert result["deleted"] is True
@@ -125,8 +126,8 @@ class TestLinkedInPoster:
 
         mock_requests.delete.return_value = mock_response
 
-        poster = LinkedInPoster(**linkedin_credentials)
-        result = poster.delete("invalid_id")
+        client = LinkedIn(**linkedin_credentials)
+        result = client.delete("invalid_id")
 
         assert result["success"] is False
         assert "404" in result["error"]
