@@ -1,7 +1,6 @@
 """Tests for Twitter poster."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from socialia.twitter import TwitterPoster
 
 

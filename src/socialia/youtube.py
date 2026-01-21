@@ -1,9 +1,7 @@
 """YouTube API integration for video uploads and community posts."""
 
 import os
-import json
-from typing import Optional, Any
-from pathlib import Path
+from typing import Optional
 
 from .base import BasePoster
 

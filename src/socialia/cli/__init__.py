@@ -45,16 +45,18 @@ Examples:
   socialia mcp run
   socialia --help-recursive
 
-Environment Variables:
-  SCITEX_X_CONSUMER_KEY         Twitter API consumer key
-  SCITEX_X_CONSUMER_KEY_SECRET  Twitter API consumer secret
-  SCITEX_X_ACCESSTOKEN          Twitter access token
-  SCITEX_X_ACCESSTOKEN_SECRET   Twitter access token secret
-  LINKEDIN_ACCESS_TOKEN         LinkedIn OAuth access token
-  REDDIT_CLIENT_ID              Reddit app client ID
-  REDDIT_CLIENT_SECRET          Reddit app client secret
-  REDDIT_USERNAME               Reddit username
-  REDDIT_PASSWORD               Reddit password
+Environment Variables (SOCIALIA_ or SCITEX_ prefix supported):
+  SOCIALIA_X_CONSUMER_KEY          Twitter API consumer key
+  SOCIALIA_X_CONSUMER_KEY_SECRET   Twitter API consumer secret
+  SOCIALIA_X_ACCESSTOKEN           Twitter access token
+  SOCIALIA_X_ACCESSTOKEN_SECRET    Twitter access token secret
+  SOCIALIA_LINKEDIN_ACCESS_TOKEN   LinkedIn OAuth access token
+  SOCIALIA_REDDIT_CLIENT_ID        Reddit app client ID
+  SOCIALIA_REDDIT_CLIENT_SECRET    Reddit app client secret
+  SOCIALIA_REDDIT_USERNAME         Reddit username
+  SOCIALIA_REDDIT_PASSWORD         Reddit password
+  SOCIALIA_GA_MEASUREMENT_ID       Google Analytics measurement ID
+  SOCIALIA_GA_API_SECRET           Google Analytics API secret
 """,
     )
     parser.add_argument(

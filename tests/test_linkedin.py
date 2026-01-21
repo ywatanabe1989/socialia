@@ -1,6 +1,5 @@
 """Tests for LinkedIn poster."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 from socialia.linkedin import LinkedInPoster
 
