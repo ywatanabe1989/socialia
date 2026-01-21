@@ -14,7 +14,10 @@ class TestLinkedInPoster:
 
     def test_init_from_environment(self, monkeypatch):
         """Test initialization from environment variables."""
-        monkeypatch.setenv("LINKEDIN_ACCESS_TOKEN", "env_token")
+        # Clear any existing env vars first
+        monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.setenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", "env_token")
         poster = LinkedInPoster()
         assert poster.access_token == "env_token"
 
@@ -23,13 +26,19 @@ class TestLinkedInPoster:
         poster = LinkedInPoster(**linkedin_credentials)
         assert poster.validate_credentials() is True
 
-    def test_validate_credentials_missing(self):
+    def test_validate_credentials_missing(self, monkeypatch):
         """Test credential validation with missing token."""
+        # Clear environment variables that might be set
+        monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
         poster = LinkedInPoster()
         assert poster.validate_credentials() is False
 
-    def test_post_missing_credentials(self):
+    def test_post_missing_credentials(self, monkeypatch):
         """Test post fails with missing credentials."""
+        # Clear environment variables that might be set
+        monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
         poster = LinkedInPoster()
         result = poster.post("Test")
         assert result["success"] is False
