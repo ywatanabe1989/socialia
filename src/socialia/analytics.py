@@ -14,9 +14,10 @@ class GoogleAnalytics:
     - Measurement Protocol (sending events)
     - Data API (retrieving metrics) - requires service account
 
-    Environment Variables:
-        GA_MEASUREMENT_ID: GA4 Measurement ID (G-XXXXXXXXXX)
-        GA_API_SECRET: GA4 Measurement Protocol API secret
+    Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+        GOOGLE_ANALYTICS_MEASUREMENT_ID: GA4 Measurement ID (G-XXXXXXXXXX)
+        GOOGLE_ANALYTICS_API_SECRET: Measurement Protocol API secret
+        GOOGLE_ANALYTICS_PROPERTY_ID: Property ID (numeric, for Data API)
         GOOGLE_APPLICATION_CREDENTIALS: Path to service account JSON (for Data API)
     """
 
@@ -34,21 +35,40 @@ class GoogleAnalytics:
             api_secret: Measurement Protocol API secret
             property_id: GA4 Property ID (numeric, for Data API)
         """
+        # Google Analytics credentials (explicit > short > unprefixed)
         self.measurement_id = measurement_id or (
-            os.environ.get("SOCIALIA_GA_MEASUREMENT_ID")
+            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_MEASUREMENT_ID")
+            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_MEASUREMENT_ID")
+            or os.environ.get("SOCIALIA_GA_MEASUREMENT_ID")
             or os.environ.get("SCITEX_GA_MEASUREMENT_ID")
             or os.environ.get("GA_MEASUREMENT_ID")
         )
         self.api_secret = api_secret or (
-            os.environ.get("SOCIALIA_GA_API_SECRET")
+            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_API_SECRET")
+            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_API_SECRET")
+            or os.environ.get("SOCIALIA_GA_API_SECRET")
             or os.environ.get("SCITEX_GA_API_SECRET")
             or os.environ.get("GA_API_SECRET")
         )
         self.property_id = property_id or (
-            os.environ.get("SOCIALIA_GA_PROPERTY_ID")
+            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID")
+            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_PROPERTY_ID")
+            or os.environ.get("SOCIALIA_GA_PROPERTY_ID")
             or os.environ.get("SCITEX_GA_PROPERTY_ID")
             or os.environ.get("GA_PROPERTY_ID")
         )
+
+        # Google Application Credentials (for Data API service account)
+        credentials_path = (
+            os.environ.get("SOCIALIA_GOOGLE_APPLICATION_CREDENTIALS")
+            or os.environ.get("SCITEX_GOOGLE_APPLICATION_CREDENTIALS")
+            or os.environ.get("SOCIALIA_GA_CREDENTIALS")
+            or os.environ.get("SCITEX_GA_CREDENTIALS")
+        )
+        if credentials_path and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expandvars(
+                credentials_path
+            )
 
         # Measurement Protocol endpoint
         self.mp_endpoint = "https://www.google-analytics.com/mp/collect"

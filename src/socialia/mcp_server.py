@@ -4,12 +4,48 @@ Socialia MCP Server.
 
 Provides MCP tools that delegate to CLI commands for reproducibility.
 All MCP tool calls can be reproduced via CLI commands.
+
+Environment Variables:
+    SOCIALIA_ENV_FILE: Path to .env file to load (optional)
+    Or set individual SCITEX_*/SOCIALIA_* env vars
 """
 
+import os
 import subprocess
 import sys
 import json
+from pathlib import Path
 from typing import Any
+
+
+def load_env_file(env_file: str) -> None:
+    """Load environment variables from a file."""
+    path = Path(os.path.expandvars(env_file)).expanduser()
+    if not path.exists():
+        print(f"Warning: SOCIALIA_ENV_FILE not found: {path}", file=sys.stderr)
+        return
+
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            # Skip comments and empty lines
+            if not line or line.startswith("#"):
+                continue
+            # Handle 'export VAR=value' or 'VAR=value'
+            if line.startswith("export "):
+                line = line[7:]
+            if "=" in line:
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                # Expand $HOME and other vars
+                value = os.path.expandvars(value)
+                os.environ[key] = value
+
+
+# Load env file if specified
+if env_file := os.environ.get("SOCIALIA_ENV_FILE"):
+    load_env_file(env_file)
 
 try:
     from mcp.server import Server
@@ -169,6 +205,14 @@ def create_server() -> "Server":
                     },
                 },
             ),
+            Tool(
+                name="analytics_realtime",
+                description="Get realtime active users from Google Analytics. CLI: socialia analytics realtime",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+            ),
         ]
 
     @server.call_tool()
@@ -209,6 +253,9 @@ def create_server() -> "Server":
             if arguments.get("end_date"):
                 args.extend(["--end", arguments["end_date"]])
             result = run_cli(*args)
+
+        elif name == "analytics_realtime":
+            result = run_cli("analytics", "realtime")
 
         else:
             result = {"success": False, "error": f"Unknown tool: {name}"}

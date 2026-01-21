@@ -306,6 +306,7 @@ def cmd_mcp(args) -> int:
             "social_post",
             "social_delete",
             "analytics_track",
+            "analytics_realtime",
             "analytics_pageviews",
             "analytics_sources",
         ]:
