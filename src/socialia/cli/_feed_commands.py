@@ -41,7 +41,9 @@ def cmd_feed(args, output_json: bool = False) -> int:
     for platform in platforms:
         client = get_client(platform)
         if not client.validate_credentials():
-            results[platform] = {"success": False, "error": "Not configured"}
+            # Skip unconfigured platforms silently (unless specifically requested)
+            if hasattr(args, "platform") and args.platform:
+                results[platform] = {"success": False, "error": "Not configured"}
             continue
 
         if mentions_only:
@@ -71,18 +73,28 @@ def cmd_feed(args, output_json: bool = False) -> int:
                 print("  No recent posts")
                 continue
 
-            for item in items[:limit]:
+            for i, item in enumerate(items[:limit]):
                 text = item.get("text", item.get("title", ""))[:80]
                 text = text.replace("\n", " ")
                 if len(text) > 77:
                     text = text[:77] + "..."
                 likes = item.get("likes", item.get("score", ""))
+                retweets = item.get("retweets", "")
                 created = (
                     item.get("created_at", "")[:10] if item.get("created_at") else ""
                 )
                 print(f"  • {text}")
-                if likes or created:
-                    print(f"    {created} {'❤️ ' + str(likes) if likes else ''}")
+                metrics = []
+                if created:
+                    metrics.append(created)
+                if likes:
+                    metrics.append(f"❤️ {likes}")
+                if retweets:
+                    metrics.append(f"🔁 {retweets}")
+                if metrics:
+                    print(f"    {' · '.join(metrics)}")
+                if i < len(items[:limit]) - 1:
+                    print()  # Blank line between posts
 
     return 0
 

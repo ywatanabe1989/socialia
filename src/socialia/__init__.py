@@ -1,6 +1,6 @@
 """Socialia - Unified social media management: posting, analytics, and insights."""
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 from .base import BasePoster
 from .twitter import Twitter

@@ -15,6 +15,8 @@ import argparse
 import sys
 from pathlib import Path
 
+import argcomplete
+
 from .. import __version__
 from ._commands import (
     cmd_post,
@@ -235,6 +237,7 @@ def create_parser() -> argparse.ArgumentParser:
     feed_parser.add_argument(
         "-m", "--mentions", action="store_true", help="Show mentions instead of posts"
     )
+    feed_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # check command - verify connections
     check_parser = subparsers.add_parser(
@@ -248,6 +251,7 @@ def create_parser() -> argparse.ArgumentParser:
         choices=PLATFORMS,
         help="Platform to check (default: all)",
     )
+    check_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     # me command - get user info
     me_parser = subparsers.add_parser(
@@ -256,6 +260,7 @@ def create_parser() -> argparse.ArgumentParser:
         description="Display user profile information for a platform",
     )
     me_parser.add_argument("platform", choices=PLATFORMS, help="Target platform")
+    me_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     return parser
 
@@ -285,6 +290,7 @@ def cmd_help_recursive(parser: argparse.ArgumentParser) -> int:
 def main(argv: list[str] = None) -> int:
     """Main entry point."""
     parser = create_parser()
+    argcomplete.autocomplete(parser)
     args = parser.parse_args(argv)
 
     if args.help_recursive:
@@ -309,11 +315,11 @@ def main(argv: list[str] = None) -> int:
     elif args.command == "setup":
         return cmd_setup(args)
     elif args.command == "feed":
-        return cmd_feed(args, output_json=args.json)
+        return cmd_feed(args, output_json=args.json or getattr(args, "json", False))
     elif args.command == "check":
-        return cmd_check(args, output_json=args.json)
+        return cmd_check(args, output_json=args.json or getattr(args, "json", False))
     elif args.command == "me":
-        return cmd_me(args, output_json=args.json)
+        return cmd_me(args, output_json=args.json or getattr(args, "json", False))
     else:
         parser.print_help()
         return 1
