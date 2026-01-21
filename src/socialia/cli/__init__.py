@@ -24,9 +24,9 @@ from ._commands import (
     cmd_thread,
     cmd_analytics,
     cmd_status,
-    cmd_mcp,
     cmd_setup,
 )
+from ._mcp_commands import cmd_mcp
 from ._feed_commands import (
     cmd_feed,
     cmd_check,
@@ -203,12 +203,22 @@ def create_parser() -> argparse.ArgumentParser:
     )
     mcp_sub = mcp_parser.add_subparsers(dest="mcp_command", help="MCP operations")
     mcp_sub.add_parser(
-        "run", help="Run the MCP server", description="Start the MCP server"
+        "start", help="Start the MCP server", description="Start the MCP server"
     )
     mcp_sub.add_parser(
-        "info",
-        help="Show MCP server info",
-        description="Display MCP server information",
+        "doctor",
+        help="Check MCP server health",
+        description="Check configuration and dependencies",
+    )
+    mcp_sub.add_parser(
+        "list-tools",
+        help="List available MCP tools",
+        description="Display all available MCP tools",
+    )
+    mcp_sub.add_parser(
+        "installation",
+        help="Show Claude Desktop configuration",
+        description="Display configuration for Claude Desktop",
     )
 
     # setup command

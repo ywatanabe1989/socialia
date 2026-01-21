@@ -45,15 +45,25 @@ socialia check
 
 # Get recent posts from all platforms
 socialia feed
-
-# Get mentions/notifications
-socialia feed --mentions
+socialia feed --detail        # Full text with URLs
+socialia feed --mentions      # Get mentions/notifications
+socialia feed --replies       # Get replies to your posts (Twitter)
 
 # Get user profile info
 socialia me twitter
 
 # Post to Twitter
 socialia post twitter "Hello World!"
+
+# Schedule a post for later
+socialia post twitter "Hello!" --schedule "10:00"
+socialia post twitter "Hello!" --schedule "2026-01-23 10:00"
+socialia post twitter "Hello!" --schedule "+1h"
+
+# Manage scheduled posts
+socialia schedule list        # View pending posts
+socialia schedule cancel ID   # Cancel a scheduled post
+socialia schedule daemon      # Run scheduler in background
 
 # Post to LinkedIn
 socialia post linkedin "Professional update!"
@@ -86,7 +96,7 @@ socialia post twitter "Test" --dry-run
 socialia --help-recursive
 
 # JSON output
-socialia --json post twitter "Hello"
+socialia feed --json
 ```
 
 </details>
@@ -103,6 +113,7 @@ twitter.check()      # Verify connection
 twitter.me()         # Get user profile
 twitter.feed()       # Get recent tweets
 twitter.mentions()   # Get mentions
+twitter.replies()    # Get replies to your posts
 
 # Post content
 twitter.post("Hello World!")
@@ -138,14 +149,28 @@ ga.get_page_views(start_date="7daysAgo", end_date="today")
 <details>
 <summary><b>MCP Server</b></summary>
 
+```bash
+# Check server health and credentials
+socialia mcp doctor
+
+# List available MCP tools
+socialia mcp list-tools
+
+# Show Claude Desktop configuration
+socialia mcp installation
+
+# Start the MCP server
+socialia mcp start
+```
+
 Add to Claude Code settings:
 
 ```json
 {
   "mcpServers": {
     "socialia": {
-      "command": "python",
-      "args": ["-m", "socialia.mcp_server"],
+      "command": "socialia",
+      "args": ["mcp", "start"],
       "env": {
         "SOCIALIA_X_CONSUMER_KEY": "...",
         "SOCIALIA_X_CONSUMER_KEY_SECRET": "...",
@@ -216,6 +241,7 @@ socialia/
 │   ├── reddit.py         # Reddit API (PRAW)
 │   ├── youtube.py        # YouTube API
 │   ├── analytics.py      # Google Analytics
+│   ├── scheduler.py      # Post scheduling system
 │   ├── mcp_server.py     # MCP server (delegates to CLI)
 │   └── base.py           # Base class
 ├── docs/
