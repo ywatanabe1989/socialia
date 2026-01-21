@@ -112,3 +112,30 @@ class TestCLIMain:
         captured = capsys.readouterr()
         assert "MCP" in captured.out or "Tools" in captured.out
         assert "social_post" in captured.out
+
+
+class TestCLICompletion:
+    """Test CLI completion commands."""
+
+    def test_completion_bash(self, capsys):
+        """Test completion bash command."""
+        result = main(["completion", "bash"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "argcomplete" in captured.out.lower() or "compdef" in captured.out
+
+    def test_completion_zsh(self, capsys):
+        """Test completion zsh command."""
+        result = main(["completion", "zsh"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "compdef" in captured.out or "bashcompinit" in captured.out
+
+    def test_completion_status(self, capsys):
+        """Test completion status command."""
+        result = main(["completion", "status"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "Completion Status" in captured.out
+        assert "Bash" in captured.out
+        assert "Zsh" in captured.out

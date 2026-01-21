@@ -33,6 +33,7 @@ from ._feed_commands import (
     cmd_me,
 )
 from ._schedule_commands import cmd_schedule
+from ._completion_commands import cmd_completion
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
 
@@ -267,6 +268,39 @@ def create_parser() -> argparse.ArgumentParser:
         help="Check interval in seconds (default: 60)",
     )
 
+    # completion command
+    completion_parser = subparsers.add_parser(
+        "completion",
+        help="Shell completion setup",
+        description="Generate and install shell completion scripts",
+    )
+    completion_sub = completion_parser.add_subparsers(
+        dest="completion_command", help="Completion operations"
+    )
+    completion_sub.add_parser(
+        "bash",
+        help="Print bash completion script",
+        description="Output bash completion",
+    )
+    completion_sub.add_parser(
+        "zsh", help="Print zsh completion script", description="Output zsh completion"
+    )
+    install_parser = completion_sub.add_parser(
+        "install",
+        help="Install completion to shell config",
+        description="Auto-install completion scripts",
+    )
+    install_parser.add_argument(
+        "--shell",
+        choices=["bash", "zsh"],
+        help="Shell to install for (auto-detected if omitted)",
+    )
+    completion_sub.add_parser(
+        "status",
+        help="Show completion installation status",
+        description="Check if completion is installed",
+    )
+
     # feed command - READ recent posts
     feed_parser = subparsers.add_parser(
         "feed",
@@ -379,6 +413,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_check(args, output_json=args.json or getattr(args, "json", False))
     elif args.command == "me":
         return cmd_me(args, output_json=args.json or getattr(args, "json", False))
+    elif args.command == "completion":
+        return cmd_completion(args, output_json=args.json)
     else:
         parser.print_help()
         return 1
