@@ -105,10 +105,10 @@ class TestCLIMain:
         assert "Socialia" in captured.out
         assert "TWITTER" in captured.out or "twitter" in captured.out.lower()
 
-    def test_mcp_info_command(self, capsys):
-        """Test mcp info command."""
-        result = main(["mcp", "info"])
+    def test_mcp_list_tools_command(self, capsys):
+        """Test mcp list-tools command."""
+        result = main(["mcp", "list-tools"])
         assert result == 0
         captured = capsys.readouterr()
-        assert "MCP" in captured.out
+        assert "MCP" in captured.out or "Tools" in captured.out
         assert "social_post" in captured.out

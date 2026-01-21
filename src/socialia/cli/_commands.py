@@ -309,46 +309,6 @@ def cmd_status(output_json: bool = False) -> int:
     return 0
 
 
-def cmd_mcp(args) -> int:
-    """Handle MCP command."""
-    if args.mcp_command == "run":
-        import asyncio
-        from ..mcp_server import main as mcp_main, HAS_MCP
-
-        if not HAS_MCP:
-            print(
-                "Error: MCP package not installed. Run: pip install mcp",
-                file=sys.stderr,
-            )
-            return 1
-        asyncio.run(mcp_main())
-        return 0
-
-    elif args.mcp_command == "info":
-        print("Socialia MCP Server")
-        print("=" * 40)
-        print()
-        print("Available tools:")
-        for tool_name in [
-            "social_post",
-            "social_delete",
-            "analytics_track",
-            "analytics_realtime",
-            "analytics_pageviews",
-            "analytics_sources",
-        ]:
-            print(f"  - {tool_name}")
-        print()
-        print("Usage:")
-        print("  socialia mcp run")
-        print("  python -m socialia.mcp_server")
-        return 0
-
-    else:
-        print("Error: Specify mcp subcommand (run, info)", file=sys.stderr)
-        return 1
-
-
 def _get_setup_guide(platform: str) -> str:
     """Get setup guide with branded env var names."""
     from .._branding import get_env_var_name

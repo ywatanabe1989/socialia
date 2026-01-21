@@ -61,6 +61,16 @@ echo "--- 04: Analytics ---"
 python 04_analytics.py
 echo ""
 
+# 05: Feed and replies (read-only, safe)
+echo "--- 05: Feed and Replies ---"
+python 05_feed_and_replies.py --limit 3
+echo ""
+
+# 06: Schedule posts (demo mode)
+echo "--- 06: Schedule Posts ---"
+python 06_schedule_posts.py
+echo ""
+
 echo "======================================"
 echo "All examples completed!"
 echo "======================================"
