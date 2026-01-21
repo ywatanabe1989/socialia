@@ -17,6 +17,7 @@ class Twitter(BasePoster):
     ME_ENDPOINT = "https://api.x.com/2/users/me"
     USER_TWEETS_ENDPOINT = "https://api.x.com/2/users/{user_id}/tweets"
     USER_MENTIONS_ENDPOINT = "https://api.x.com/2/users/{user_id}/mentions"
+    SEARCH_ENDPOINT = "https://api.x.com/2/tweets/search/recent"
 
     def __init__(
         self,
@@ -279,4 +280,64 @@ class Twitter(BasePoster):
                     }
                 )
             return {"success": True, "mentions": mentions, "count": len(mentions)}
+        return {"success": False, "error": f"{response.status_code}: {response.text}"}
+
+    def replies(self, limit: int = 10) -> dict:
+        """
+        Get recent replies to the user's tweets.
+
+        Args:
+            limit: Maximum number of replies to return (max 100)
+
+        Returns:
+            dict with 'success', 'replies' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        # First get user info
+        user_info = self.me()
+        if not user_info.get("success"):
+            return user_info
+
+        oauth = self._get_session()
+        # Search for replies to this user (excluding own tweets)
+        query = f"to:{user_info['username']} -from:{user_info['username']}"
+        response = oauth.get(
+            self.SEARCH_ENDPOINT,
+            params={
+                "query": query,
+                "max_results": max(10, min(limit, 100)),  # Search requires 10-100
+                "tweet.fields": "created_at,public_metrics,text,author_id,in_reply_to_user_id,conversation_id",
+                "expansions": "author_id",
+                "user.fields": "username,name",
+            },
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            # Build user lookup
+            users = {}
+            for user in data.get("includes", {}).get("users", []):
+                users[user["id"]] = user
+
+            replies = []
+            for tweet in data.get("data", []):
+                author = users.get(tweet.get("author_id"), {})
+                metrics = tweet.get("public_metrics", {})
+                replies.append(
+                    {
+                        "id": tweet["id"],
+                        "text": tweet["text"],
+                        "created_at": tweet.get("created_at"),
+                        "author_id": tweet.get("author_id"),
+                        "author_username": author.get("username"),
+                        "author_name": author.get("name"),
+                        "conversation_id": tweet.get("conversation_id"),
+                        "likes": metrics.get("like_count", 0),
+                        "retweets": metrics.get("retweet_count", 0),
+                        "url": f"https://x.com/i/web/status/{tweet['id']}",
+                    }
+                )
+            return {"success": True, "replies": replies, "count": len(replies)}
         return {"success": False, "error": f"{response.status_code}: {response.text}"}

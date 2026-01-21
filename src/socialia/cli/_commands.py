@@ -362,6 +362,12 @@ LINKEDIN SETUP
 Environment Variables:
   export {get_env_var_name("LINKEDIN_ACCESS_TOKEN")}="..."
 
+LIMITATIONS:
+  - Posting: ✅ Works with w_member_social scope
+  - Feed/mentions: ❌ Requires r_member_social scope (partner-only)
+  - LinkedIn restricts feed reading to verified partners
+  - "socialia feed linkedin" will return 403 error
+
 Note: Tokens expire after 60 days. Regenerate via OAuth 2.0 tools.
 
 Test:

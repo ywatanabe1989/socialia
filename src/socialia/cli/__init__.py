@@ -238,6 +238,9 @@ def create_parser() -> argparse.ArgumentParser:
         "-m", "--mentions", action="store_true", help="Show mentions instead of posts"
     )
     feed_parser.add_argument(
+        "-r", "--replies", action="store_true", help="Show replies to your posts"
+    )
+    feed_parser.add_argument(
         "-d",
         "--detail",
         action="store_true",

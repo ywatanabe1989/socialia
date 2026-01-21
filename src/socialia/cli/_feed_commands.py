@@ -36,6 +36,7 @@ def cmd_feed(args, output_json: bool = False) -> int:
 
     limit = getattr(args, "limit", 5)
     mentions_only = getattr(args, "mentions", False)
+    replies_only = getattr(args, "replies", False)
     detail = getattr(args, "detail", False)
     results = {}
 
@@ -47,7 +48,12 @@ def cmd_feed(args, output_json: bool = False) -> int:
                 results[platform] = {"success": False, "error": "Not configured"}
             continue
 
-        if mentions_only:
+        if replies_only:
+            if hasattr(client, "replies"):
+                result = client.replies(limit=limit)
+            else:
+                result = {"success": False, "error": "Replies not supported"}
+        elif mentions_only:
             result = client.mentions(limit=limit)
         else:
             result = client.feed(limit=limit)
@@ -63,11 +69,12 @@ def cmd_feed(args, output_json: bool = False) -> int:
                 print(f"  ⚠️  {result.get('error', 'Unknown error')}")
                 continue
 
-            # Get posts/tweets/mentions
+            # Get posts/tweets/mentions/replies
             items = (
                 result.get("posts")
                 or result.get("tweets")
                 or result.get("mentions")
+                or result.get("replies")
                 or []
             )
             if not items:
@@ -87,7 +94,12 @@ def cmd_feed(args, output_json: bool = False) -> int:
                 created = (
                     item.get("created_at", "")[:10] if item.get("created_at") else ""
                 )
-                print(f"  • {text}")
+                # Show author for replies/mentions
+                author = item.get("author_username", "")
+                if author:
+                    print(f"  • @{author}: {text}")
+                else:
+                    print(f"  • {text}")
                 metrics = []
                 if created:
                     metrics.append(created)
