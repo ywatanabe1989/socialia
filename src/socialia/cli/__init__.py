@@ -29,13 +29,11 @@ from ._commands import (
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
 
 
-def create_parser() -> argparse.ArgumentParser:
-    """Create the argument parser with all subcommands."""
-    parser = argparse.ArgumentParser(
-        prog="socialia",
-        description="Unified social media management CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+def _get_epilog() -> str:
+    """Generate epilog with branded env var names."""
+    from .._branding import get_env_var_name
+
+    return f"""
 Examples:
   socialia post twitter "Hello World!"
   socialia post twitter --file tweet.txt
@@ -45,19 +43,28 @@ Examples:
   socialia mcp run
   socialia --help-recursive
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix supported):
-  SOCIALIA_X_CONSUMER_KEY          Twitter API consumer key
-  SOCIALIA_X_CONSUMER_KEY_SECRET   Twitter API consumer secret
-  SOCIALIA_X_ACCESSTOKEN           Twitter access token
-  SOCIALIA_X_ACCESSTOKEN_SECRET    Twitter access token secret
-  SOCIALIA_LINKEDIN_ACCESS_TOKEN   LinkedIn OAuth access token
-  SOCIALIA_REDDIT_CLIENT_ID        Reddit app client ID
-  SOCIALIA_REDDIT_CLIENT_SECRET    Reddit app client secret
-  SOCIALIA_REDDIT_USERNAME         Reddit username
-  SOCIALIA_REDDIT_PASSWORD         Reddit password
-  SOCIALIA_GA_MEASUREMENT_ID       Google Analytics measurement ID
-  SOCIALIA_GA_API_SECRET           Google Analytics API secret
-""",
+Environment Variables:
+  {get_env_var_name("X_CONSUMER_KEY"):36} Twitter API consumer key
+  {get_env_var_name("X_CONSUMER_KEY_SECRET"):36} Twitter API consumer secret
+  {get_env_var_name("X_ACCESSTOKEN"):36} Twitter access token
+  {get_env_var_name("X_ACCESSTOKEN_SECRET"):36} Twitter access token secret
+  {get_env_var_name("LINKEDIN_ACCESS_TOKEN"):36} LinkedIn OAuth access token
+  {get_env_var_name("REDDIT_CLIENT_ID"):36} Reddit app client ID
+  {get_env_var_name("REDDIT_CLIENT_SECRET"):36} Reddit app client secret
+  {get_env_var_name("REDDIT_USERNAME"):36} Reddit username
+  {get_env_var_name("REDDIT_PASSWORD"):36} Reddit password
+  {get_env_var_name("GOOGLE_ANALYTICS_MEASUREMENT_ID"):36} Google Analytics measurement ID
+  {get_env_var_name("GOOGLE_ANALYTICS_API_SECRET"):36} Google Analytics API secret
+"""
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the argument parser with all subcommands."""
+    parser = argparse.ArgumentParser(
+        prog="socialia",
+        description="Unified social media management CLI",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=_get_epilog(),
     )
     parser.add_argument(
         "-v", "--version", action="version", version=f"%(prog)s {__version__}"

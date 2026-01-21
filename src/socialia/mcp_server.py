@@ -7,7 +7,7 @@ All MCP tool calls can be reproduced via CLI commands.
 
 Environment Variables:
     SOCIALIA_ENV_FILE: Path to .env file to load (optional)
-    Or set individual SCITEX_*/SOCIALIA_* env vars
+    Or set individual SOCIALIA_* env vars (see socialia setup)
 """
 
 import os

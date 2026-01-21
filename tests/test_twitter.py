@@ -17,10 +17,10 @@ class TestTwitterPoster:
 
     def test_init_from_environment(self, monkeypatch):
         """Test initialization from environment variables."""
-        monkeypatch.setenv("SCITEX_X_CONSUMER_KEY", "env_consumer_key")
-        monkeypatch.setenv("SCITEX_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
-        monkeypatch.setenv("SCITEX_X_ACCESSTOKEN", "env_access_token")
-        monkeypatch.setenv("SCITEX_X_ACCESSTOKEN_SECRET", "env_access_secret")
+        monkeypatch.setenv("SOCIALIA_X_CONSUMER_KEY", "env_consumer_key")
+        monkeypatch.setenv("SOCIALIA_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
+        monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN", "env_access_token")
+        monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN_SECRET", "env_access_secret")
 
         poster = TwitterPoster()
         assert poster.consumer_key == "env_consumer_key"
@@ -34,20 +34,20 @@ class TestTwitterPoster:
     def test_validate_credentials_missing(self, monkeypatch):
         """Test credential validation with missing credentials."""
         # Clear environment variables
-        monkeypatch.delenv("SCITEX_X_CONSUMER_KEY", raising=False)
-        monkeypatch.delenv("SCITEX_X_CONSUMER_KEY_SECRET", raising=False)
-        monkeypatch.delenv("SCITEX_X_ACCESSTOKEN", raising=False)
-        monkeypatch.delenv("SCITEX_X_ACCESSTOKEN_SECRET", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_CONSUMER_KEY", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_CONSUMER_KEY_SECRET", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_ACCESSTOKEN", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_ACCESSTOKEN_SECRET", raising=False)
         poster = TwitterPoster(consumer_key="only_one")
         assert poster.validate_credentials() is False
 
     def test_post_missing_credentials(self, monkeypatch):
         """Test post fails with missing credentials."""
         # Clear environment variables
-        monkeypatch.delenv("SCITEX_X_CONSUMER_KEY", raising=False)
-        monkeypatch.delenv("SCITEX_X_CONSUMER_KEY_SECRET", raising=False)
-        monkeypatch.delenv("SCITEX_X_ACCESSTOKEN", raising=False)
-        monkeypatch.delenv("SCITEX_X_ACCESSTOKEN_SECRET", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_CONSUMER_KEY", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_CONSUMER_KEY_SECRET", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_ACCESSTOKEN", raising=False)
+        monkeypatch.delenv("SOCIALIA_X_ACCESSTOKEN_SECRET", raising=False)
         poster = TwitterPoster()
         result = poster.post("Test")
         assert result["success"] is False
