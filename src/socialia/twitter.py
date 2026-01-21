@@ -1,10 +1,10 @@
 """Twitter/X API v2 poster."""
 
-import os
 from typing import Optional
 from requests_oauthlib import OAuth1Session
 
 from .base import BasePoster
+from ._branding import get_env
 
 
 class TwitterPoster(BasePoster):
@@ -20,13 +20,11 @@ class TwitterPoster(BasePoster):
         access_token: Optional[str] = None,
         access_token_secret: Optional[str] = None,
     ):
-        self.consumer_key = consumer_key or os.environ.get("SCITEX_X_CONSUMER_KEY")
-        self.consumer_secret = consumer_secret or os.environ.get(
-            "SCITEX_X_CONSUMER_KEY_SECRET"
-        )
-        self.access_token = access_token or os.environ.get("SCITEX_X_ACCESSTOKEN")
-        self.access_token_secret = access_token_secret or os.environ.get(
-            "SCITEX_X_ACCESSTOKEN_SECRET"
+        self.consumer_key = consumer_key or get_env("X_CONSUMER_KEY")
+        self.consumer_secret = consumer_secret or get_env("X_CONSUMER_KEY_SECRET")
+        self.access_token = access_token or get_env("X_ACCESSTOKEN")
+        self.access_token_secret = access_token_secret or get_env(
+            "X_ACCESSTOKEN_SECRET"
         )
 
     def _get_session(self) -> OAuth1Session:

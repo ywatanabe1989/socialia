@@ -5,6 +5,8 @@ import requests
 from typing import Optional
 from datetime import datetime
 
+from ._branding import get_env
+
 
 class GoogleAnalytics:
     """
@@ -14,7 +16,7 @@ class GoogleAnalytics:
     - Measurement Protocol (sending events)
     - Data API (retrieving metrics) - requires service account
 
-    Environment Variables (SOCIALIA_ or SCITEX_ prefix):
+    Environment Variables (use branded prefix, e.g., SOCIALIA_):
         GOOGLE_ANALYTICS_MEASUREMENT_ID: GA4 Measurement ID (G-XXXXXXXXXX)
         GOOGLE_ANALYTICS_API_SECRET: Measurement Protocol API secret
         GOOGLE_ANALYTICS_PROPERTY_ID: Property ID (numeric, for Data API)
@@ -35,35 +37,20 @@ class GoogleAnalytics:
             api_secret: Measurement Protocol API secret
             property_id: GA4 Property ID (numeric, for Data API)
         """
-        # Google Analytics credentials (explicit > short > unprefixed)
+        # Google Analytics credentials (use branding-aware get_env)
         self.measurement_id = measurement_id or (
-            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_MEASUREMENT_ID")
-            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_MEASUREMENT_ID")
-            or os.environ.get("SOCIALIA_GA_MEASUREMENT_ID")
-            or os.environ.get("SCITEX_GA_MEASUREMENT_ID")
-            or os.environ.get("GA_MEASUREMENT_ID")
+            get_env("GOOGLE_ANALYTICS_MEASUREMENT_ID") or get_env("GA_MEASUREMENT_ID")
         )
         self.api_secret = api_secret or (
-            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_API_SECRET")
-            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_API_SECRET")
-            or os.environ.get("SOCIALIA_GA_API_SECRET")
-            or os.environ.get("SCITEX_GA_API_SECRET")
-            or os.environ.get("GA_API_SECRET")
+            get_env("GOOGLE_ANALYTICS_API_SECRET") or get_env("GA_API_SECRET")
         )
         self.property_id = property_id or (
-            os.environ.get("SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID")
-            or os.environ.get("SCITEX_GOOGLE_ANALYTICS_PROPERTY_ID")
-            or os.environ.get("SOCIALIA_GA_PROPERTY_ID")
-            or os.environ.get("SCITEX_GA_PROPERTY_ID")
-            or os.environ.get("GA_PROPERTY_ID")
+            get_env("GOOGLE_ANALYTICS_PROPERTY_ID") or get_env("GA_PROPERTY_ID")
         )
 
         # Google Application Credentials (for Data API service account)
-        credentials_path = (
-            os.environ.get("SOCIALIA_GOOGLE_APPLICATION_CREDENTIALS")
-            or os.environ.get("SCITEX_GOOGLE_APPLICATION_CREDENTIALS")
-            or os.environ.get("SOCIALIA_GA_CREDENTIALS")
-            or os.environ.get("SCITEX_GA_CREDENTIALS")
+        credentials_path = get_env("GOOGLE_APPLICATION_CREDENTIALS") or get_env(
+            "GA_CREDENTIALS"
         )
         if credentials_path and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.expandvars(

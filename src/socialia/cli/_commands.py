@@ -2,7 +2,6 @@
 """CLI command handlers for socialia."""
 
 import json
-import os
 import sys
 
 from .. import __version__
@@ -11,15 +10,6 @@ from ..linkedin import LinkedInPoster
 from ..reddit import RedditPoster
 from ..analytics import GoogleAnalytics
 from ..youtube import YouTubePoster
-
-
-def _get_env(key: str) -> str | None:
-    """Get env var with prefix priority: SOCIALIA_ > SCITEX_ > unprefixed."""
-    return (
-        os.environ.get(f"SOCIALIA_{key}")
-        or os.environ.get(f"SCITEX_{key}")
-        or os.environ.get(key)
-    )
 
 
 def get_poster(platform: str):
@@ -224,31 +214,40 @@ def cmd_analytics(args, output_json: bool = False) -> int:
 
 def cmd_status(output_json: bool = False) -> int:
     """Show configuration and environment status."""
+    from .._branding import get_env, get_env_var_name
+
     env_vars = {
         "twitter": {
-            "SOCIALIA_X_CONSUMER_KEY": _get_env("X_CONSUMER_KEY"),
-            "SOCIALIA_X_CONSUMER_KEY_SECRET": _get_env("X_CONSUMER_KEY_SECRET"),
-            "SOCIALIA_X_ACCESSTOKEN": _get_env("X_ACCESSTOKEN"),
-            "SOCIALIA_X_ACCESSTOKEN_SECRET": _get_env("X_ACCESSTOKEN_SECRET"),
+            get_env_var_name("X_CONSUMER_KEY"): get_env("X_CONSUMER_KEY"),
+            get_env_var_name("X_CONSUMER_KEY_SECRET"): get_env("X_CONSUMER_KEY_SECRET"),
+            get_env_var_name("X_ACCESSTOKEN"): get_env("X_ACCESSTOKEN"),
+            get_env_var_name("X_ACCESSTOKEN_SECRET"): get_env("X_ACCESSTOKEN_SECRET"),
         },
         "linkedin": {
-            "SOCIALIA_LINKEDIN_ACCESS_TOKEN": _get_env("LINKEDIN_ACCESS_TOKEN"),
+            get_env_var_name("LINKEDIN_ACCESS_TOKEN"): get_env("LINKEDIN_ACCESS_TOKEN"),
         },
         "reddit": {
-            "SOCIALIA_REDDIT_CLIENT_ID": _get_env("REDDIT_CLIENT_ID"),
-            "SOCIALIA_REDDIT_CLIENT_SECRET": _get_env("REDDIT_CLIENT_SECRET"),
-            "SOCIALIA_REDDIT_USERNAME": _get_env("REDDIT_USERNAME"),
-            "SOCIALIA_REDDIT_PASSWORD": _get_env("REDDIT_PASSWORD"),
+            get_env_var_name("REDDIT_CLIENT_ID"): get_env("REDDIT_CLIENT_ID"),
+            get_env_var_name("REDDIT_CLIENT_SECRET"): get_env("REDDIT_CLIENT_SECRET"),
+            get_env_var_name("REDDIT_USERNAME"): get_env("REDDIT_USERNAME"),
+            get_env_var_name("REDDIT_PASSWORD"): get_env("REDDIT_PASSWORD"),
         },
         "youtube": {
-            "SOCIALIA_YOUTUBE_CLIENT_SECRETS_FILE": _get_env(
+            get_env_var_name("YOUTUBE_CLIENT_SECRETS_FILE"): get_env(
                 "YOUTUBE_CLIENT_SECRETS_FILE"
             ),
         },
         "analytics": {
-            "SOCIALIA_GA_MEASUREMENT_ID": _get_env("GA_MEASUREMENT_ID"),
-            "SOCIALIA_GA_API_SECRET": _get_env("GA_API_SECRET"),
-            "SOCIALIA_GA_PROPERTY_ID": _get_env("GA_PROPERTY_ID"),
+            get_env_var_name("GOOGLE_ANALYTICS_MEASUREMENT_ID"): (
+                get_env("GOOGLE_ANALYTICS_MEASUREMENT_ID")
+                or get_env("GA_MEASUREMENT_ID")
+            ),
+            get_env_var_name("GOOGLE_ANALYTICS_API_SECRET"): (
+                get_env("GOOGLE_ANALYTICS_API_SECRET") or get_env("GA_API_SECRET")
+            ),
+            get_env_var_name("GOOGLE_ANALYTICS_PROPERTY_ID"): (
+                get_env("GOOGLE_ANALYTICS_PROPERTY_ID") or get_env("GA_PROPERTY_ID")
+            ),
         },
     }
 
@@ -322,8 +321,12 @@ def cmd_mcp(args) -> int:
         return 1
 
 
-SETUP_GUIDES = {
-    "twitter": """
+def _get_setup_guide(platform: str) -> str:
+    """Get setup guide with branded env var names."""
+    from .._branding import get_env_var_name
+
+    guides = {
+        "twitter": f"""
 TWITTER/X SETUP
 ===============
 
@@ -331,16 +334,16 @@ TWITTER/X SETUP
 2. Create app with Read+Write permissions
 3. Generate API keys and access tokens
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix):
-  export SOCIALIA_X_CONSUMER_KEY="..."
-  export SOCIALIA_X_CONSUMER_KEY_SECRET="..."
-  export SOCIALIA_X_ACCESSTOKEN="..."
-  export SOCIALIA_X_ACCESSTOKEN_SECRET="..."
+Environment Variables:
+  export {get_env_var_name("X_CONSUMER_KEY")}="..."
+  export {get_env_var_name("X_CONSUMER_KEY_SECRET")}="..."
+  export {get_env_var_name("X_ACCESSTOKEN")}="..."
+  export {get_env_var_name("X_ACCESSTOKEN_SECRET")}="..."
 
 Test:
   socialia post twitter "Test" --dry-run
 """,
-    "linkedin": """
+        "linkedin": f"""
 LINKEDIN SETUP
 ==============
 
@@ -348,31 +351,31 @@ LINKEDIN SETUP
 2. Create app, request 'Share on LinkedIn' product
 3. Generate token at Token Generator
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix):
-  export SOCIALIA_LINKEDIN_ACCESS_TOKEN="..."
+Environment Variables:
+  export {get_env_var_name("LINKEDIN_ACCESS_TOKEN")}="..."
 
 Note: Tokens expire after 60 days.
 
 Test:
   socialia post linkedin "Test" --dry-run
 """,
-    "reddit": """
+        "reddit": f"""
 REDDIT SETUP
 ============
 
 1. Go to https://www.reddit.com/prefs/apps
 2. Create 'script' type app
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix):
-  export SOCIALIA_REDDIT_CLIENT_ID="..."
-  export SOCIALIA_REDDIT_CLIENT_SECRET="..."
-  export SOCIALIA_REDDIT_USERNAME="..."
-  export SOCIALIA_REDDIT_PASSWORD="..."
+Environment Variables:
+  export {get_env_var_name("REDDIT_CLIENT_ID")}="..."
+  export {get_env_var_name("REDDIT_CLIENT_SECRET")}="..."
+  export {get_env_var_name("REDDIT_USERNAME")}="..."
+  export {get_env_var_name("REDDIT_PASSWORD")}="..."
 
 Test:
   socialia post reddit "Test" --subreddit test --dry-run
 """,
-    "youtube": """
+        "youtube": f"""
 YOUTUBE SETUP
 =============
 
@@ -381,13 +384,13 @@ YOUTUBE SETUP
 3. Create OAuth 2.0 credentials
 4. Download client_secrets.json
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix):
-  export SOCIALIA_YOUTUBE_CLIENT_SECRETS_FILE="/path/to/client_secrets.json"
+Environment Variables:
+  export {get_env_var_name("YOUTUBE_CLIENT_SECRETS_FILE")}="/path/to/client_secrets.json"
 
 Test:
   socialia post youtube "Test" --video test.mp4 --dry-run
 """,
-    "analytics": """
+        "analytics": f"""
 GOOGLE ANALYTICS SETUP
 ======================
 
@@ -397,9 +400,9 @@ PART 1: Send Events (Measurement Protocol)
 2. Admin > Data Streams > Select your stream
 3. Measurement Protocol API secrets > Create
 
-Environment Variables (SOCIALIA_ or SCITEX_ prefix):
-  export SOCIALIA_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
-  export SOCIALIA_GA_API_SECRET="..."
+Environment Variables:
+  export {get_env_var_name("GOOGLE_ANALYTICS_MEASUREMENT_ID")}="G-XXXXXXXXXX"
+  export {get_env_var_name("GOOGLE_ANALYTICS_API_SECRET")}="..."
 
 Test:
   socialia analytics track test_event
@@ -416,7 +419,7 @@ PART 2: Read Data (Data API) - Optional
    - Add service account email with Viewer role
 
 Environment Variables:
-  export SOCIALIA_GA_PROPERTY_ID="379172597"
+  export {get_env_var_name("GOOGLE_ANALYTICS_PROPERTY_ID")}="379172597"
   export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
 
 Test:
@@ -424,7 +427,8 @@ Test:
   socialia analytics pageviews
   socialia analytics sources
 """,
-}
+    }
+    return guides[platform]
 
 
 def cmd_setup(args) -> int:
@@ -433,8 +437,8 @@ def cmd_setup(args) -> int:
 
     if platform == "all":
         for name in ["twitter", "linkedin", "reddit", "youtube", "analytics"]:
-            print(SETUP_GUIDES[name])
+            print(_get_setup_guide(name))
     else:
-        print(SETUP_GUIDES[platform])
+        print(_get_setup_guide(platform))
 
     return 0
