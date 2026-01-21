@@ -32,6 +32,7 @@ from ._feed_commands import (
     cmd_check,
     cmd_me,
 )
+from ._schedule_commands import cmd_schedule
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
 
@@ -111,6 +112,11 @@ def create_parser() -> argparse.ArgumentParser:
     )
     post_parser.add_argument(
         "-n", "--dry-run", action="store_true", help="Print without posting"
+    )
+    post_parser.add_argument(
+        "--schedule",
+        "-S",
+        help="Schedule post for later (e.g., '10:00', '2026-01-23 10:00', '+1h', '+30m')",
     )
 
     # delete command
@@ -219,6 +225,38 @@ def create_parser() -> argparse.ArgumentParser:
         help="Platform to show setup for (default: all)",
     )
 
+    # schedule command
+    schedule_parser = subparsers.add_parser(
+        "schedule",
+        help="Manage scheduled posts",
+        description="List, cancel, or run scheduled posts",
+    )
+    schedule_sub = schedule_parser.add_subparsers(
+        dest="schedule_command", help="Schedule operations"
+    )
+    schedule_sub.add_parser(
+        "list", help="List pending scheduled posts", description="Show all pending jobs"
+    )
+    cancel_parser = schedule_sub.add_parser(
+        "cancel", help="Cancel a scheduled post", description="Cancel by job ID"
+    )
+    cancel_parser.add_argument("job_id", help="Job ID to cancel")
+    schedule_sub.add_parser(
+        "run", help="Run due jobs now", description="Execute all jobs that are due"
+    )
+    daemon_parser = schedule_sub.add_parser(
+        "daemon",
+        help="Run scheduler daemon",
+        description="Background process that executes scheduled posts",
+    )
+    daemon_parser.add_argument(
+        "--interval",
+        "-i",
+        type=int,
+        default=60,
+        help="Check interval in seconds (default: 60)",
+    )
+
     # feed command - READ recent posts
     feed_parser = subparsers.add_parser(
         "feed",
@@ -323,6 +361,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_mcp(args)
     elif args.command == "setup":
         return cmd_setup(args)
+    elif args.command == "schedule":
+        return cmd_schedule(args, output_json=args.json)
     elif args.command == "feed":
         return cmd_feed(args, output_json=args.json or getattr(args, "json", False))
     elif args.command == "check":

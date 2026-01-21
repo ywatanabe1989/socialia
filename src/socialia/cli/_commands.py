@@ -56,6 +56,34 @@ def cmd_post(args, output_json: bool = False) -> int:
         print(
             f"Text ({len(text)} chars): {text[:100]}{'...' if len(text) > 100 else ''}"
         )
+        if getattr(args, "schedule", None):
+            print(f"Schedule: {args.schedule}")
+        return 0
+
+    # Handle scheduled posts
+    if getattr(args, "schedule", None):
+        from ..scheduler import schedule_post
+
+        kwargs = {}
+        if args.platform == "reddit":
+            kwargs["subreddit"] = getattr(args, "subreddit", "test")
+            kwargs["title"] = getattr(args, "title", None)
+        elif args.platform == "twitter":
+            kwargs["reply_to"] = getattr(args, "reply_to", None)
+            kwargs["quote_tweet_id"] = getattr(args, "quote", None)
+
+        result = schedule_post(args.platform, text, args.schedule, **kwargs)
+
+        if output_json:
+            print(json.dumps(result, indent=2))
+        elif result["success"]:
+            print(f"📅 Scheduled for {result['scheduled_for']}")
+            print(f"   Job ID: {result['job_id']}")
+            print("   Run 'socialia schedule list' to view pending posts")
+            print("   Run 'socialia schedule daemon' to start the scheduler")
+        else:
+            print(f"Error: {result['error']}", file=sys.stderr)
+            return 1
         return 0
 
     client = get_client(args.platform)
