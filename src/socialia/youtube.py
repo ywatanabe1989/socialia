@@ -4,6 +4,7 @@ import os
 from typing import Optional
 
 from .base import BasePoster
+from ._branding import get_env
 
 try:
     from google.oauth2.credentials import Credentials
@@ -11,6 +12,7 @@ try:
     from google.auth.transport.requests import Request
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaFileUpload
+
     HAS_YOUTUBE = True
 except ImportError:
     HAS_YOUTUBE = False
@@ -51,12 +53,11 @@ class YouTubePoster(BasePoster):
             client_secrets_file: Path to OAuth client secrets JSON from Google Console
             token_file: Path to store/load OAuth tokens
         """
-        self.client_secrets_file = client_secrets_file or os.environ.get(
+        self.client_secrets_file = client_secrets_file or get_env(
             "YOUTUBE_CLIENT_SECRETS_FILE"
         )
-        self.token_file = token_file or os.environ.get(
-            "YOUTUBE_TOKEN_FILE",
-            os.path.expanduser("~/.youtube_token.json")
+        self.token_file = token_file or (
+            get_env("YOUTUBE_TOKEN_FILE") or os.path.expanduser("~/.youtube_token.json")
         )
         self._youtube = None
         self._credentials = None
@@ -313,10 +314,14 @@ class YouTubePoster(BasePoster):
 
         try:
             # Get current video details
-            current = youtube.videos().list(
-                part="snippet,status",
-                id=video_id,
-            ).execute()
+            current = (
+                youtube.videos()
+                .list(
+                    part="snippet,status",
+                    id=video_id,
+                )
+                .execute()
+            )
 
             if not current.get("items"):
                 return {"success": False, "error": f"Video not found: {video_id}"}
@@ -369,10 +374,14 @@ class YouTubePoster(BasePoster):
             return {"success": False, "error": "Could not create YouTube client"}
 
         try:
-            response = youtube.channels().list(
-                part="snippet,statistics",
-                mine=True,
-            ).execute()
+            response = (
+                youtube.channels()
+                .list(
+                    part="snippet,statistics",
+                    mine=True,
+                )
+                .execute()
+            )
 
             if not response.get("items"):
                 return {"success": False, "error": "No channel found"}
@@ -411,34 +420,46 @@ class YouTubePoster(BasePoster):
 
         try:
             # Get uploads playlist ID
-            channels = youtube.channels().list(
-                part="contentDetails",
-                mine=True,
-            ).execute()
+            channels = (
+                youtube.channels()
+                .list(
+                    part="contentDetails",
+                    mine=True,
+                )
+                .execute()
+            )
 
             if not channels.get("items"):
                 return {"success": False, "error": "No channel found"}
 
-            uploads_id = channels["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+            uploads_id = channels["items"][0]["contentDetails"]["relatedPlaylists"][
+                "uploads"
+            ]
 
             # Get videos from uploads playlist
-            videos_response = youtube.playlistItems().list(
-                part="snippet",
-                playlistId=uploads_id,
-                maxResults=max_results,
-            ).execute()
+            videos_response = (
+                youtube.playlistItems()
+                .list(
+                    part="snippet",
+                    playlistId=uploads_id,
+                    maxResults=max_results,
+                )
+                .execute()
+            )
 
             videos = []
             for item in videos_response.get("items", []):
                 snippet = item["snippet"]
                 video_id = snippet["resourceId"]["videoId"]
-                videos.append({
-                    "id": video_id,
-                    "title": snippet["title"],
-                    "description": snippet.get("description", "")[:100],
-                    "published_at": snippet["publishedAt"],
-                    "url": f"https://www.youtube.com/watch?v={video_id}",
-                })
+                videos.append(
+                    {
+                        "id": video_id,
+                        "title": snippet["title"],
+                        "description": snippet.get("description", "")[:100],
+                        "published_at": snippet["publishedAt"],
+                        "url": f"https://www.youtube.com/watch?v={video_id}",
+                    }
+                )
 
             return {
                 "success": True,

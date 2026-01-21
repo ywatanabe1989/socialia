@@ -1,10 +1,10 @@
 """LinkedIn API poster."""
 
-import os
 from typing import Optional
 import requests
 
 from .base import BasePoster
+from ._branding import get_env
 
 
 class LinkedInPoster(BasePoster):
@@ -12,6 +12,7 @@ class LinkedInPoster(BasePoster):
 
     BASE_URL = "https://api.linkedin.com/v2"
     ME_ENDPOINT = f"{BASE_URL}/me"
+    USERINFO_ENDPOINT = f"{BASE_URL}/userinfo"  # OpenID Connect endpoint
     UGC_POSTS_ENDPOINT = f"{BASE_URL}/ugcPosts"
     POSTS_ENDPOINT = f"{BASE_URL}/posts"
 
@@ -21,9 +22,9 @@ class LinkedInPoster(BasePoster):
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
     ):
-        self.access_token = access_token or os.environ.get("LINKEDIN_ACCESS_TOKEN")
-        self.client_id = client_id or os.environ.get("LINKEDIN_CLIENT_ID")
-        self.client_secret = client_secret or os.environ.get("LINKEDIN_CLIENT_SECRET")
+        self.access_token = access_token or get_env("LINKEDIN_ACCESS_TOKEN")
+        self.client_id = client_id or get_env("LINKEDIN_CLIENT_ID")
+        self.client_secret = client_secret or get_env("LINKEDIN_CLIENT_SECRET")
         self._user_urn: Optional[str] = None
 
     def _get_headers(self) -> dict:
@@ -47,11 +48,25 @@ class LinkedInPoster(BasePoster):
         if not self.validate_credentials():
             return None
 
+        # Try OpenID Connect userinfo endpoint first (requires openid scope)
+        response = requests.get(
+            self.USERINFO_ENDPOINT,
+            headers={"Authorization": f"Bearer {self.access_token}"},
+        )
+        if response.status_code == 200:
+            user_data = response.json()
+            # OpenID returns 'sub' as the user identifier
+            if "sub" in user_data:
+                self._user_urn = f"urn:li:person:{user_data['sub']}"
+                return self._user_urn
+
+        # Fallback to /me endpoint (requires r_liteprofile scope)
         response = requests.get(self.ME_ENDPOINT, headers=self._get_headers())
         if response.status_code == 200:
             user_data = response.json()
             self._user_urn = f"urn:li:person:{user_data['id']}"
             return self._user_urn
+
         return None
 
     def post(

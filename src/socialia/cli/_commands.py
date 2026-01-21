@@ -348,13 +348,21 @@ LINKEDIN SETUP
 ==============
 
 1. Go to https://www.linkedin.com/developers/
-2. Create app, request 'Share on LinkedIn' product
-3. Generate token at Token Generator
+2. Create app (or use existing one)
+3. Go to Products tab, add TWO products:
+   - "Share on LinkedIn" (for posting)
+   - "Sign In with LinkedIn using OpenID Connect" (for user ID)
+4. Go to Auth tab → OAuth 2.0 tools
+5. Select BOTH scopes:
+   - w_member_social
+   - openid
+6. Click "Request access token"
+7. Authorize and copy the token
 
 Environment Variables:
   export {get_env_var_name("LINKEDIN_ACCESS_TOKEN")}="..."
 
-Note: Tokens expire after 60 days.
+Note: Tokens expire after 60 days. Regenerate via OAuth 2.0 tools.
 
 Test:
   socialia post linkedin "Test" --dry-run
