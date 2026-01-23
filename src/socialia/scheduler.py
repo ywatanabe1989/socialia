@@ -219,14 +219,28 @@ def list_scheduled(full: bool = False) -> list:
 
 
 def cancel_scheduled(job_id: str) -> dict:
-    """Cancel a scheduled job."""
+    """Cancel a scheduled job. Supports prefix matching like screen -r."""
     jobs = _load_schedule()
-    for job in jobs:
-        if job["id"] == job_id:
-            job["status"] = "cancelled"
-            _save_schedule(jobs)
-            return {"success": True, "cancelled": job_id}
-    return {"success": False, "error": f"Job not found: {job_id}"}
+
+    # Find matching jobs (prefix match)
+    matches = [
+        j for j in jobs if j["id"].startswith(job_id) and j.get("status") == "pending"
+    ]
+
+    if len(matches) == 0:
+        return {"success": False, "error": f"Job not found: {job_id}"}
+    elif len(matches) > 1:
+        ids = [m["id"] for m in matches]
+        return {
+            "success": False,
+            "error": f"Ambiguous ID '{job_id}' matches: {', '.join(ids)}",
+        }
+
+    # Single match - cancel it
+    job = matches[0]
+    job["status"] = "cancelled"
+    _save_schedule(jobs)
+    return {"success": True, "cancelled": job["id"]}
 
 
 def update_source_path(old_path: str, new_path: str) -> dict:

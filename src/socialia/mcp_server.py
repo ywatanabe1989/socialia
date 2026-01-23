@@ -1,9 +1,75 @@
 #!/usr/bin/env python3
 """
-Socialia MCP Server.
+Socialia MCP Server - Social Media Automation with Platform-Specific Strategies.
 
-Provides MCP tools that delegate to CLI commands for reproducibility.
+Provides MCP tools for posting to Twitter/X, LinkedIn, Reddit, and YouTube.
 All MCP tool calls can be reproduced via CLI commands.
+
+## PLATFORM CONTENT STRATEGIES
+
+When composing posts, follow these platform-specific strategies for engagement:
+
+### Twitter/X (280 chars)
+- **Hook first**: Lead with curiosity, controversy, or value (not announcements)
+- **Format**: Short sentences. Line breaks. Visual hierarchy.
+- **Emoji**: Use at least 1 emoji per tweet for visual appeal (🔧 🚀 ✨ 💡 🎯)
+- **Links**: ALWAYS include GitHub/project URL for discoverability
+- **Hashtags**: 3-5 for SEO, ALWAYS at the end, never mid-sentence
+  - Mix broad + specific for reach: #Python #OpenSource #DevTools #CLI #Automation
+  - More hashtags = better discoverability on Twitter/X
+- **Avoid**: "Just released", "Check out", "New version" - boring intros
+
+BAD:  "SciTeX v2.15.0 released! New audio relay for remote AI agents. pip install scitex[audio] #Python #AI"
+GOOD: "Your AI agent on a remote server can now speak to you locally.
+
+Audio relay in SciTeX bridges the gap.
+
+pip install scitex[audio]
+
+#AIAgents #Python"
+
+Templates:
+- Problem → Solution: "Tired of X? Now you can Y. #hashtag"
+- Curiosity gap: "The one thing most developers miss about X... #hashtag"
+- Counter-intuitive: "Why X is actually better than Y #hashtag"
+- Tutorial teaser: "How to X in 3 steps (thread): #hashtag"
+
+### LinkedIn (3,000 chars)
+- **Hook**: First 2 lines visible before "see more" - make them count
+- **Format**: Short paragraphs (1-2 sentences). Lots of whitespace.
+- **Tone**: Professional but human. Share learnings, not just announcements.
+- **Hashtags**: 3-5 at the very end, after content. Use industry terms.
+  - #ArtificialIntelligence #MachineLearning #SoftwareDevelopment #OpenSource #TechInnovation
+- **CTA**: Ask a question or invite discussion at the end
+
+BAD:  "Excited to announce SciTeX v2.15.0 with new audio features!"
+GOOD: "Remote AI development has a UX problem.
+
+When your agent runs on a server, you lose audio feedback entirely.
+
+We solved this with audio relay - your remote agent speaks to your local machine.
+
+Here's what we learned building it:
+• Challenge 1...
+• Challenge 2...
+
+What's the biggest UX gap you face with remote AI tools?
+
+#ArtificialIntelligence #RemoteDevelopment #Python #OpenSource"
+
+### Reddit
+- **Title is everything**: Descriptive, specific, follows subreddit culture
+- **Body**: Provide value first. Self-promotion last (10:1 rule).
+- **Tone**: Authentic, not corporate. Redditors detect marketing.
+- **Subreddit rules**: Check sidebar before posting
+
+BAD Title:  "Check out my new Python package!"
+GOOD Title: "I built a Python tool that lets remote AI agents play audio on your local machine"
+
+### YouTube
+- **Title**: Keyword-rich, curiosity-driven, under 60 chars ideal
+- **Description**: First 2 lines matter (shown in search). Keywords naturally.
+- **Tags**: Relevant, mix of broad and specific
 
 Environment Variables:
     SOCIALIA_ENV_FILE: Path to .env file to load (optional)
@@ -50,11 +116,48 @@ if env_file := os.environ.get("SOCIALIA_ENV_FILE"):
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import Tool, TextContent
+    from mcp.types import Tool, TextContent, Resource, TextResourceContents
 
     HAS_MCP = True
 except ImportError:
     HAS_MCP = False
+
+
+# Platform content strategies - exposed via MCP resource and tool descriptions
+PLATFORM_STRATEGIES = """
+## PLATFORM CONTENT STRATEGIES
+
+### Twitter/X (280 chars)
+- Hook first: Lead with curiosity, controversy, or value (NOT announcements)
+- Format: Short sentences. Line breaks. Visual hierarchy.
+- Hashtags: 1-2 at the END. Niche > generic (#AIAgents not #AI)
+  - Tech: #Python #OpenSource #DevTools #MachineLearning #AIAgents
+- Avoid: "Just released", "Check out", "New version"
+
+BAD:  "SciTeX v2.15.0 released! New audio relay. pip install scitex[audio] #Python #AI"
+GOOD: "Your AI agent on a remote server can now speak to you locally.
+
+Audio relay in SciTeX bridges the gap.
+
+pip install scitex[audio]
+
+#AIAgents #Python"
+
+### LinkedIn (3,000 chars)
+- Hook: First 2 lines visible before "see more" - make them count
+- Format: Short paragraphs. Lots of whitespace.
+- Hashtags: 3-5 at the END. Industry terms.
+  - #ArtificialIntelligence #MachineLearning #SoftwareDevelopment #OpenSource
+- CTA: End with a question
+
+### Reddit
+- Title is everything: Descriptive, specific, subreddit culture
+- NO hashtags. Authentic tone. Value first, self-promo last.
+
+### YouTube
+- Title: Keyword-rich, <60 chars, curiosity-driven
+- Hashtags: 3-5 in description
+"""
 
 
 def run_cli(*args: str) -> dict[str, Any]:
@@ -94,24 +197,56 @@ def create_server() -> "Server":
 
     server = Server("socialia")
 
+    @server.list_resources()
+    async def list_resources() -> list[Resource]:
+        """List available resources."""
+        return [
+            Resource(
+                uri="socialia://strategies",
+                name="Platform Content Strategies",
+                description="Content strategies for Twitter, LinkedIn, Reddit, YouTube",
+                mimeType="text/plain",
+            ),
+        ]
+
+    @server.read_resource()
+    async def read_resource(uri: str) -> str:
+        """Read a resource by URI."""
+        if uri == "socialia://strategies":
+            return PLATFORM_STRATEGIES
+        raise ValueError(f"Unknown resource: {uri}")
+
     @server.list_tools()
     async def list_tools() -> list[Tool]:
         """List available tools."""
         return [
             Tool(
                 name="social_post",
-                description="Post content to social media. CLI: socialia post <platform> <text>",
+                description=(
+                    "Post content to social media. CLI: socialia post <platform> <text>\n\n"
+                    "PLATFORM STRATEGIES:\n"
+                    "- twitter: 280 chars. Hook first, not announcements. 1-2 hashtags at end.\n"
+                    "- linkedin: 3000 chars. First 2 lines critical. Short paragraphs. End with question.\n"
+                    "- reddit: Title is key. Value first, self-promo last. Check subreddit rules.\n"
+                    "- youtube: Keyword-rich title <60 chars. First 2 description lines shown in search."
+                ),
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "platform": {
                             "type": "string",
                             "enum": ["twitter", "linkedin", "reddit", "youtube"],
-                            "description": "Target platform",
+                            "description": (
+                                "Target platform. "
+                                "twitter=280 chars, hook-driven; "
+                                "linkedin=professional, whitespace; "
+                                "reddit=community-first; "
+                                "youtube=SEO-focused"
+                            ),
                         },
                         "text": {
                             "type": "string",
-                            "description": "Content to post",
+                            "description": "Content to post. Follow platform strategy from module docstring.",
                         },
                         "reply_to": {
                             "type": "string",
