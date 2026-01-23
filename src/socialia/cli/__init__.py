@@ -34,6 +34,7 @@ from ._feed_commands import (
 )
 from ._schedule_commands import cmd_schedule
 from ._completion_commands import cmd_completion
+from ._org_commands import add_org_parser, cmd_org
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
 
@@ -245,8 +246,14 @@ def create_parser() -> argparse.ArgumentParser:
     schedule_sub = schedule_parser.add_subparsers(
         dest="schedule_command", help="Schedule operations"
     )
-    schedule_sub.add_parser(
+    list_parser = schedule_sub.add_parser(
         "list", help="List pending scheduled posts", description="Show all pending jobs"
+    )
+    list_parser.add_argument(
+        "--full",
+        "-a",
+        action="store_true",
+        help="Show all jobs (including cancelled/completed)",
     )
     cancel_parser = schedule_sub.add_parser(
         "cancel", help="Cancel a scheduled post", description="Cancel by job ID"
@@ -267,6 +274,13 @@ def create_parser() -> argparse.ArgumentParser:
         default=60,
         help="Check interval in seconds (default: 60)",
     )
+    update_source_parser = schedule_sub.add_parser(
+        "update-source",
+        help="Update source file path after rename",
+        description="Update source_file path in jobs after org file rename",
+    )
+    update_source_parser.add_argument("old_path", help="Old file path")
+    update_source_parser.add_argument("new_path", help="New file path")
 
     # completion command
     completion_parser = subparsers.add_parser(
@@ -353,6 +367,9 @@ def create_parser() -> argparse.ArgumentParser:
     me_parser.add_argument("platform", choices=PLATFORMS, help="Target platform")
     me_parser.add_argument("--json", action="store_true", help="Output as JSON")
 
+    # org command - org mode draft management
+    add_org_parser(subparsers, PLATFORMS)
+
     return parser
 
 
@@ -415,6 +432,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_me(args, output_json=args.json or getattr(args, "json", False))
     elif args.command == "completion":
         return cmd_completion(args, output_json=args.json)
+    elif args.command == "org":
+        return cmd_org(args, output_json=args.json)
     else:
         parser.print_help()
         return 1

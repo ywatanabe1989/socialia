@@ -103,6 +103,77 @@ socialia completion bash      # Print bash completion script
 socialia completion zsh       # Print zsh completion script
 socialia completion install   # Auto-install to shell config
 socialia completion status    # Check installation status
+
+# Org mode draft management (Emacs integration)
+socialia org init drafts.org              # Create template
+socialia org status drafts.org            # Show draft status
+socialia org list drafts.org              # List all drafts
+socialia org schedule drafts.org          # Schedule future posts
+socialia org post drafts.org              # Post due drafts
+socialia org post drafts.org --dry-run    # Preview without posting
+```
+
+</details>
+
+<details>
+<summary><b>Org Mode Integration</b></summary>
+
+Manage social media drafts in Emacs org mode files:
+
+```org
+* Twitter Drafts [0/2]
+
+** TODO [#A] My First Post
+   SCHEDULED: <2026-01-24 Fri 10:00>
+   :PROPERTIES:
+   :PLATFORM: twitter
+   :END:
+
+Post content goes here.
+Multiple lines supported.
+
+** TODO [#B] Second Post
+   SCHEDULED: <2026-01-25 Sat 10:00>
+   :PROPERTIES:
+   :PLATFORM: linkedin
+   :END:
+
+Another draft for LinkedIn.
+```
+
+**Features:**
+- Parse org files with TODO/DONE status
+- Support SCHEDULED timestamps
+- Platform selection via :PLATFORM: property
+- Automatic status update after posting
+- Dry-run mode for previewing
+
+```bash
+# Create a new drafts file
+socialia org init ~/drafts/january.org --platform twitter
+
+# Check status of all drafts
+socialia org status ~/drafts/january.org
+
+# Schedule all future posts
+socialia org schedule ~/drafts/january.org
+
+# Post all due drafts (scheduled time passed)
+socialia org post ~/drafts/january.org
+
+# Run scheduler daemon to auto-post
+socialia schedule daemon
+```
+
+```python
+from socialia import OrgDraftManager
+
+manager = OrgDraftManager("drafts.org")
+manager.status_report()      # Get overview
+manager.get_pending()        # List TODO drafts
+manager.get_due()            # Get drafts ready to post
+manager.schedule_all()       # Schedule future posts
+manager.post_draft(draft, dry_run=True)  # Post with preview
 ```
 
 </details>
@@ -248,6 +319,7 @@ socialia/
 │   ├── youtube.py        # YouTube API
 │   ├── analytics.py      # Google Analytics
 │   ├── scheduler.py      # Post scheduling system
+│   ├── org.py            # Org mode draft management
 │   ├── mcp_server.py     # MCP server (delegates to CLI)
 │   └── base.py           # Base class
 ├── docs/
