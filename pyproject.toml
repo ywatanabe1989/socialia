@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 reddit = ["praw>=7.7.0"]
-mcp = ["mcp>=1.0.0"]
+mcp = ["fastmcp>=2.0.0"]
 analytics = ["google-analytics-data>=0.18.0"]
 youtube = ["google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 dev = ["pytest", "ruff"]

@@ -18,8 +18,10 @@ class TestTwitter:
 
     def test_init_from_environment(self, monkeypatch):
         """Test initialization from environment variables."""
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
         # Clear any existing env vars first
-        for prefix in ["SOCIALIA_", "SCITEX_"]:
+        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
             monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
@@ -29,6 +31,12 @@ class TestTwitter:
         monkeypatch.setenv("SOCIALIA_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
         monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN", "env_access_token")
         monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN_SECRET", "env_access_secret")
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
 
         client = Twitter()
         assert client.consumer_key == "env_consumer_key"
@@ -41,23 +49,41 @@ class TestTwitter:
 
     def test_validate_credentials_missing(self, monkeypatch):
         """Test credential validation with missing credentials."""
-        # Clear environment variables for both prefixes
-        for prefix in ["SOCIALIA_", "SCITEX_"]:
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
+        # Clear environment variables for all prefixes
+        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
             monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
             monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN_SECRET", raising=False)
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         client = Twitter(consumer_key="only_one")
         assert client.validate_credentials() is False
 
     def test_post_missing_credentials(self, monkeypatch):
         """Test post fails with missing credentials."""
-        # Clear environment variables for both prefixes
-        for prefix in ["SOCIALIA_", "SCITEX_"]:
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
+        # Clear environment variables for all prefixes
+        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
             monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
             monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
             monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN_SECRET", raising=False)
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         client = Twitter()
         result = client.post("Test")
         assert result["success"] is False

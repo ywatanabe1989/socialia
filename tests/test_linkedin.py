@@ -15,10 +15,20 @@ class TestLinkedIn:
 
     def test_init_from_environment(self, monkeypatch):
         """Test initialization from environment variables."""
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
         # Clear any existing env vars first
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_SOCIAL_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.setenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", "env_token")
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         client = LinkedIn()
         assert client.access_token == "env_token"
 
@@ -29,17 +39,37 @@ class TestLinkedIn:
 
     def test_validate_credentials_missing(self, monkeypatch):
         """Test credential validation with missing token."""
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
         # Clear environment variables that might be set
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_SOCIAL_LINKEDIN_ACCESS_TOKEN", raising=False)
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         client = LinkedIn()
         assert client.validate_credentials() is False
 
     def test_post_missing_credentials(self, monkeypatch):
         """Test post fails with missing credentials."""
+        # Clear branding to use default SOCIALIA_ prefix
+        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
         # Clear environment variables that might be set
         monkeypatch.delenv("SOCIALIA_LINKEDIN_ACCESS_TOKEN", raising=False)
         monkeypatch.delenv("SCITEX_LINKEDIN_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("SCITEX_SOCIAL_LINKEDIN_ACCESS_TOKEN", raising=False)
+
+        # Reload branding module to pick up cleared prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         client = LinkedIn()
         result = client.post("Test")
         assert result["success"] is False

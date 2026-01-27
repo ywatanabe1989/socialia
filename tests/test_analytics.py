@@ -26,12 +26,22 @@ class TestGoogleAnalyticsInit:
             assert ga.measurement_id == "G-TEST123"
             assert ga.api_secret == "secret123"
 
-    def test_init_with_scitex_prefix(self):
+    def test_init_with_scitex_prefix(self, monkeypatch):
         """Test initialization with SCITEX_ prefix."""
+        # Clear branding and set to SCITEX prefix
+        monkeypatch.setenv("SOCIALIA_ENV_PREFIX", "SCITEX")
         env_vars = {
+            "SOCIALIA_ENV_PREFIX": "SCITEX",
             "SCITEX_GOOGLE_ANALYTICS_MEASUREMENT_ID": "G-SCITEX",
             "SCITEX_GOOGLE_ANALYTICS_API_SECRET": "scitex_secret",
         }
+
+        # Reload branding module to pick up new prefix
+        import importlib
+        from socialia import _branding
+
+        importlib.reload(_branding)
+
         with patch.dict("os.environ", env_vars, clear=True):
             ga = GoogleAnalytics()
             assert ga.measurement_id == "G-SCITEX"

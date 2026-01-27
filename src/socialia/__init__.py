@@ -10,7 +10,7 @@ from .analytics import GoogleAnalytics
 from .youtube import YouTube
 from .org import OrgParser, OrgDraft, OrgDraftManager
 from .org_files import move_to_scheduled, move_to_posted, ensure_project_dirs
-from .mcp_server import PLATFORM_STRATEGIES
+from ._server import PLATFORM_STRATEGIES
 
 # Backward compatibility aliases
 TwitterPoster = Twitter
