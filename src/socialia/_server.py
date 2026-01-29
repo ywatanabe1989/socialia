@@ -11,6 +11,8 @@ This is the main server entry point. Tools are organized in _mcp/tools/.
 
 from __future__ import annotations
 
+__all__ = ["PLATFORM_STRATEGIES"]
+
 import os
 import sys
 from pathlib import Path

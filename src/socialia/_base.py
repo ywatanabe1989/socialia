@@ -1,9 +1,11 @@
 """Base class for social media clients."""
 
+__all__ = ["_Base"]
+
 from abc import ABC, abstractmethod
 
 
-class BasePoster(ABC):
+class _Base(ABC):
     """Abstract base class for social media clients with CRUD operations."""
 
     # Platform identifier

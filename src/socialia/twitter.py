@@ -1,14 +1,16 @@
 """Twitter/X API v2 poster."""
 
+__all__ = ["Twitter"]
+
 from typing import Optional
 
 from requests_oauthlib import OAuth1Session
 
 from ._branding import get_env
-from .base import BasePoster
+from ._base import _Base
 
 
-class Twitter(BasePoster):
+class Twitter(_Base):
     """Twitter/X API v2 client using OAuth 1.0a."""
 
     platform_name = "twitter"

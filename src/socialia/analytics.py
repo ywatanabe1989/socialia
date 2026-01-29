@@ -1,5 +1,7 @@
 """Google Analytics integration for tracking and metrics."""
 
+__all__ = ["GoogleAnalytics"]
+
 import os
 import requests
 from typing import Optional

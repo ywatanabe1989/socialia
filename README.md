@@ -166,7 +166,7 @@ socialia schedule daemon
 ```
 
 ```python
-from socialia import OrgDraftManager
+from socialia.org import OrgDraftManager
 
 manager = OrgDraftManager("drafts.org")
 manager.status_report()      # Get overview

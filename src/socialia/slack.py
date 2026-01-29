@@ -1,14 +1,16 @@
 """Slack API client for channel messaging."""
 
+__all__ = ["Slack"]
+
 from typing import Optional
 
 import requests
 
 from ._branding import get_env
-from .base import BasePoster
+from ._base import _Base
 
 
-class Slack(BasePoster):
+class Slack(_Base):
     """Slack Web API client for posting to channels."""
 
     platform_name = "slack"
