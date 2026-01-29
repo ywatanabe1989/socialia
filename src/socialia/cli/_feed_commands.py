@@ -8,6 +8,7 @@ from .. import __version__
 from ..twitter import Twitter
 from ..linkedin import LinkedIn
 from ..reddit import Reddit
+from ..slack import Slack
 from ..youtube import YouTube
 
 
@@ -19,6 +20,8 @@ def get_client(platform: str):
         return LinkedIn()
     elif platform == "reddit":
         return Reddit()
+    elif platform == "slack":
+        return Slack()
     elif platform == "youtube":
         return YouTube()
     else:
@@ -32,7 +35,7 @@ def cmd_feed(args, output_json: bool = False) -> int:
         platforms = [args.platform]
     else:
         # Check all configured platforms
-        platforms = ["twitter", "linkedin", "reddit", "youtube"]
+        platforms = ["twitter", "linkedin", "reddit", "slack", "youtube"]
 
     limit = getattr(args, "limit", 5)
     mentions_only = getattr(args, "mentions", False)

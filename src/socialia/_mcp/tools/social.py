@@ -21,7 +21,7 @@ def register_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def social_post(
-        platform: Literal["twitter", "linkedin", "reddit", "youtube"],
+        platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
         text: str,
         reply_to: Optional[str] = None,
         dry_run: bool = False,
@@ -33,13 +33,14 @@ def register_tools(mcp: FastMCP) -> None:
         - twitter: 280 chars. Hook first, not announcements. 1-2 hashtags at end.
         - linkedin: 3000 chars. First 2 lines critical. Short paragraphs. End with question.
         - reddit: Title is key. Value first, self-promo last. Check subreddit rules.
+        - slack: Use channel mentions @here/@channel sparingly. Code blocks for technical content.
         - youtube: Keyword-rich title <60 chars. First 2 description lines shown in search.
         """
         return _social_post(platform, text, reply_to, dry_run)
 
     @mcp.tool()
     def social_delete(
-        platform: Literal["twitter", "linkedin", "reddit", "youtube"],
+        platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
         post_id: str,
     ) -> dict:
         """Delete a social media post. CLI: socialia delete <platform> <post_id>"""
@@ -47,7 +48,7 @@ def register_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def social_status(
-        platform: Literal["twitter", "linkedin", "reddit", "youtube"],
+        platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
     ) -> dict:
         """Check authentication status for a platform. CLI: socialia status <platform>"""
         return _social_status(platform)

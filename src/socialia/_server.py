@@ -87,6 +87,13 @@ pip install scitex[audio]
 - Title is everything: Descriptive, specific, subreddit culture
 - NO hashtags. Authentic tone. Value first, self-promo last.
 
+### Slack
+- Use channel mentions (@here, @channel) sparingly - they notify everyone
+- Code blocks: Use triple backticks for technical content
+- Threads: Keep discussions organized by replying in threads
+- Links: Slack auto-unfurls URLs with previews
+- Emoji reactions encouraged for engagement
+
 ### YouTube
 - Title: Keyword-rich, <60 chars, curiosity-driven
 - Hashtags: 3-5 in description
@@ -95,7 +102,7 @@ pip install scitex[audio]
 MCP_INSTRUCTIONS = f"""
 Socialia: Social Media Automation with Platform-Specific Strategies.
 
-Posts to Twitter/X, LinkedIn, Reddit, and YouTube.
+Posts to Twitter/X, LinkedIn, Reddit, Slack, and YouTube.
 All MCP tool calls can be reproduced via CLI commands.
 
 {PLATFORM_STRATEGIES}

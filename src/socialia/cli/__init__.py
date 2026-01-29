@@ -35,8 +35,9 @@ from ._feed_commands import (
 from ._schedule_commands import cmd_schedule
 from ._completion_commands import cmd_completion
 from ._org_commands import add_org_parser, cmd_org
+from ._youtube_commands import add_youtube_parser, cmd_youtube
 
-PLATFORMS = ["twitter", "linkedin", "reddit", "youtube"]
+PLATFORMS = ["twitter", "linkedin", "reddit", "slack", "youtube"]
 
 
 def _get_epilog() -> str:
@@ -100,6 +101,10 @@ def create_parser() -> argparse.ArgumentParser:
     post_parser.add_argument(
         "--subreddit", "-s", default="test", help="Target subreddit (Reddit)"
     )
+    post_parser.add_argument(
+        "--channel", "-c", help="Channel ID (Slack, uses default if not specified)"
+    )
+    post_parser.add_argument("--thread-ts", help="Thread timestamp to reply to (Slack)")
     post_parser.add_argument("--title", "-t", help="Post title (Reddit/YouTube)")
     post_parser.add_argument(
         "--video", "-V", type=Path, help="Video file path (YouTube)"
@@ -119,6 +124,12 @@ def create_parser() -> argparse.ArgumentParser:
         "--schedule",
         "-S",
         help="Schedule post for later (e.g., '10:00', '2026-01-23 10:00', '+1h', '+30m')",
+    )
+    post_parser.add_argument(
+        "--image",
+        "-i",
+        type=Path,
+        help="Image file to attach (Twitter)",
     )
 
     # delete command
@@ -370,6 +381,9 @@ def create_parser() -> argparse.ArgumentParser:
     # org command - org mode draft management
     add_org_parser(subparsers, PLATFORMS)
 
+    # youtube batch command
+    add_youtube_parser(subparsers)
+
     return parser
 
 
@@ -434,6 +448,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_completion(args, output_json=args.json)
     elif args.command == "org":
         return cmd_org(args, output_json=args.json)
+    elif args.command == "youtube":
+        return cmd_youtube(args, output_json=args.json)
     else:
         parser.print_help()
         return 1

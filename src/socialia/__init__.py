@@ -6,6 +6,7 @@ from .base import BasePoster
 from .twitter import Twitter
 from .linkedin import LinkedIn
 from .reddit import Reddit
+from .slack import Slack
 from .analytics import GoogleAnalytics
 from .youtube import YouTube
 from .org import OrgParser, OrgDraft, OrgDraftManager
@@ -25,6 +26,7 @@ __all__ = [
     "Twitter",
     "LinkedIn",
     "Reddit",
+    "Slack",
     "YouTube",
     "GoogleAnalytics",
     # Org mode
