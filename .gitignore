@@ -3,7 +3,6 @@
 # Please add files here
 projects/*
 !projects/template-project/
-camera/
 drafts/
 
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Claude.gitignore ###
