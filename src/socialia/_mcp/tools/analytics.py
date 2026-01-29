@@ -21,33 +21,33 @@ def register_tools(mcp: FastMCP) -> None:
     """Register analytics tools."""
 
     @mcp.tool()
-    def analytics_track(
+    def social_analytics_track(
         event_name: str,
         params: Optional[dict] = None,
     ) -> dict:
-        """Track custom event in Google Analytics. CLI: socialia analytics track <event_name>"""
+        """[social] Track custom event in Google Analytics. CLI: socialia analytics track <event_name>"""
         return _analytics_track(event_name, params)
 
     @mcp.tool()
-    def analytics_pageviews(
+    def social_analytics_pageviews(
         start_date: str = "7daysAgo",
         end_date: str = "today",
         path: Optional[str] = None,
     ) -> dict:
-        """Get page view metrics from Google Analytics. CLI: socialia analytics pageviews"""
+        """[social] Get page view metrics from Google Analytics. CLI: socialia analytics pageviews"""
         return _analytics_pageviews(start_date, end_date, path)
 
     @mcp.tool()
-    def analytics_sources(
+    def social_analytics_sources(
         start_date: str = "7daysAgo",
         end_date: str = "today",
     ) -> dict:
-        """Get traffic sources from Google Analytics. CLI: socialia analytics sources"""
+        """[social] Get traffic sources from Google Analytics. CLI: socialia analytics sources"""
         return _analytics_sources(start_date, end_date)
 
     @mcp.tool()
-    def analytics_realtime() -> dict:
-        """Get realtime active users from Google Analytics. CLI: socialia analytics realtime"""
+    def social_analytics_realtime() -> dict:
+        """[social] Get realtime active users from Google Analytics. CLI: socialia analytics realtime"""
         return _analytics_realtime()
 
 

@@ -1,10 +1,12 @@
 """YouTube API integration for video uploads and community posts."""
 
+__all__ = ["YouTube"]
+
 import os
 from typing import Optional
 
-from .base import BasePoster
 from ._branding import get_env
+from ._base import _Base
 
 try:
     from google.oauth2.credentials import Credentials
@@ -26,7 +28,7 @@ SCOPES = [
 ]
 
 
-class YouTube(BasePoster):
+class YouTube(_Base):
     """
     YouTube API client for video uploads and management.
 

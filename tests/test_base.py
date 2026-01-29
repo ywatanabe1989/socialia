@@ -3,10 +3,10 @@
 import pytest
 from unittest.mock import patch
 
-from socialia.base import BasePoster
+from socialia._base import _Base
 
 
-class ConcretePoster(BasePoster):
+class ConcretePoster(_Base):
     """Concrete implementation for testing."""
 
     platform_name = "test"
@@ -18,13 +18,13 @@ class ConcretePoster(BasePoster):
         return {"success": True, "deleted": post_id}
 
 
-class TestBasePoster:
-    """Test BasePoster base class."""
+class TestBase:
+    """Test _Base base class."""
 
-    def test_base_poster_is_abstract(self):
-        """Test that BasePoster cannot be instantiated directly."""
+    def test_base_is_abstract(self):
+        """Test that _Base cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            BasePoster()
+            _Base()
 
     def test_concrete_poster_works(self):
         """Test concrete implementation works."""
@@ -128,15 +128,6 @@ class TestPlatformImports:
         from socialia import GoogleAnalytics
 
         assert GoogleAnalytics is not None
-
-    def test_backward_compat_aliases(self):
-        """Test backward compatibility aliases."""
-        from socialia import TwitterPoster, LinkedInPoster, RedditPoster, YouTubePoster
-
-        assert TwitterPoster is not None
-        assert LinkedInPoster is not None
-        assert RedditPoster is not None
-        assert YouTubePoster is not None
 
 
 class TestVersion:

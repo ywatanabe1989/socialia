@@ -7,6 +7,8 @@ Handles automatic movement of files between directories:
 - posted/    -> Archive after posting
 """
 
+__all__ = ["move_to_scheduled", "move_to_posted", "ensure_project_dirs"]
+
 import shutil
 from pathlib import Path
 

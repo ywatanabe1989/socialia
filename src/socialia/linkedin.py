@@ -1,13 +1,15 @@
 """LinkedIn API client."""
 
+__all__ = ["LinkedIn"]
+
 from typing import Optional
 import requests
 
-from .base import BasePoster
+from ._base import _Base
 from ._branding import get_env
 
 
-class LinkedIn(BasePoster):
+class LinkedIn(_Base):
     """LinkedIn API client using OAuth 2.0."""
 
     platform_name = "linkedin"

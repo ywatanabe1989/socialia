@@ -1,9 +1,11 @@
 """Reddit API client using PRAW."""
 
+__all__ = ["Reddit"]
+
 from typing import Optional
 
 from ._branding import get_env
-from .base import BasePoster
+from ._base import _Base
 
 try:
     import praw
@@ -13,7 +15,7 @@ except ImportError:
     HAS_PRAW = False
 
 
-class Reddit(BasePoster):
+class Reddit(_Base):
     """Reddit API client using PRAW (Python Reddit API Wrapper)."""
 
     platform_name = "reddit"

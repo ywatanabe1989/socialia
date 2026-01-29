@@ -24,6 +24,8 @@ Parent package sets env vars before importing:
 Then env vars like SCITEX_X_CONSUMER_KEY will be used.
 """
 
+__all__ = ["get_env", "get_env_var_name", "get_mcp_server_name"]
+
 import os
 from typing import Optional
 
