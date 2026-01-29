@@ -57,41 +57,24 @@ class Twitter(BasePoster):
 
     def upload_media(self, file_path: str) -> dict:
         """
-        Upload media file to Twitter.
+        Upload media file to Twitter (images and videos).
+
+        Automatically detects file type and uses:
+        - Simple upload for images (jpg, png, gif, webp)
+        - Chunked upload for videos (mp4, mov)
 
         Args:
-            file_path: Path to image file (jpg, png, gif, webp)
+            file_path: Path to media file
 
         Returns:
             dict with 'success', 'media_id' or 'error'
         """
-        from pathlib import Path
+        from . import _twitter_media
 
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 
-        path = Path(file_path)
-        if not path.exists():
-            return {"success": False, "error": f"File not found: {file_path}"}
-
-        oauth = self._get_session()
-
-        with open(path, "rb") as f:
-            media_data = f.read()
-
-        files = {"media": media_data}
-        response = oauth.post(self.MEDIA_UPLOAD_ENDPOINT, files=files)
-
-        if response.status_code == 200:
-            data = response.json()
-            return {
-                "success": True,
-                "media_id": data["media_id_string"],
-            }
-        return {
-            "success": False,
-            "error": f"{response.status_code}: {response.text}",
-        }
+        return _twitter_media.upload_media(self._get_session(), file_path)
 
     def post(
         self,
