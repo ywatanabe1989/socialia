@@ -6,11 +6,12 @@ from .base import BasePoster
 from .twitter import Twitter
 from .linkedin import LinkedIn
 from .reddit import Reddit
+from .slack import Slack
 from .analytics import GoogleAnalytics
 from .youtube import YouTube
 from .org import OrgParser, OrgDraft, OrgDraftManager
 from .org_files import move_to_scheduled, move_to_posted, ensure_project_dirs
-from .mcp_server import PLATFORM_STRATEGIES
+from ._server import PLATFORM_STRATEGIES
 
 # Backward compatibility aliases
 TwitterPoster = Twitter
@@ -25,6 +26,7 @@ __all__ = [
     "Twitter",
     "LinkedIn",
     "Reddit",
+    "Slack",
     "YouTube",
     "GoogleAnalytics",
     # Org mode

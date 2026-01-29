@@ -56,12 +56,11 @@ def cmd_mcp(args) -> int:
         tools = [
             ("social_post", "Post to social media platform"),
             ("social_delete", "Delete a post"),
-            ("social_feed", "Get recent posts"),
-            ("social_mentions", "Get mentions"),
+            ("social_status", "Check platform auth status"),
             ("analytics_track", "Track an event"),
-            ("analytics_realtime", "Get realtime users"),
             ("analytics_pageviews", "Get page views"),
             ("analytics_sources", "Get traffic sources"),
+            ("analytics_realtime", "Get realtime users"),
         ]
         for name, desc in tools:
             print(f"  {name:20} {desc}")

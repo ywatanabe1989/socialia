@@ -1,10 +1,11 @@
 """Twitter/X API v2 poster."""
 
 from typing import Optional
+
 from requests_oauthlib import OAuth1Session
 
-from .base import BasePoster
 from ._branding import get_env
+from .base import BasePoster
 
 
 class Twitter(BasePoster):
@@ -18,6 +19,7 @@ class Twitter(BasePoster):
     USER_TWEETS_ENDPOINT = "https://api.x.com/2/users/{user_id}/tweets"
     USER_MENTIONS_ENDPOINT = "https://api.x.com/2/users/{user_id}/mentions"
     SEARCH_ENDPOINT = "https://api.x.com/2/tweets/search/recent"
+    MEDIA_UPLOAD_ENDPOINT = "https://upload.twitter.com/1.1/media/upload.json"
 
     def __init__(
         self,
@@ -53,11 +55,33 @@ class Twitter(BasePoster):
             ]
         )
 
+    def upload_media(self, file_path: str) -> dict:
+        """
+        Upload media file to Twitter (images and videos).
+
+        Automatically detects file type and uses:
+        - Simple upload for images (jpg, png, gif, webp)
+        - Chunked upload for videos (mp4, mov)
+
+        Args:
+            file_path: Path to media file
+
+        Returns:
+            dict with 'success', 'media_id' or 'error'
+        """
+        from . import _twitter_media
+
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        return _twitter_media.upload_media(self._get_session(), file_path)
+
     def post(
         self,
         text: str,
         reply_to: Optional[str] = None,
         quote_tweet_id: Optional[str] = None,
+        media_ids: Optional[list] = None,
     ) -> dict:
         """
         Post a tweet.
@@ -66,6 +90,7 @@ class Twitter(BasePoster):
             text: Tweet content (max 280 chars standard, 25000 premium)
             reply_to: Tweet ID to reply to
             quote_tweet_id: Tweet ID to quote
+            media_ids: List of media IDs from upload_media()
 
         Returns:
             dict with 'success', 'id', 'url' or 'error'
@@ -80,6 +105,8 @@ class Twitter(BasePoster):
             payload["reply"] = {"in_reply_to_tweet_id": reply_to}
         if quote_tweet_id:
             payload["quote_tweet_id"] = quote_tweet_id
+        if media_ids:
+            payload["media"] = {"media_ids": media_ids}
 
         response = oauth.post(self.POST_ENDPOINT, json=payload)
 

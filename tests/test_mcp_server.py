@@ -17,8 +17,7 @@ class TestMCPToolDefinitions:
         # Check all expected tools are listed
         assert "social_post" in captured.out
         assert "social_delete" in captured.out
-        assert "social_feed" in captured.out
-        assert "social_mentions" in captured.out
+        assert "social_status" in captured.out
         assert "analytics_track" in captured.out
         assert "analytics_realtime" in captured.out
 
@@ -30,8 +29,7 @@ class TestMCPDoctor:
         """Test doctor command shows health check."""
         from socialia.cli import main
 
-        result = main(["mcp", "doctor"])
-        assert result == 0
+        assert main(["mcp", "doctor"]) == 0
 
         captured = capsys.readouterr()
         assert "Health Check" in captured.out
@@ -44,7 +42,7 @@ class TestMCPDoctor:
         """Test doctor shows platform names."""
         from socialia.cli import main
 
-        result = main(["mcp", "doctor"])
+        main(["mcp", "doctor"])
         captured = capsys.readouterr()
 
         # Should show platform names
@@ -59,8 +57,7 @@ class TestMCPInstallation:
         """Test installation command shows config."""
         from socialia.cli import main
 
-        result = main(["mcp", "installation"])
-        assert result == 0
+        assert main(["mcp", "installation"]) == 0
 
         captured = capsys.readouterr()
         assert "Claude Desktop" in captured.out
@@ -73,7 +70,7 @@ class TestMCPInstallation:
         """Test installation output is valid JSON-like."""
         from socialia.cli import main
 
-        result = main(["mcp", "installation"])
+        main(["mcp", "installation"])
         captured = capsys.readouterr()
 
         # Should contain JSON structure elements
@@ -111,7 +108,7 @@ class TestMCPServerModule:
 
         assert "social_post" in captured.out
         assert "social_delete" in captured.out
-        assert "social_feed" in captured.out
+        assert "social_status" in captured.out
         assert "analytics_track" in captured.out
 
 

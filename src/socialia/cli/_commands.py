@@ -8,6 +8,7 @@ from .. import __version__
 from ..twitter import Twitter
 from ..linkedin import LinkedIn
 from ..reddit import Reddit
+from ..slack import Slack
 from ..analytics import GoogleAnalytics
 from ..youtube import YouTube
 
@@ -20,6 +21,8 @@ def get_client(platform: str):
         return LinkedIn()
     elif platform == "reddit":
         return Reddit()
+    elif platform == "slack":
+        return Slack()
     elif platform == "youtube":
         return YouTube()
     else:
@@ -88,16 +91,34 @@ def cmd_post(args, output_json: bool = False) -> int:
 
     client = get_client(args.platform)
     if args.platform == "twitter":
+        media_ids = None
+        image_path = getattr(args, "image", None)
+        if image_path:
+            upload_result = client.upload_media(str(image_path))
+            if upload_result["success"]:
+                media_ids = [upload_result["media_id"]]
+            else:
+                print(
+                    f"Error uploading image: {upload_result['error']}", file=sys.stderr
+                )
+                return 1
         result = client.post(
             text,
             reply_to=getattr(args, "reply_to", None),
             quote_tweet_id=getattr(args, "quote", None),
+            media_ids=media_ids,
         )
     elif args.platform == "reddit":
         result = client.post(
             text,
             subreddit=getattr(args, "subreddit", "test"),
             title=getattr(args, "title", None),
+        )
+    elif args.platform == "slack":
+        result = client.post(
+            text,
+            channel=getattr(args, "channel", None),
+            thread_ts=getattr(args, "thread_ts", None),
         )
     elif args.platform == "youtube":
         video_path = getattr(args, "video", None)
