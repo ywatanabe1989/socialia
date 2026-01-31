@@ -36,6 +36,7 @@ from ._schedule_commands import cmd_schedule
 from ._completion_commands import cmd_completion
 from ._org_commands import add_org_parser, cmd_org
 from ._youtube_commands import add_youtube_parser, cmd_youtube
+from ._grow_commands import add_grow_parser, cmd_grow
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "slack", "youtube"]
 
@@ -384,6 +385,9 @@ def create_parser() -> argparse.ArgumentParser:
     # youtube batch command
     add_youtube_parser(subparsers)
 
+    # grow command - discover and follow users
+    add_grow_parser(subparsers)
+
     return parser
 
 
@@ -450,6 +454,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_org(args, output_json=args.json)
     elif args.command == "youtube":
         return cmd_youtube(args, output_json=args.json)
+    elif args.command == "grow":
+        return cmd_grow(args, output_json=args.json)
     else:
         parser.print_help()
         return 1

@@ -101,6 +101,78 @@ def parse_schedule_time(time_str: str) -> datetime:
     raise ValueError(f"Cannot parse time: {time_str}")
 
 
+def schedule_grow(
+    platform: str,
+    query: str,
+    schedule_time: str,
+    limit: int = 10,
+    min_followers: int = 0,
+    fluctuation: int = 0,
+    fluctuation_bias: str = "none",
+    repeat_interval: str = None,
+) -> dict:
+    """
+    Schedule a grow job for later.
+
+    Args:
+        platform: Target platform (twitter only for now)
+        query: Search query for discovering users
+        schedule_time: When to run (see parse_schedule_time)
+        limit: Max users to follow per run
+        min_followers: Minimum follower count filter
+        fluctuation: Max random fluctuation in minutes
+        fluctuation_bias: "early", "late", or "none"
+        repeat_interval: Repeat interval (e.g., "+1h", "+30m") or None
+
+    Returns:
+        dict with 'success', 'job_id', 'scheduled_for'
+    """
+    try:
+        scheduled_dt = parse_schedule_time(schedule_time)
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+
+    original_dt = scheduled_dt
+    if fluctuation > 0:
+        scheduled_dt = add_human_fluctuation(
+            scheduled_dt, max_minutes=fluctuation, bias=fluctuation_bias
+        )
+
+    job = {
+        "id": str(uuid.uuid4())[:8],
+        "type": "grow",
+        "platform": platform,
+        "query": query,
+        "limit": limit,
+        "min_followers": min_followers,
+        "scheduled_for": scheduled_dt.isoformat(),
+        "created_at": datetime.now().isoformat(),
+        "status": "pending",
+    }
+
+    if repeat_interval:
+        job["repeat_interval"] = repeat_interval
+
+    if fluctuation > 0:
+        job["original_time"] = original_dt.isoformat()
+        job["fluctuation_applied"] = (scheduled_dt - original_dt).total_seconds() / 60
+
+    jobs = _load_schedule()
+    jobs.append(job)
+    _save_schedule(jobs)
+
+    result = {
+        "success": True,
+        "job_id": job["id"],
+        "scheduled_for": scheduled_dt.strftime("%Y-%m-%d %H:%M"),
+    }
+
+    if repeat_interval:
+        result["repeat_interval"] = repeat_interval
+
+    return result
+
+
 def schedule_post(
     platform: str,
     text: str,
@@ -256,6 +328,23 @@ def update_source_path(old_path: str, new_path: str) -> dict:
     return {"success": True, "updated": updated, "new_path": new_path}
 
 
+def _run_grow_job(job: dict) -> dict:
+    """Execute a grow job."""
+    from .twitter import Twitter
+
+    if job["platform"] != "twitter":
+        return {"success": False, "error": f"Grow not supported for {job['platform']}"}
+
+    client = Twitter()
+    result = client.grow(
+        query=job["query"],
+        limit=job.get("limit", 10),
+        min_followers=job.get("min_followers", 0),
+        dry_run=False,
+    )
+    return result
+
+
 def run_due_jobs() -> list:
     """Run all jobs that are due. Returns list of results."""
     from .twitter import Twitter
@@ -279,6 +368,7 @@ def run_due_jobs() -> list:
     results = []
     now = datetime.now()
     completed_files = set()
+    new_jobs = []  # For repeat jobs
 
     for job in jobs:
         if job.get("status") != "pending":
@@ -288,22 +378,65 @@ def run_due_jobs() -> list:
         if scheduled <= now:
             # Job is due
             try:
-                client = get_client(job["platform"])
-                kwargs = job.get("kwargs", {})
-                result = client.post(job["text"], **kwargs)
-                job["status"] = "completed" if result.get("success") else "failed"
-                job["result"] = result
-                job["executed_at"] = now.isoformat()
-                results.append({"job_id": job["id"], **result})
+                job_type = job.get("type", "post")
 
-                # Track completed source files
-                if result.get("success") and job.get("source_file"):
-                    completed_files.add(job["source_file"])
+                if job_type == "grow":
+                    result = _run_grow_job(job)
+                    job["status"] = "completed"
+                    job["result"] = {
+                        "followed_count": result.get("followed_count", 0),
+                        "rate_limited": result.get("rate_limited", False),
+                    }
+                    job["executed_at"] = now.isoformat()
+                    results.append(
+                        {
+                            "job_id": job["id"],
+                            "type": "grow",
+                            "followed": result.get("followed_count", 0),
+                            "rate_limited": result.get("rate_limited", False),
+                            **result,
+                        }
+                    )
+
+                    # Schedule repeat if configured
+                    if job.get("repeat_interval") and not result.get("rate_limited"):
+                        next_time = parse_schedule_time(job["repeat_interval"])
+                        new_job = {
+                            "id": str(uuid.uuid4())[:8],
+                            "type": "grow",
+                            "platform": job["platform"],
+                            "query": job["query"],
+                            "limit": job.get("limit", 10),
+                            "min_followers": job.get("min_followers", 0),
+                            "scheduled_for": next_time.isoformat(),
+                            "created_at": now.isoformat(),
+                            "status": "pending",
+                            "repeat_interval": job["repeat_interval"],
+                            "parent_job": job["id"],
+                        }
+                        new_jobs.append(new_job)
+
+                else:
+                    # Regular post job
+                    client = get_client(job["platform"])
+                    kwargs = job.get("kwargs", {})
+                    result = client.post(job["text"], **kwargs)
+                    job["status"] = "completed" if result.get("success") else "failed"
+                    job["result"] = result
+                    job["executed_at"] = now.isoformat()
+                    results.append({"job_id": job["id"], **result})
+
+                    # Track completed source files
+                    if result.get("success") and job.get("source_file"):
+                        completed_files.add(job["source_file"])
+
             except Exception as e:
                 job["status"] = "failed"
                 job["error"] = str(e)
                 results.append({"job_id": job["id"], "success": False, "error": str(e)})
 
+    # Add new repeat jobs
+    jobs.extend(new_jobs)
     _save_schedule(jobs)
 
     # Move completed source files to posted/ if all jobs for that file are done
