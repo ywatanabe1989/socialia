@@ -26,7 +26,7 @@ from ._commands import (
     cmd_status,
     cmd_setup,
 )
-from ._mcp_commands import cmd_mcp
+from ._mcp_commands import cmd_mcp, add_mcp_parser
 from ._feed_commands import (
     cmd_feed,
     cmd_check,
@@ -37,6 +37,7 @@ from ._completion_commands import cmd_completion
 from ._org_commands import add_org_parser, cmd_org
 from ._youtube_commands import add_youtube_parser, cmd_youtube
 from ._grow_commands import add_grow_parser, cmd_grow
+from ._introspect_commands import cmd_list_python_apis
 
 PLATFORMS = ["twitter", "linkedin", "reddit", "slack", "youtube"]
 
@@ -79,7 +80,14 @@ def create_parser() -> argparse.ArgumentParser:
         epilog=_get_epilog(),
     )
     parser.add_argument(
-        "-v", "--version", action="version", version=f"%(prog)s {__version__}"
+        "-V", "--version", action="version", version=f"%(prog)s {__version__}"
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Verbosity level: -v, -vv, -vvv",
     )
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
     parser.add_argument(
@@ -210,30 +218,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # mcp command
-    mcp_parser = subparsers.add_parser(
-        "mcp",
-        help="MCP server commands",
-        description="Model Context Protocol server operations",
-    )
-    mcp_sub = mcp_parser.add_subparsers(dest="mcp_command", help="MCP operations")
-    mcp_sub.add_parser(
-        "start", help="Start the MCP server", description="Start the MCP server"
-    )
-    mcp_sub.add_parser(
-        "doctor",
-        help="Check MCP server health",
-        description="Check configuration and dependencies",
-    )
-    mcp_sub.add_parser(
-        "list-tools",
-        help="List available MCP tools",
-        description="Display all available MCP tools",
-    )
-    mcp_sub.add_parser(
-        "installation",
-        help="Show Claude Desktop configuration",
-        description="Display configuration for Claude Desktop",
-    )
+    add_mcp_parser(subparsers)
 
     # setup command
     setup_parser = subparsers.add_parser(
@@ -388,6 +373,25 @@ def create_parser() -> argparse.ArgumentParser:
     # grow command - discover and follow users
     add_grow_parser(subparsers)
 
+    # list-python-apis command - introspection
+    apis_parser = subparsers.add_parser(
+        "list-python-apis",
+        help="List Python APIs (alias for: introspect api socialia)",
+    )
+    apis_parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Verbosity: -v +doc, -vv full doc",
+    )
+    apis_parser.add_argument(
+        "-d", "--max-depth", type=int, default=5, help="Max recursion depth"
+    )
+    apis_parser.add_argument(
+        "--json", action="store_true", default=False, help="Output as JSON"
+    )
+
     return parser
 
 
@@ -456,6 +460,8 @@ def main(argv: list[str] = None) -> int:
         return cmd_youtube(args, output_json=args.json)
     elif args.command == "grow":
         return cmd_grow(args, output_json=args.json)
+    elif args.command == "list-python-apis":
+        return cmd_list_python_apis(args)
     else:
         parser.print_help()
         return 1

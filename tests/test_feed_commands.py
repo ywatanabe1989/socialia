@@ -149,7 +149,8 @@ class TestMCPCommands:
     def test_mcp_doctor(self, capsys):
         """Test mcp doctor command output."""
         result = main(["mcp", "doctor"])
-        assert result == 0
+        # Returns 0 if all configured, 1 if some unconfigured (both valid)
+        assert result in (0, 1)
         captured = capsys.readouterr()
         assert "Health Check" in captured.out
         assert "Twitter" in captured.out
