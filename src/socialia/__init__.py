@@ -1,6 +1,6 @@
 """Socialia - Unified social media management: posting, analytics, and insights."""
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 from .twitter import Twitter
 from .linkedin import LinkedIn
