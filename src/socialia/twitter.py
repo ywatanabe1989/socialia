@@ -15,6 +15,7 @@ class Twitter(TwitterGrowthMixin, _Base):
     """Twitter/X API v2 client using OAuth 1.0a."""
 
     platform_name = "twitter"
+    MAX_TWEET_LENGTH = 280
 
     POST_ENDPOINT = "https://api.x.com/2/tweets"
     DELETE_ENDPOINT = "https://api.x.com/2/tweets/{tweet_id}"
@@ -106,6 +107,13 @@ class Twitter(TwitterGrowthMixin, _Base):
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 
+        # Validate tweet length
+        if len(text) > self.MAX_TWEET_LENGTH:
+            return {
+                "success": False,
+                "error": f"Tweet too long: {len(text)} chars (max {self.MAX_TWEET_LENGTH})",
+            }
+
         oauth = self._get_session()
         payload = {"text": text}
 
@@ -167,6 +175,14 @@ class Twitter(TwitterGrowthMixin, _Base):
         Returns:
             dict with 'success', 'ids', 'urls' or 'error'
         """
+        # Validate all tweets before posting
+        for i, text in enumerate(tweets):
+            if len(text) > self.MAX_TWEET_LENGTH:
+                return {
+                    "success": False,
+                    "error": f"Tweet {i + 1} too long: {len(text)} chars (max {self.MAX_TWEET_LENGTH})",
+                }
+
         ids = []
         urls = []
         reply_to = None

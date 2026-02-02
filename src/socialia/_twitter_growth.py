@@ -15,6 +15,8 @@ class TwitterGrowthMixin:
     UNFOLLOW_ENDPOINT = (
         "https://api.x.com/2/users/{source_user_id}/following/{target_user_id}"
     )
+    FOLLOWERS_ENDPOINT = "https://api.x.com/2/users/{user_id}/followers"
+    FOLLOWING_ENDPOINT = "https://api.x.com/2/users/{user_id}/following"
 
     def get_user(self, username: str) -> dict:
         """
@@ -128,6 +130,128 @@ class TwitterGrowthMixin:
         if result.get("success"):
             result["user"] = user
         return result
+
+    def get_followers(self, limit: int = 100) -> dict:
+        """
+        Get list of users who follow the authenticated user.
+
+        Args:
+            limit: Maximum number of followers to return (max 1000)
+
+        Returns:
+            dict with 'success', 'followers' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        me = self.me()
+        if not me.get("success"):
+            return me
+
+        oauth = self._get_session()
+        url = self.FOLLOWERS_ENDPOINT.format(user_id=me["id"])
+        all_followers = []
+        pagination_token = None
+
+        while len(all_followers) < limit:
+            params = {
+                "max_results": min(100, limit - len(all_followers)),
+                "user.fields": "id,name,username,public_metrics,description",
+            }
+            if pagination_token:
+                params["pagination_token"] = pagination_token
+
+            response = oauth.get(url, params=params)
+            if response.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"{response.status_code}: {response.text}",
+                }
+
+            data = response.json()
+            for user in data.get("data", []):
+                metrics = user.get("public_metrics", {})
+                all_followers.append(
+                    {
+                        "id": user["id"],
+                        "username": user.get("username"),
+                        "name": user.get("name"),
+                        "description": user.get("description"),
+                        "followers": metrics.get("followers_count", 0),
+                        "following": metrics.get("following_count", 0),
+                    }
+                )
+
+            pagination_token = data.get("meta", {}).get("next_token")
+            if not pagination_token:
+                break
+
+        return {
+            "success": True,
+            "followers": all_followers,
+            "count": len(all_followers),
+        }
+
+    def get_following(self, limit: int = 100) -> dict:
+        """
+        Get list of users the authenticated user follows.
+
+        Args:
+            limit: Maximum number of users to return (max 1000)
+
+        Returns:
+            dict with 'success', 'following' list or 'error'
+        """
+        if not self.validate_credentials():
+            return {"success": False, "error": "Missing credentials"}
+
+        me = self.me()
+        if not me.get("success"):
+            return me
+
+        oauth = self._get_session()
+        url = self.FOLLOWING_ENDPOINT.format(user_id=me["id"])
+        all_following = []
+        pagination_token = None
+
+        while len(all_following) < limit:
+            params = {
+                "max_results": min(100, limit - len(all_following)),
+                "user.fields": "id,name,username,public_metrics,description",
+            }
+            if pagination_token:
+                params["pagination_token"] = pagination_token
+
+            response = oauth.get(url, params=params)
+            if response.status_code != 200:
+                return {
+                    "success": False,
+                    "error": f"{response.status_code}: {response.text}",
+                }
+
+            data = response.json()
+            for user in data.get("data", []):
+                metrics = user.get("public_metrics", {})
+                all_following.append(
+                    {
+                        "id": user["id"],
+                        "username": user.get("username"),
+                        "name": user.get("name"),
+                        "description": user.get("description"),
+                        "followers": metrics.get("followers_count", 0),
+                        "following": metrics.get("following_count", 0),
+                    }
+                )
+
+            pagination_token = data.get("meta", {}).get("next_token")
+            if not pagination_token:
+                break
+
+        return {
+            "success": True,
+            "following": all_following,
+            "count": len(all_following),
+        }
 
     def search_tweets(
         self, query: str, limit: int = 10, include_users: bool = True
