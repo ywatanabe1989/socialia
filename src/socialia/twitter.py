@@ -8,9 +8,10 @@ from requests_oauthlib import OAuth1Session
 
 from ._branding import get_env
 from ._base import _Base
+from ._twitter_growth import TwitterGrowthMixin
 
 
-class Twitter(_Base):
+class Twitter(TwitterGrowthMixin, _Base):
     """Twitter/X API v2 client using OAuth 1.0a."""
 
     platform_name = "twitter"
@@ -22,6 +23,11 @@ class Twitter(_Base):
     USER_MENTIONS_ENDPOINT = "https://api.x.com/2/users/{user_id}/mentions"
     SEARCH_ENDPOINT = "https://api.x.com/2/tweets/search/recent"
     MEDIA_UPLOAD_ENDPOINT = "https://upload.twitter.com/1.1/media/upload.json"
+    USER_BY_USERNAME_ENDPOINT = "https://api.x.com/2/users/by/username/{username}"
+    FOLLOW_ENDPOINT = "https://api.x.com/2/users/{source_user_id}/following"
+    UNFOLLOW_ENDPOINT = (
+        "https://api.x.com/2/users/{source_user_id}/following/{target_user_id}"
+    )
 
     def __init__(
         self,

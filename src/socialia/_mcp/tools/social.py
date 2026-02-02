@@ -24,6 +24,7 @@ def register_tools(mcp: FastMCP) -> None:
         platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
         text: str,
         reply_to: Optional[str] = None,
+        image: Optional[str] = None,
         dry_run: bool = False,
     ) -> dict:
         """
@@ -31,12 +32,13 @@ def register_tools(mcp: FastMCP) -> None:
 
         PLATFORM STRATEGIES:
         - twitter: 280 chars. Hook first, not announcements. 1-2 hashtags at end.
+          Supports image attachment via `image` parameter (path to jpg/png/gif/webp).
         - linkedin: 3000 chars. First 2 lines critical. Short paragraphs. End with question.
         - reddit: Title is key. Value first, self-promo last. Check subreddit rules.
         - slack: Use channel mentions @here/@channel sparingly. Code blocks for technical content.
         - youtube: Keyword-rich title <60 chars. First 2 description lines shown in search.
         """
-        return _social_post(platform, text, reply_to, dry_run)
+        return _social_post(platform, text, reply_to, image, dry_run)
 
     @mcp.tool()
     def social_delete(

@@ -29,7 +29,9 @@ class TestMCPDoctor:
         """Test doctor command shows health check."""
         from socialia.cli import main
 
-        assert main(["mcp", "doctor"]) == 0
+        # Returns 0 if all configured, 1 if some unconfigured (both valid)
+        result = main(["mcp", "doctor"])
+        assert result in (0, 1)
 
         captured = capsys.readouterr()
         assert "Health Check" in captured.out

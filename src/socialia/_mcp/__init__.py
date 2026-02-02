@@ -7,7 +7,7 @@
 Socialia MCP module.
 
 Provides register_all_tools for thin wrapper delegation.
-For mcp instance and run_server, import from socialia._server directly.
+For mcp instance, import from socialia._server directly.
 """
 
 from .tools import register_all_tools

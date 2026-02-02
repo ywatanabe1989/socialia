@@ -3,8 +3,12 @@
 **Unified social media management — posting, analytics, and insights**
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Documentation Status](https://readthedocs.org/projects/socialia/badge/?version=latest)](https://socialia.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml)
 
 Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
+
+📚 **[Documentation](https://socialia.readthedocs.io/)** | 🐙 **[GitHub](https://github.com/ywatanabe1989/socialia)**
 
 ## Installation
 

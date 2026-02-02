@@ -52,12 +52,15 @@ def social_post(
     platform: str,
     text: str,
     reply_to: str | None = None,
+    image: str | None = None,
     dry_run: bool = False,
 ) -> dict[str, Any]:
     """Post content to social media."""
     args = ["post", platform, text]
     if reply_to:
         args.extend(["--reply-to", reply_to])
+    if image:
+        args.extend(["--image", image])
     if dry_run:
         args.append("--dry-run")
     return run_cli(*args)
