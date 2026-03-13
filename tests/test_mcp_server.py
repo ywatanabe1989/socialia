@@ -2,6 +2,8 @@
 
 import pytest
 
+fastmcp = pytest.importorskip("fastmcp", reason="fastmcp not installed")
+
 
 class TestMCPToolDefinitions:
     """Test MCP tool definitions."""
