@@ -9,7 +9,11 @@ from .slack import Slack
 from .analytics import GoogleAnalytics
 from .youtube import YouTube
 from .org_files import move_to_scheduled, move_to_posted, ensure_project_dirs
-from ._server import PLATFORM_STRATEGIES
+
+try:
+    from ._server import PLATFORM_STRATEGIES
+except ImportError:
+    PLATFORM_STRATEGIES = {}
 
 __all__ = [
     # Platform clients
@@ -28,6 +32,3 @@ __all__ = [
     # Version
     "__version__",
 ]
-
-# Clean up module namespace - hide internal submodules
-del twitter, linkedin, reddit, slack, analytics, youtube, org_files, _server
