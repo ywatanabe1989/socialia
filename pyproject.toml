@@ -34,11 +34,21 @@ reddit = ["praw>=7.7.0"]
 mcp = ["fastmcp>=2.0.0"]
 analytics = ["google-analytics-data>=0.18.0"]
 youtube = ["google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5",
+    "sphinx-autodoc-typehints>=1.25",
+]
 dev = ["pytest", "ruff"]
-all = ["praw>=7.7.0", "mcp>=1.0.0", "google-analytics-data>=0.18.0", "google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
+all = ["socialia[docs]", "praw>=7.7.0", "mcp>=1.0.0", "google-analytics-data>=0.18.0", "google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 
 [project.scripts]
 socialia = "socialia.cli:main"
+
+[project.entry-points."scitex_dev.docs"]
+socialia = "socialia"
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/socialia"
