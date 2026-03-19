@@ -50,12 +50,18 @@ socialia = "socialia.cli:main"
 [project.entry-points."scitex_dev.docs"]
 socialia = "socialia"
 
+[project.entry-points."scitex_dev.skills"]
+socialia = "socialia"
+
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/socialia"
 Repository = "https://github.com/ywatanabe1989/socialia"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+socialia = ["skills/*.md", "skills/references/*.md"]
 
 [tool.ruff]
 line-length = 88
