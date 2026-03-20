@@ -151,7 +151,10 @@ def cmd_mcp(args) -> int:
             )
             return 1
 
-        tools = list(mcp._tool_manager._tools.keys())
+        from scitex_dev import get_tools_sync
+
+        tools_map = get_tools_sync(mcp)
+        tools = list(tools_map.keys())
         total = len(tools)
 
         # Group by logical module
@@ -194,7 +197,7 @@ def cmd_mcp(args) -> int:
             mod_tools = sorted(modules[module])
             print(_style(f"{module}: {len(mod_tools)} tools", "green", bold=True))
             for tool_name in mod_tools:
-                tool_obj = mcp._tool_manager._tools.get(tool_name)
+                tool_obj = tools_map.get(tool_name)
 
                 if verbose == 0:
                     print(f"  {tool_name}")
