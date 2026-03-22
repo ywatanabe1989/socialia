@@ -107,6 +107,7 @@ class TestCLIMain:
 
     def test_mcp_list_tools_command(self, capsys):
         """Test mcp list-tools command."""
+        pytest.importorskip("fastmcp", reason="fastmcp not installed")
         result = main(["mcp", "list-tools"])
         assert result == 0
         captured = capsys.readouterr()
