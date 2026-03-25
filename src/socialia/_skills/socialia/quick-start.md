@@ -1,5 +1,4 @@
 ---
-name: quick-start
 description: Basic social media posting — Twitter, LinkedIn, Reddit.
 ---
 

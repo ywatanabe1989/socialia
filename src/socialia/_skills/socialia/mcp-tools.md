@@ -1,5 +1,4 @@
 ---
-name: mcp-tools
 description: MCP tools for social media management.
 ---
 

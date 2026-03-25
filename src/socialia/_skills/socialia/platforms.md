@@ -1,5 +1,4 @@
 ---
-name: platforms
 description: Supported platforms — Twitter/X, LinkedIn, Reddit, Slack, YouTube.
 ---
 
