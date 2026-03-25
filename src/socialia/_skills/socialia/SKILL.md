@@ -1,5 +1,4 @@
 ---
-name: socialia
 description: Unified social media management — posting across Twitter/X, LinkedIn, and other platforms.
 allowed-tools: mcp__scitex__social_*
 ---
