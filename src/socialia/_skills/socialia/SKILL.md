@@ -11,6 +11,8 @@ Unified social media posting and management.
 
 - [quick-start.md](quick-start.md) — Basic usage
 - [platforms.md](platforms.md) — Supported platforms
+- [environment.md](environment.md) — Environment variables for all platforms
+- [python-api.md](python-api.md) — Python API reference (classes, methods, utilities)
 - [cli-reference.md](cli-reference.md) — CLI commands
 - [mcp-tools.md](mcp-tools.md) — MCP tools for AI agents
 
@@ -28,3 +30,7 @@ socialia status
 | `social_post` | Post to social media |
 | `social_status` | Check platform status |
 | `social_delete` | Delete a post |
+| `social_analytics_track` | Track custom GA4 event |
+| `social_analytics_pageviews` | Get page view metrics |
+| `social_analytics_sources` | Get traffic sources |
+| `social_analytics_realtime` | Get realtime active users |
