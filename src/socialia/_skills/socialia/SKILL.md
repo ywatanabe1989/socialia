@@ -5,6 +5,14 @@ allowed-tools: mcp__scitex__social_*
 
 # socialia
 
+## Installation
+
+```bash
+pip install socialia
+# Development:
+pip install -e /home/ywatanabe/proj/socialia
+```
+
 Unified social media posting and management.
 
 ## Sub-skills
