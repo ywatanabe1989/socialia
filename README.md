@@ -25,7 +25,7 @@ pip install socialia[all]         # Everything
 ## Quick Start
 
 ```python
-from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics
+from socialia import Twitter, LinkedIn, Reddit, Slack, YouTube, GoogleAnalytics
 
 # Post to Twitter
 twitter = Twitter()
@@ -34,6 +34,10 @@ twitter.post("Hello World!")
 # Post to LinkedIn
 linkedin = LinkedIn()
 linkedin.post("Professional update!")
+
+# Post to Slack
+slack = Slack()
+slack.post("Deploy finished", channel="#alerts")
 
 # Track analytics
 ga = GoogleAnalytics()
@@ -74,6 +78,9 @@ socialia post linkedin "Professional update!"
 
 # Post to Reddit
 socialia post reddit "Post body" --subreddit python --title "Post Title"
+
+# Post to Slack
+socialia post slack "Deploy finished" --channel "#alerts"
 
 # Post to YouTube (video upload)
 socialia post youtube "Description" --video video.mp4 --title "My Video"
@@ -186,7 +193,7 @@ manager.post_draft(draft, dry_run=True)  # Post with preview
 <summary><b>Python API</b></summary>
 
 ```python
-from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics
+from socialia import Twitter, LinkedIn, Reddit, Slack, YouTube, GoogleAnalytics
 
 # Check connection and get user info
 twitter = Twitter()
@@ -212,6 +219,13 @@ reddit.post("Post body", subreddit="test", title="Title")
 reddit.feed()        # Get recent posts
 reddit.mentions()    # Get inbox mentions
 reddit.update("post_id", "Updated text")  # Edit post
+
+# Slack
+slack = Slack()
+slack.post("Deploy finished", channel="#alerts")
+slack.post_thread(["Step 1", "Step 2"], channel="#alerts")
+slack.update(post_id, "New text", channel="#alerts")
+slack.feed(channel="#alerts")
 
 # YouTube (requires: pip install socialia[youtube])
 youtube = YouTube()
@@ -278,6 +292,10 @@ export SOCIALIA_X_ACCESSTOKEN_SECRET="your_access_token_secret"
 # LinkedIn
 export SOCIALIA_LINKEDIN_ACCESS_TOKEN="your_access_token"
 
+# Slack
+export SOCIALIA_SLACK_BOT_TOKEN="xoxb-..."
+export SOCIALIA_SLACK_DEFAULT_CHANNEL="#general"  # optional
+
 # Reddit
 export SOCIALIA_REDDIT_CLIENT_ID="your_client_id"
 export SOCIALIA_REDDIT_CLIENT_SECRET="your_client_secret"
@@ -305,6 +323,7 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 | Twitter/X | Ready | v2 OAuth 1.0a | `pip install socialia` |
 | LinkedIn | Ready | v2 OAuth 2.0 | `pip install socialia` |
 | Reddit | Ready | PRAW | `pip install socialia[reddit]` |
+| Slack | Ready | Web API (bot token) | `pip install socialia` |
 | YouTube | Ready | Data API v3 | `pip install socialia[youtube]` |
 | Google Analytics | Ready | GA4 + Data API | `pip install socialia[analytics]` |
 
@@ -317,17 +336,22 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 socialia/
 ├── src/socialia/         # Python package
 │   ├── cli/              # CLI with argparse
+│   ├── _mcp/             # MCP tool registrations (social, analytics)
+│   ├── _server.py        # FastMCP server
+│   ├── _skills/socialia/ # Packaged skill docs (SKILL.md + sub-skills)
 │   ├── twitter.py        # Twitter/X API
 │   ├── linkedin.py       # LinkedIn API
 │   ├── reddit.py         # Reddit API (PRAW)
+│   ├── slack.py          # Slack Web API
 │   ├── youtube.py        # YouTube API
 │   ├── analytics.py      # Google Analytics
 │   ├── scheduler.py      # Post scheduling system
-│   ├── org.py            # Org mode draft management
-│   ├── mcp_server.py     # MCP server (delegates to CLI)
-│   └── base.py           # Base class
+│   ├── org.py            # Org-mode draft management
+│   ├── org_files.py      # Draft → scheduled → posted lifecycle
+│   └── _base.py          # Base class
 ├── docs/
-│   ├── platforms/        # Platform API documentation
+│   ├── sphinx/           # Sphinx documentation
+│   ├── platforms/        # Platform API notes
 │   └── SETUP.md          # Step-by-step setup guide
 ├── examples/             # Usage examples
 ├── Makefile              # Command dispatcher

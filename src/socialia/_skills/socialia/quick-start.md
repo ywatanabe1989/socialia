@@ -1,25 +1,44 @@
 ---
-description: Basic social media posting — Twitter, LinkedIn, Reddit.
+description: Minimal working examples per platform (Twitter, LinkedIn, Reddit, Slack, YouTube).
 ---
 
 # Quick Start
 
 ```python
-from socialia import Twitter, LinkedIn, Reddit, Slack, YouTube
+from socialia import Twitter, LinkedIn, Reddit, Slack, YouTube, GoogleAnalytics
 
-# Post to Twitter/X
+# Twitter/X
 twitter = Twitter()
-twitter.post("New paper published! #research")
+twitter.post("Hello world!")
+twitter.post_thread(["First", "Second", "Third"])
 
-# Post to LinkedIn
+# LinkedIn
 linkedin = LinkedIn()
-linkedin.post("Excited to share our latest findings...")
+linkedin.post("Professional update")
 
-# Post to Reddit
+# Reddit  (requires: pip install socialia[reddit])
 reddit = Reddit()
-reddit.post("r/MachineLearning", "New approach to ...", body="...")
+reddit.post("Body text", subreddit="test", title="Post title")
 
-# Slack notification
+# Slack
 slack = Slack()
-slack.post("#general", "Experiment complete!")
+slack.post("Deploy finished", channel="#alerts")
+
+# YouTube  (requires: pip install socialia[youtube])
+youtube = YouTube()
+youtube.post("Description", video_path="clip.mp4", title="My video")
+
+# Google Analytics  (requires: pip install socialia[analytics])
+ga = GoogleAnalytics()
+ga.track_event("page_view", {"page": "/docs"})
+```
+
+CLI equivalent:
+
+```bash
+socialia post twitter "Hello world!"
+socialia post linkedin "Professional update"
+socialia post reddit "Body text" --subreddit test --title "Post title"
+socialia post slack "Deploy finished" --channel "#alerts"
+socialia post youtube "Description" --video clip.mp4 --title "My video"
 ```

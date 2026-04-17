@@ -1,32 +1,47 @@
 ---
-description: Supported platforms — Twitter/X, LinkedIn, Reddit, Slack, YouTube.
+description: Supported platforms and capability matrix.
 ---
 
 # Supported Platforms
 
-| Platform | Class | Features |
-|----------|-------|----------|
-| Twitter/X | `Twitter` | Post, thread, media |
-| LinkedIn | `LinkedIn` | Post, articles |
-| Reddit | `Reddit` | Post, subreddit targeting |
-| Slack | `Slack` | Channel messages |
-| YouTube | `YouTube` | Video metadata |
-| Google Analytics | `GoogleAnalytics` | Analytics data |
+| Platform | Class | Transport / API | Extra install |
+|----------|-------|-----------------|---------------|
+| Twitter/X | `Twitter` | v2 REST + OAuth 1.0a | (core) |
+| LinkedIn | `LinkedIn` | v2 REST + OAuth 2.0 | (core) |
+| Reddit | `Reddit` | PRAW | `socialia[reddit]` |
+| Slack | `Slack` | Web API (bot token) | (core) |
+| YouTube | `YouTube` | Data API v3 + OAuth | `socialia[youtube]` |
+| Google Analytics | `GoogleAnalytics` | GA4 Measurement + Data API | `socialia[analytics]` |
 
-## Org-file Workflow
+## Feature matrix
+
+| | post | delete | feed | me | thread | mentions | replies | update | media/video |
+|--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Twitter | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |   | image |
+| LinkedIn | ✓ | ✓ | ✓ | ✓ |   |   |   |   |   |
+| Reddit | ✓ | ✓ | ✓ | ✓ |   | ✓ |   | ✓ |   |
+| Slack | ✓ | ✓ | ✓ | ✓ | ✓ |   |   | ✓ |   |
+| YouTube | ✓ | ✓ | ✓ | ✓ |   |   |   | ✓ | video |
+
+## Twitter growth (extra)
+
+```python
+from socialia import Twitter
+t = Twitter()
+t.follow_by_username("someone")
+t.get_followers(limit=100)
+t.grow(keywords=["ml"], max_follows=10)   # discover + follow
+```
+
+## Org-file lifecycle helpers
 
 ```python
 from socialia import move_to_scheduled, move_to_posted, ensure_project_dirs
-
-# Manage content lifecycle via org files
 ensure_project_dirs("/path/to/project")
-move_to_scheduled("post.org")  # Draft → Scheduled
-move_to_posted("post.org")     # Scheduled → Posted
+move_to_scheduled("draft.org")   # → scheduled/
+move_to_posted("draft.org")      # → posted/
 ```
 
-## MCP Platform Strategies
+## PLATFORM_STRATEGIES
 
-```python
-from socialia import PLATFORM_STRATEGIES
-# Platform-specific content adaptation for AI agents
-```
+`from socialia import PLATFORM_STRATEGIES` — dict used by the MCP server to pick a client per platform. Empty if `fastmcp` is not installed.

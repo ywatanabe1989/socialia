@@ -1,44 +1,51 @@
 ---
-description: Unified social media management — posting across Twitter/X, LinkedIn, and other platforms.
-allowed-tools: mcp__scitex__social_*
+description: Unified social media management for Twitter/X, LinkedIn, Reddit, Slack, YouTube, and Google Analytics — Python API, CLI, and MCP tools.
+allowed-tools: mcp__socialia__social_*
 ---
 
 # socialia
+
+Unified multi-platform social media posting, scheduling, analytics, and AI-agent integration. Part of the [SciTeX](https://scitex.ai) ecosystem.
 
 ## Installation
 
 ```bash
 pip install socialia
-# Development:
-pip install -e /home/ywatanabe/proj/socialia
+# Optional extras: [reddit], [youtube], [analytics], [mcp], [all]
+pip install -e /home/ywatanabe/proj/socialia     # local dev
 ```
 
-Unified social media posting and management.
+## What it gives you
+
+- **Platform clients** — `Twitter`, `LinkedIn`, `Reddit`, `Slack`, `YouTube`, `GoogleAnalytics`.
+- **CLI** — `socialia post|feed|check|me|schedule|analytics|org|grow|mcp|completion|status`.
+- **MCP server** (`socialia mcp start`) — 7 tools for AI agents (`social_post`, `social_delete`, `social_status`, `social_analytics_{track,pageviews,sources,realtime}`).
+- **Scheduling daemon** — persistent job queue for deferred posts.
+- **Org-mode draft workflow** — manage TODO/SCHEDULED drafts in Emacs org files.
+- **Twitter growth** — `Twitter.grow()`, follow/unfollow, follower lookup.
+- **Org-file lifecycle helpers** — `move_to_scheduled`, `move_to_posted`, `ensure_project_dirs`.
 
 ## Sub-skills
 
-- [quick-start.md](quick-start.md) — Basic usage
-- [platforms.md](platforms.md) — Supported platforms
-- [environment.md](environment.md) — Environment variables for all platforms
-- [python-api.md](python-api.md) — Python API reference (classes, methods, utilities)
-- [cli-reference.md](cli-reference.md) — CLI commands
-- [mcp-tools.md](mcp-tools.md) — MCP tools for AI agents
+- [quick-start.md](quick-start.md) — Minimal working examples per platform.
+- [platforms.md](platforms.md) — Supported platforms and capabilities.
+- [environment.md](environment.md) — Credentials / env vars per platform.
+- [python-api.md](python-api.md) — Class-by-class method reference.
+- [cli-reference.md](cli-reference.md) — Full CLI surface.
+- [mcp-tools.md](mcp-tools.md) — MCP tools exposed to AI agents.
 
-## CLI
+## Quick example
 
-```bash
-socialia post "New paper published!" --platform twitter
-socialia status
+```python
+from socialia import Twitter, LinkedIn, Slack
+
+Twitter().post("Hello world!")
+LinkedIn().post("Professional update")
+Slack().post("Ping from CI", channel="#alerts")
 ```
 
-## MCP Tools
-
-| Tool | Description |
-|------|-------------|
-| `social_post` | Post to social media |
-| `social_status` | Check platform status |
-| `social_delete` | Delete a post |
-| `social_analytics_track` | Track custom GA4 event |
-| `social_analytics_pageviews` | Get page view metrics |
-| `social_analytics_sources` | Get traffic sources |
-| `social_analytics_realtime` | Get realtime active users |
+```bash
+socialia check                               # verify all platform credentials
+socialia post twitter "Hello!" --image a.png
+socialia mcp start                           # run MCP server for AI agents
+```

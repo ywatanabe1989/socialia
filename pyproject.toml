@@ -61,7 +61,12 @@ Repository = "https://github.com/ywatanabe1989/socialia"
 where = ["src"]
 
 [tool.setuptools.package-data]
-socialia = ["skills/*.md", "skills/references/*.md"]
+socialia = [
+    "_skills/**/*.md",
+    "_skills/**/*.yaml",
+    "_skills/**/*.yml",
+    "_skills/**/*.json",
+]
 
 [tool.ruff]
 line-length = 88
