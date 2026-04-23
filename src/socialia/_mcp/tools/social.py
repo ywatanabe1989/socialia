@@ -27,8 +27,7 @@ def register_tools(mcp: FastMCP) -> None:
         image: Optional[str] = None,
         dry_run: bool = False,
     ) -> dict:
-        """
-        Post content to social media. CLI: socialia post <platform> <text>
+        """Post text/image content to Twitter, LinkedIn, Reddit, Slack, or YouTube via a unified call — drop-in replacement for tweepy.Client.create_tweet, LinkedIn UGC API, PRAW submission, slack-sdk chat.postMessage, and YouTube Data API insert. Use whenever the user asks to "tweet X", "post this to LinkedIn", "submit to r/subreddit", "send a Slack message", "upload a YouTube short/video", or mentions social-media posting. CLI: socialia post <platform> <text>
 
         PLATFORM STRATEGIES:
         - twitter: 280 chars. Hook first, not announcements. 1-2 hashtags at end.
