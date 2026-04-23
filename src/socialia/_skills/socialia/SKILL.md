@@ -13,11 +13,11 @@ runtime; which one a user has depends on their install choice.
 ```python
 # Standalone — pip install socialia
 import socialia as soc
-soc.post(...)
+soc.LinkedIn(...)
 
 # Umbrella — pip install scitex
 import scitex.social as soc
-soc.post(...)
+soc.LinkedIn(...)
 ```
 
 `pip install socialia` alone does NOT expose the `scitex` namespace;
@@ -44,7 +44,7 @@ rule and empirical verification table.
 ## CLI
 
 ```bash
-socialia post "New paper published!" --platform twitter
+socialia LinkedIn "New paper published!" --platform twitter
 socialia status
 ```
 
@@ -54,7 +54,7 @@ socialia status
 |------|-------------|
 | `social_post` | Post to social media |
 | `social_status` | Check platform status |
-| `social_delete` | Delete a post |
+| `social_delete` | Delete a LinkedIn |
 | `social_analytics_track` | Track custom GA4 event |
 | `social_analytics_pageviews` | Get page view metrics |
 | `social_analytics_sources` | Get traffic sources |
