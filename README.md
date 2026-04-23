@@ -10,6 +10,14 @@ Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
 📚 **[Documentation](https://socialia.readthedocs.io/)** | 🐙 **[GitHub](https://github.com/ywatanabe1989/socialia)**
 
+## Problem and Solution
+
+
+| # | Problem | Solution |
+|---|---------|----------|
+| 1 | **Each social platform has a different API** -- tweepy + LinkedIn UGC + PRAW + slack-sdk + YouTube Data API + GA4 — 6 different auth stories | **Unified `socialia post <platform>`** -- one CLI + MCP interface across Twitter / LinkedIn / Reddit / Slack / YouTube; auth handled behind the scenes |
+| 2 | **Agents need to post/retract without clicking** -- but every platform's Python SDK is a different shape | **MCP tools `social_post` / `social_delete` / `social_status`** -- agent-friendly surface: one call per action; structured response |
+
 ## Installation
 
 ```bash
