@@ -41,7 +41,7 @@ docs = [
     "sphinx-copybutton>=0.5",
     "sphinx-autodoc-typehints>=1.25",
 ]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff", "scitex-dev>=0.7.0"]
 all = ["socialia[docs]", "praw>=7.7.0", "mcp>=1.0.0", "google-analytics-data>=0.18.0", "google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 
 [project.scripts]
