@@ -25,7 +25,7 @@ def register_tools(mcp: FastMCP) -> None:
         event_name: str,
         params: Optional[dict] = None,
     ) -> dict:
-        """Track custom event in Google Analytics. CLI: socialia analytics track <event_name>"""
+        """Use when the user asks to track, log, or send a custom event (signup, click, conversion, download) to Google Analytics — drop-in replacement for raw GA4 Measurement Protocol POST calls to /mp/collect. CLI: socialia analytics track <event_name>"""
         return _analytics_track(event_name, params)
 
     @mcp.tool()
@@ -34,7 +34,7 @@ def register_tools(mcp: FastMCP) -> None:
         end_date: str = "today",
         path: Optional[str] = None,
     ) -> dict:
-        """Get page view metrics from Google Analytics. CLI: socialia analytics pageviews"""
+        """Use when the user asks for page view metrics, visit counts, or traffic to specific pages/paths from Google Analytics — drop-in replacement for google-analytics-data (BetaAnalyticsDataClient.run_report) queries on screenPageViews metrics. CLI: socialia analytics pageviews"""
         return _analytics_pageviews(start_date, end_date, path)
 
     @mcp.tool()
@@ -42,12 +42,12 @@ def register_tools(mcp: FastMCP) -> None:
         start_date: str = "7daysAgo",
         end_date: str = "today",
     ) -> dict:
-        """Get traffic sources from Google Analytics. CLI: socialia analytics sources"""
+        """Use when the user asks where visitors are coming from — traffic sources, referrers, campaigns, or acquisition channels (organic/direct/social/referral) — drop-in replacement for google-analytics-data SDK run_report calls on sessionSource/sessionMedium dimensions. CLI: socialia analytics sources"""
         return _analytics_sources(start_date, end_date)
 
     @mcp.tool()
     def social_analytics_realtime() -> dict:
-        """Get realtime active users from Google Analytics. CLI: socialia analytics realtime"""
+        """Use when the user asks how many users are on the site right now, for live/realtime/current active visitor counts — drop-in replacement for google-analytics-data SDK run_realtime_report calls on activeUsers. CLI: socialia analytics realtime"""
         return _analytics_realtime()
 
 

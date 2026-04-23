@@ -45,14 +45,14 @@ def register_tools(mcp: FastMCP) -> None:
         platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
         post_id: str,
     ) -> dict:
-        """Delete a social media post. CLI: socialia delete <platform> <post_id>"""
+        """Use when the user asks to delete, retract, remove, or take down a tweet, LinkedIn post, Reddit post/comment, Slack message, or YouTube video by ID — drop-in replacement for platform-specific delete APIs (tweepy delete_tweet, LinkedIn UGC delete, PRAW .delete(), YouTube Data API videos.delete). CLI: socialia delete <platform> <post_id>"""
         return _social_delete(platform, post_id)
 
     @mcp.tool()
     def social_status(
         platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
     ) -> dict:
-        """Check authentication status for a platform. CLI: socialia status <platform>"""
+        """Use when the user asks to check if Twitter/LinkedIn/Reddit/Slack/YouTube OAuth credentials are configured and the token is valid before posting, or to verify "am I logged in" / "is auth working" — drop-in replacement for manually calling each platform's /me or verify_credentials endpoint. CLI: socialia status <platform>"""
         return _social_status(platform)
 
 
