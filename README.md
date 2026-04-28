@@ -10,6 +10,8 @@ Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
 📚 **[Documentation](https://socialia.readthedocs.io/)** | 🐙 **[GitHub](https://github.com/ywatanabe1989/socialia)**
 
+> **Interfaces:** Python ⭐ · CLI ⭐ · MCP ⭐⭐⭐ (primary) · Skills ⭐⭐ · Hook — · HTTP —
+
 ## Problem and Solution
 
 
