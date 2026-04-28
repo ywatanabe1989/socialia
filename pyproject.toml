@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "socialia"
-version = "0.5.6"
+version = "0.5.7"
 description = "Unified social media management - posting, analytics, and insights"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "AGPL-3.0"}
+license = "AGPL-3.0-only"
 authors = [
     {name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai"}
 ]
