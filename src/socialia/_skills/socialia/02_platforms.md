@@ -1,5 +1,7 @@
 ---
 description: Supported platforms — Twitter/X, LinkedIn, Reddit, Slack, YouTube.
+name: platforms
+tags: [socialia, scitex-package]
 ---
 
 # Supported Platforms
