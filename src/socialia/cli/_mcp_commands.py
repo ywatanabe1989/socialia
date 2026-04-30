@@ -144,14 +144,13 @@ def cmd_mcp(args) -> int:
 
         try:
             from .._server import mcp
+            from scitex_dev import get_tools_sync
         except ImportError:
             print(
                 "Error: MCP not installed. Run: pip install socialia[mcp]",
                 file=sys.stderr,
             )
             return 1
-
-        from scitex_dev import get_tools_sync
 
         tools_map = get_tools_sync(mcp)
         tools = list(tools_map.keys())

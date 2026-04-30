@@ -1,7 +1,16 @@
 """Socialia - Unified social media management: posting, analytics, and insights."""
 
-__version__ = "0.5.3"
+from __future__ import annotations
 
+try:
+    from importlib.metadata import version as _v, PackageNotFoundError
+    try:
+        __version__ = _v("socialia")
+    except PackageNotFoundError:
+        __version__ = "0.0.0+local"
+    del _v, PackageNotFoundError
+except ImportError:  # pragma: no cover — only on ancient Pythons
+    __version__ = "0.0.0+local"
 from .twitter import Twitter
 from .linkedin import LinkedIn
 from .reddit import Reddit

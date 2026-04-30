@@ -27,8 +27,7 @@ def register_tools(mcp: FastMCP) -> None:
         image: Optional[str] = None,
         dry_run: bool = False,
     ) -> dict:
-        """
-        Post content to social media. CLI: socialia post <platform> <text>
+        """Post text/image content to Twitter, LinkedIn, Reddit, Slack, or YouTube via a unified call — drop-in replacement for tweepy.Client.create_tweet, LinkedIn UGC API, PRAW submission, slack-sdk chat.postMessage, and YouTube Data API insert. Use whenever the user asks to "tweet X", "post this to LinkedIn", "submit to r/subreddit", "send a Slack message", "upload a YouTube short/video", or mentions social-media posting. CLI: socialia post <platform> <text>
 
         PLATFORM STRATEGIES:
         - twitter: 280 chars. Hook first, not announcements. 1-2 hashtags at end.
@@ -45,14 +44,14 @@ def register_tools(mcp: FastMCP) -> None:
         platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
         post_id: str,
     ) -> dict:
-        """Delete a social media post. CLI: socialia delete <platform> <post_id>"""
+        """Use when the user asks to delete, retract, remove, or take down a tweet, LinkedIn post, Reddit post/comment, Slack message, or YouTube video by ID — drop-in replacement for platform-specific delete APIs (tweepy delete_tweet, LinkedIn UGC delete, PRAW .delete(), YouTube Data API videos.delete). CLI: socialia delete <platform> <post_id>"""
         return _social_delete(platform, post_id)
 
     @mcp.tool()
     def social_status(
         platform: Literal["twitter", "linkedin", "reddit", "slack", "youtube"],
     ) -> dict:
-        """Check authentication status for a platform. CLI: socialia status <platform>"""
+        """Use when the user asks to check if Twitter/LinkedIn/Reddit/Slack/YouTube OAuth credentials are configured and the token is valid before posting, or to verify "am I logged in" / "is auth working" — drop-in replacement for manually calling each platform's /me or verify_credentials endpoint. CLI: socialia status <platform>"""
         return _social_status(platform)
 
 

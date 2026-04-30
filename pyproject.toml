@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "socialia"
-version = "0.5.3"
+version = "0.5.9"
 description = "Unified social media management - posting, analytics, and insights"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "AGPL-3.0"}
+license = "AGPL-3.0-only"
 authors = [
     {name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai"}
 ]
@@ -17,13 +17,13 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
+    "scitex-config>=0.3.0",
     "requests-oauthlib>=1.3.0",
     "requests>=2.28.0",
     "argcomplete>=3.0.0",
@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 reddit = ["praw>=7.7.0"]
-mcp = ["fastmcp>=2.0.0"]
+mcp = ["fastmcp>=2.0.0", "scitex-dev[mcp]>=0.7.0"]
 analytics = ["google-analytics-data>=0.18.0"]
 youtube = ["google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 docs = [
@@ -41,7 +41,7 @@ docs = [
     "sphinx-copybutton>=0.5",
     "sphinx-autodoc-typehints>=1.25",
 ]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff", "scitex-dev>=0.7.0"]
 all = ["socialia[docs]", "praw>=7.7.0", "mcp>=1.0.0", "google-analytics-data>=0.18.0", "google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 
 [project.scripts]
@@ -61,7 +61,7 @@ Repository = "https://github.com/ywatanabe1989/socialia"
 where = ["src"]
 
 [tool.setuptools.package-data]
-socialia = ["skills/*.md", "skills/references/*.md"]
+socialia = ["_skills/**/*.md"]
 
 [tool.ruff]
 line-length = 88

@@ -94,8 +94,10 @@ def parse_schedule_time(time_str: str) -> datetime:
         target = datetime.strptime(time_str, "%H:%M")
         target = target.replace(year=now.year, month=now.month, day=now.day)
         if target <= now:
-            # Schedule for tomorrow
-            target = target.replace(day=now.day + 1)
+            # Schedule for tomorrow.  `target.replace(day=now.day + 1)` breaks
+            # at month-end (e.g. April 30 + 1 → ValueError).  timedelta crosses
+            # month / year boundaries cleanly.
+            target = target + timedelta(days=1)
         return target
 
     raise ValueError(f"Cannot parse time: {time_str}")
