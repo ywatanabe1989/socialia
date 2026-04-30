@@ -1,5 +1,7 @@
 """Socialia - Unified social media management: posting, analytics, and insights."""
 
+from __future__ import annotations
+
 try:
     from importlib.metadata import version as _v, PackageNotFoundError
     try:
