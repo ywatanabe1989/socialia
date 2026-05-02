@@ -27,6 +27,7 @@ dependencies = [
     "requests-oauthlib>=1.3.0",
     "requests>=2.28.0",
     "argcomplete>=3.0.0",
+    "click>=8.0",
 ]
 
 [project.optional-dependencies]
@@ -56,6 +57,7 @@ socialia = "socialia"
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/socialia"
 Repository = "https://github.com/ywatanabe1989/socialia"
+Documentation = "https://socialia.readthedocs.io"
 
 [tool.setuptools.packages.find]
 where = ["src"]

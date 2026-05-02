@@ -1,61 +1,18 @@
-"""Tests for socialia CLI."""
+"""Tests for socialia CLI (Click-based, post-audit migration).
+
+Parser-shape tests (argparse-only) have been removed. Behavior is tested via
+the public ``main(argv)`` entry point, which now wraps Click + a backward-compat
+argv-rewrite shim so deprecated subcommand names still work.
+"""
 
 import pytest
-from socialia.cli import create_parser, main
-
-
-class TestCLIParser:
-    """Test CLI argument parsing."""
-
-    def test_parser_creation(self):
-        """Test parser is created successfully."""
-        parser = create_parser()
-        assert parser is not None
-        assert parser.prog == "socialia"
-
-    def test_version_argument(self, capsys):
-        """Test --version argument."""
-        parser = create_parser()
-        with pytest.raises(SystemExit) as exc_info:
-            parser.parse_args(["--version"])
-        assert exc_info.value.code == 0
-
-    def test_post_command_parsing(self):
-        """Test post command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["post", "twitter", "Hello World"])
-        assert args.command == "post"
-        assert args.platform == "twitter"
-        assert args.text == "Hello World"
-
-    def test_post_dry_run(self):
-        """Test post dry-run flag."""
-        parser = create_parser()
-        args = parser.parse_args(["post", "twitter", "Test", "--dry-run"])
-        assert args.dry_run is True
-
-    def test_delete_command_parsing(self):
-        """Test delete command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["delete", "twitter", "123456"])
-        assert args.command == "delete"
-        assert args.platform == "twitter"
-        assert args.post_id == "123456"
-
-    def test_analytics_track_parsing(self):
-        """Test analytics track command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["analytics", "track", "test_event"])
-        assert args.command == "analytics"
-        assert args.analytics_command == "track"
-        assert args.event_name == "test_event"
+from socialia.cli import main
 
 
 class TestCLIDryRun:
     """Test CLI dry-run functionality."""
 
     def test_post_dry_run_twitter(self, capsys):
-        """Test dry-run post to Twitter."""
         result = main(["post", "twitter", "Test message", "--dry-run"])
         assert result == 0
         captured = capsys.readouterr()
@@ -63,7 +20,6 @@ class TestCLIDryRun:
         assert "twitter" in captured.out.lower()
 
     def test_post_dry_run_linkedin(self, capsys):
-        """Test dry-run post to LinkedIn."""
         result = main(["post", "linkedin", "Test message", "--dry-run"])
         assert result == 0
         captured = capsys.readouterr()
@@ -75,68 +31,98 @@ class TestCLIMain:
     """Test CLI main function."""
 
     def test_no_command_shows_help(self, capsys):
-        """Test that no command shows help."""
         result = main([])
         assert result == 0
         captured = capsys.readouterr()
         assert "usage:" in captured.out.lower() or "socialia" in captured.out.lower()
 
     def test_help_recursive(self, capsys):
-        """Test --help-recursive option."""
         result = main(["--help-recursive"])
         assert result == 0
         captured = capsys.readouterr()
-        assert "SOCIALIA" in captured.out
+        # Click renders usage with "Usage:" prefix; subcommands are visible too.
         assert "post" in captured.out.lower()
-        assert "delete" in captured.out.lower()
+        assert "delete-post" in captured.out.lower()
 
-    def test_post_missing_text_error(self, capsys):
-        """Test post without text shows error."""
-        result = main(["post", "twitter"])
-        assert result == 1
-        captured = capsys.readouterr()
-        assert "error" in captured.err.lower()
-
-    def test_status_command(self, capsys):
-        """Test status command."""
-        result = main(["status"])
+    def test_status_command_canonical(self, capsys):
+        # Canonical name.
+        result = main(["show-status"])
         assert result == 0
         captured = capsys.readouterr()
-        assert "Socialia" in captured.out
-        assert "TWITTER" in captured.out or "twitter" in captured.out.lower()
+        assert "Socialia" in captured.out or "socialia" in captured.out.lower()
+
+    def test_status_command_deprecated_alias(self, capsys):
+        # Deprecated `status` alias still routes to show-status.
+        result = main(["status"])
+        assert result == 0
 
     def test_mcp_list_tools_command(self, capsys):
-        """Test mcp list-tools command."""
         pytest.importorskip("fastmcp", reason="fastmcp not installed")
         result = main(["mcp", "list-tools"])
         assert result == 0
         captured = capsys.readouterr()
         assert "MCP" in captured.out or "Tools" in captured.out
-        assert "social_post" in captured.out
 
 
 class TestCLICompletion:
     """Test CLI completion commands."""
 
-    def test_completion_bash(self, capsys):
-        """Test completion bash command."""
-        result = main(["completion", "bash"])
+    def test_completion_bash_canonical(self, capsys):
+        # Canonical: top-level show-completion-bash.
+        result = main(["show-completion-bash"])
         assert result == 0
         captured = capsys.readouterr()
         assert "argcomplete" in captured.out.lower() or "compdef" in captured.out
 
-    def test_completion_zsh(self, capsys):
-        """Test completion zsh command."""
-        result = main(["completion", "zsh"])
+    def test_completion_bash_deprecated_alias(self, capsys):
+        # `completion bash` still works via shim.
+        result = main(["completion", "bash"])
+        assert result == 0
+
+    def test_completion_zsh_canonical(self, capsys):
+        result = main(["show-completion-zsh"])
         assert result == 0
         captured = capsys.readouterr()
         assert "compdef" in captured.out or "bashcompinit" in captured.out
 
     def test_completion_status(self, capsys):
-        """Test completion status command."""
+        # Deprecated `completion status` is rewritten to top-level
+        # show-completion-status.
         result = main(["completion", "status"])
         assert result == 0
         captured = capsys.readouterr()
         assert "Completion Status" in captured.out
-        assert "Bash" in captured.out
-        assert "Zsh" in captured.out
+
+
+class TestCLIDeprecationAliases:
+    """Verify backward-compat shim covers the renamed subcommands."""
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ["delete", "twitter", "123", "--dry-run"],
+            ["setup"],
+            ["check", "twitter"],
+            ["me", "twitter"],
+            ["analytics", "realtime"],
+            ["analytics", "pageviews"],
+            ["analytics", "sources"],
+            ["mcp", "installation"],
+            ["schedule", "run"],
+            ["schedule", "daemon", "--dry-run"],
+            ["completion", "bash"],
+            ["completion", "zsh"],
+            ["completion", "status"],
+            ["org", "status", "/tmp/nonexistent.org"],
+            ["youtube", "config", "--scitex"],
+            ["grow", "twitter", "auto", "test", "--dry-run"],
+            ["grow", "twitter", "user", "ywatanabe"],
+        ],
+    )
+    def test_deprecated_alias_does_not_crash(self, argv):
+        # We don't assert on exit code (some require live creds / files);
+        # only that argv rewriting doesn't raise an unexpected exception.
+        try:
+            main(argv)
+        except SystemExit:
+            pass

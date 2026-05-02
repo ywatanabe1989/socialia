@@ -119,14 +119,17 @@ class TestMCPServerModule:
 class TestMCPCommandParsing:
     """Test MCP command parsing."""
 
-    def test_mcp_start_parsing(self):
-        """Test mcp start command parsing."""
-        from socialia.cli import create_parser
+    def test_mcp_start_help(self, capsys):
+        """Verify ``mcp start`` is registered (Click migration)."""
+        from socialia.cli import main
 
-        parser = create_parser()
-        args = parser.parse_args(["mcp", "start"])
-        assert args.command == "mcp"
-        assert args.mcp_command == "start"
+        rc = main(["mcp", "start", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "mcp start" in out or "start" in out.lower()
+        # Mutating verb -> must surface --dry-run / --yes per audit §2.
+        assert "--dry-run" in out
+        assert "--yes" in out
 
     def test_mcp_no_subcommand(self, capsys):
         """Test mcp without subcommand shows help."""

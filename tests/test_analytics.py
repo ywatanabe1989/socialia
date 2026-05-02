@@ -117,52 +117,51 @@ class TestGoogleAnalyticsTrackEvent:
 
 
 class TestAnalyticsCLI:
-    """Test analytics CLI commands."""
+    """Test analytics CLI commands (Click-based, post-audit migration).
 
-    def test_analytics_track_parsing(self):
-        """Test analytics track command parsing."""
-        from socialia.cli import create_parser
+    The argparse `create_parser()` API was removed; behavior is now exercised
+    via the public ``main(argv)`` Click entry point and the deprecation shim.
+    """
 
-        parser = create_parser()
-        args = parser.parse_args(["analytics", "track", "page_view"])
-        assert args.command == "analytics"
-        assert args.analytics_command == "track"
-        assert args.event_name == "page_view"
+    def test_analytics_track_help(self, capsys):
+        from socialia.cli import main
 
-    def test_analytics_track_with_params(self):
-        """Test analytics track with parameters."""
-        from socialia.cli import create_parser
+        rc = main(["analytics", "track", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "EVENT_NAME" in out or "event_name" in out.lower()
 
-        parser = create_parser()
-        args = parser.parse_args(
-            ["analytics", "track", "event", "--param", "key1", "value1"]
-        )
-        assert args.param == [["key1", "value1"]]
+    def test_analytics_track_with_params_help(self, capsys):
+        from socialia.cli import main
 
-    def test_analytics_realtime_parsing(self):
-        """Test analytics realtime command parsing."""
-        from socialia.cli import create_parser
+        rc = main(["analytics", "track", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "--param" in out
 
-        parser = create_parser()
-        args = parser.parse_args(["analytics", "realtime"])
-        assert args.analytics_command == "realtime"
+    def test_analytics_realtime_alias(self, capsys):
+        # Deprecated `analytics realtime` -> `analytics show-realtime`.
+        from socialia.cli import main
 
-    def test_analytics_pageviews_parsing(self):
-        """Test analytics pageviews command parsing."""
-        from socialia.cli import create_parser
+        rc = main(["analytics", "realtime", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "show-realtime" in out
 
-        parser = create_parser()
-        args = parser.parse_args(
-            ["analytics", "pageviews", "--start", "30daysAgo", "--end", "today"]
-        )
-        assert args.analytics_command == "pageviews"
-        assert args.start == "30daysAgo"
-        assert args.end == "today"
+    def test_analytics_pageviews_alias(self, capsys):
+        from socialia.cli import main
 
-    def test_analytics_sources_parsing(self):
-        """Test analytics sources command parsing."""
-        from socialia.cli import create_parser
+        rc = main(["analytics", "pageviews", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "show-pageviews" in out
+        assert "--start" in out
+        assert "--end" in out
 
-        parser = create_parser()
-        args = parser.parse_args(["analytics", "sources"])
-        assert args.analytics_command == "sources"
+    def test_analytics_sources_alias(self, capsys):
+        from socialia.cli import main
+
+        rc = main(["analytics", "sources", "--help"])
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "show-sources" in out

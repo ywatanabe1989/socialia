@@ -1,0 +1,15 @@
+## Project-local CLI audit dictionary for socialia.
+## Extends the bundled scitex-dev catalog with package-specific tokens.
+## See: scitex-dev/_skills/general/03_interface_02_cli/07_audit-cli.md
+
+nouns:
+  ## Shell names used as `socialia show-completion-<shell>` leaves
+  - bash
+  - zsh
+  ## Domain platforms (social-media context)
+  - youtube
+  - org
+  ## Analytics dimensions (treated as nouns/objects when used as verb-noun like
+  ## `analytics show-realtime`, `analytics show-pageviews`)
+  - realtime
+  - pageviews
