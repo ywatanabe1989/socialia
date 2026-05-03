@@ -1,7 +1,8 @@
 ---
-description: Complete CLI reference for socialia — posting, scheduling, analytics, and management.
-name: cli-reference
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Cli Reference
+  [DETAILS] Complete CLI reference for socialia — posting, scheduling, analytics, and management.
+tags: [socialia-cli-reference]
 ---
 
 # CLI Reference

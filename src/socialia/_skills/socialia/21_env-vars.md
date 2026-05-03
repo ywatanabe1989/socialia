@@ -1,7 +1,8 @@
 ---
-name: socialia-env-vars
-description: Environment variables read by socialia at import / runtime. Follow SCITEX_<MODULE>_* convention — see general/10_arch-environment-variables.md.
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Env Vars
+  [DETAILS] Environment variables read by socialia at import / runtime. Follow SCITEX_<MODULE>_* convention — see general/10_arch-environment-variables.md.
+tags: [socialia-env-vars]
 ---
 
 # socialia — Environment Variables
