@@ -44,13 +44,14 @@ rule and empirical verification table.
 ## Sub-skills
 
 ### Core
-- [01_quick-start.md](01_quick-start.md) — Basic usage
-- [02_platforms.md](02_platforms.md) — Supported platforms
+- [01_installation.md](01_installation.md) — pip install + per-platform extras
+- [02_quick-start.md](02_quick-start.md) — Basic usage
 - [03_python-api.md](03_python-api.md) — Python API reference (classes, methods, utilities)
+- [04_cli-reference.md](04_cli-reference.md) — `socialia` CLI commands
 
 ### Workflows
-- [10_cli-reference.md](10_cli-reference.md) — CLI commands
 - [11_mcp-tools.md](11_mcp-tools.md) — MCP tools for AI agents
+- [12_platforms.md](12_platforms.md) — Supported platforms (per-platform notes)
 
 ### Standards
 - [20_environment.md](20_environment.md) — Environment variables for all platforms
