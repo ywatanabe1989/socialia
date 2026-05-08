@@ -32,7 +32,7 @@ dependencies = [
 
 [project.optional-dependencies]
 reddit = ["praw>=7.7.0"]
-mcp = ["fastmcp>=2.0.0", "scitex-dev[mcp]>=0.11.5"]
+mcp = ["fastmcp>=2.0.0", "scitex-dev[mcp]>=0.11.7"]
 analytics = ["google-analytics-data>=0.18.0"]
 youtube = ["google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
 docs = [
@@ -50,7 +50,7 @@ dev = [
     "praw>=7.7.0",
     "pytest",
     "ruff",
-    "scitex-dev>=0.11.5",
+    "scitex-dev>=0.11.7",
     "socialia[docs]",
 ]
 all = ["socialia[docs]", "praw>=7.7.0", "mcp>=1.0.0", "google-analytics-data>=0.18.0", "google-api-python-client>=2.100.0", "google-auth-oauthlib>=1.1.0"]
