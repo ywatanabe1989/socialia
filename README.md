@@ -22,6 +22,12 @@ Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
 ## Installation
 
+> **Recommended**: `uv pip install socialia[all]` —
+> uv's Rust resolver handles the SciTeX dep set in 1-3 min where
+> pip's serial backtracker can take 30+ min on the full extras.
+> Plain `pip install` still works; the install block below shows both.
+
+
 ```bash
 pip install socialia
 
