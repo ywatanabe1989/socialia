@@ -170,7 +170,7 @@ Environment Variables:
 )
 @click.pass_context
 def main_group(ctx, as_json):
-    """Socialia - Unified social media management CLI.
+    """Socialia — Unified social media management CLI.
 
     \b
     Configuration precedence (highest -> lowest):
@@ -333,11 +333,12 @@ def cmd_delete_post(platform, post_id, dry_run, yes, as_json):
     if dry_run:
         click.echo(f"Would delete {platform} post {post_id}")
         sys.exit(0)
-    if not yes and not click.confirm(
-        f"Delete {platform} post {post_id}?", default=False
-    ):
-        click.echo("Aborted.")
-        sys.exit(1)
+    if not yes:
+        click.echo(
+            f"error: refusing to delete {platform} post {post_id} without --yes/-y",
+            err=True,
+        )
+        sys.exit(2)
     from ._commands import cmd_delete
 
     args = _ns(platform=platform, post_id=post_id, json=as_json)
@@ -772,9 +773,9 @@ def cmd_schedule_cancel(job_id, dry_run, yes, as_json):
     if dry_run:
         click.echo(f"Would cancel job {job_id}")
         sys.exit(0)
-    if not yes and not click.confirm(f"Cancel job {job_id}?", default=False):
-        click.echo("Aborted.")
-        sys.exit(1)
+    if not yes:
+        click.echo(f"error: refusing to cancel job {job_id} without --yes/-y", err=True)
+        sys.exit(2)
     from ._schedule_commands import cmd_schedule
 
     args = _ns(schedule_command="cancel", job_id=job_id, json=as_json)
@@ -845,9 +846,12 @@ def cmd_schedule_update_source(old_path, new_path, dry_run, yes, as_json):
     if dry_run:
         click.echo(f"Would update {old_path} -> {new_path}")
         sys.exit(0)
-    if not yes and not click.confirm(f"Update {old_path} -> {new_path}?", default=True):
-        click.echo("Aborted.")
-        sys.exit(1)
+    if not yes:
+        click.echo(
+            f"error: refusing to update {old_path} -> {new_path} without --yes/-y",
+            err=True,
+        )
+        sys.exit(2)
     from ._schedule_commands import cmd_schedule
 
     args = _ns(
@@ -1426,13 +1430,9 @@ def cmd_grow_follow_user(ctx, username, dry_run, yes, as_json):
     Example:
         $ socialia grow twitter follow-user @ywatanabe --yes
     """
-    if (
-        not dry_run
-        and not yes
-        and not click.confirm(f"Follow {username}?", default=False)
-    ):
-        click.echo("Aborted.")
-        sys.exit(1)
+    if not dry_run and not yes:
+        click.echo(f"error: refusing to follow {username} without --yes/-y", err=True)
+        sys.exit(2)
     from ._grow_commands import cmd_grow
 
     args = _ns(
@@ -1612,6 +1612,22 @@ def _rewrite_argv(argv):
         return argv
 
     return argv
+
+
+# Wire canonical install-shell-completion + print-shell-completion (§1a).
+try:
+    from scitex_dev._cli._completion import attach_shell_completion
+
+    attach_shell_completion(main_group, prog_name="socialia")
+except ImportError:
+    pass
+
+
+# Inject version line into root --help (§4).
+try:
+    main_group.help = f"socialia (v{__version__}) — " + (main_group.help or "").lstrip()
+except Exception:
+    pass
 
 
 def main(argv: list = None) -> int:

@@ -32,6 +32,40 @@ pip install socialia[analytics]   # Google Analytics Data API
 pip install socialia[all]         # Everything
 ```
 
+## Demo
+
+```bash
+# One-shot post across platforms (uses ~/.scitex/socialia/config.yaml creds)
+socialia post twitter "Hello World!"
+socialia post linkedin --file drafts/announce.md
+
+# Schedule + analytics
+socialia schedule list
+socialia analytics show-pageviews --days 7
+```
+
+![socialia CLI demo](docs/cli-demo.svg)
+
+## Architecture
+
+```
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│ drafts/*.org/.md │   │ projects/*.yaml  │   │ ~/.scitex/socialia/ │
+│ (content source) │   │ (campaign defs)  │   │ (creds, scheduler)  │
+└────────┬─────────┘   └────────┬─────────┘   └────────┬─────────┘
+         │                      │                      │
+         ▼                      ▼                      ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ socialia — Python / CLI / MCP                           │
+   │   post · schedule · analytics · grow · feed             │
+   │   per-platform adapters: twitter · linkedin · reddit ·  │
+   │   youtube · medium · github · google-analytics          │
+   └────────────────────────────────────────────────────────┘
+```
+
+A single Python core dispatches to per-platform adapters; CLI / MCP
+share the same Python API surface.
+
 ## Quick Start
 
 ```python
