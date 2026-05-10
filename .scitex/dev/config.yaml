@@ -1,0 +1,8 @@
+# scitex-dev project-type config
+# socialia carries a content-tree style root layout
+# (`drafts/`, `projects/`, `INSTRUCTIONS.md`). PS-103 is skipped
+# under `special`; every other PS rule still applies via `pip`.
+
+project-type:
+  - pip
+  - special
