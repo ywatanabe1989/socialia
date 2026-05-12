@@ -7,12 +7,10 @@ from typing import Optional
 from ._branding import get_env
 from ._base import _Base
 
-try:
-    import praw
+from scitex_dev import try_import_optional
 
-    HAS_PRAW = True
-except ImportError:
-    HAS_PRAW = False
+praw = try_import_optional("praw", extra="reddit", pkg="praw")
+HAS_PRAW = praw is not None
 
 
 class Reddit(_Base):
