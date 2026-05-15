@@ -21,6 +21,7 @@ import pytest
 # ===== AUTO-GENERATED: cross-package imports =====
 CROSS_PACKAGE_IMPORTS = [
     "scitex_dev",
+    "scitex_dev._branding",
     "scitex_dev._cli._completion",
 ]
 # ===== END AUTO-GENERATED =====
@@ -29,4 +30,9 @@ CROSS_PACKAGE_IMPORTS = [
 @pytest.mark.parametrize("module_name", CROSS_PACKAGE_IMPORTS)
 def test_cross_package_import(module_name):
     """Importing socialia's declared cross-package dependency must succeed."""
-    pytest.importorskip(module_name)
+    # Arrange
+    target = module_name
+    # Act
+    module = pytest.importorskip(target)
+    # Assert
+    assert module.__name__ == target
