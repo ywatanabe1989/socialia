@@ -8,7 +8,6 @@ has already set ``COVERAGE_FILE`` to a tmp dir by the time conftest is loaded.
 from __future__ import annotations
 
 import os
-import sys
 import sysconfig
 from pathlib import Path
 
