@@ -29,10 +29,20 @@ def _ensure_subprocess_coverage_shim() -> None:
     """
     purelib = Path(sysconfig.get_paths()["purelib"])
     pth = purelib / "_socialia_subprocess_coverage.pth"
+    # Defensive against subprocesses launched in interpreters that don't
+    # have `coverage` installed (e.g. `scitex-dev audit-all` invoked via
+    # /opt/hostedtoolcache/.../bin/scitex-dev on CI): a bare `import
+    # coverage` in a .pth file produces a noisy ``ModuleNotFoundError``
+    # at every interpreter startup and pollutes the subprocess's stderr,
+    # which trips audit-conformance tests that compare stderr to "".
     shim = (
-        "import os, coverage\n"
+        "import os\n"
         "if os.environ.get('COVERAGE_PROCESS_START'):\n"
-        "    coverage.process_startup()\n"
+        "    try:\n"
+        "        import coverage\n"
+        "        coverage.process_startup()\n"
+        "    except ImportError:\n"
+        "        pass\n"
     )
     try:
         if not pth.exists() or pth.read_text() != shim:
