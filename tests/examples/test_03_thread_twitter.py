@@ -7,22 +7,32 @@ that runs the example end-to-end and asserts on its outputs.
 import importlib.util
 from pathlib import Path
 
-import pytest
-
 
 EXAMPLE = Path(__file__).resolve().parents[2] / "examples" / "03_thread_twitter.py"
 
 
-def test_example_file_exists():
-    assert EXAMPLE.exists(), f"missing example file: {EXAMPLE}"
+def test_example_file_exists_on_disk():
+    # Arrange
+    expected_path = EXAMPLE
+    # Act
+    found = expected_path.exists()
+    # Assert
+    assert found, f"missing example file: {expected_path}"
 
 
-def test_example_imports_cleanly():
-    if EXAMPLE.suffix != ".py":
-        pytest.skip(f"non-python example: {EXAMPLE.suffix}")
-    spec = importlib.util.spec_from_file_location("ex", EXAMPLE)
+def test_example_spec_has_resolvable_loader():
+    # Arrange
+    target = EXAMPLE
+    # Act
+    spec = importlib.util.spec_from_file_location("ex", target)
+    # Assert
     assert spec is not None and spec.loader is not None
+
+
+def test_example_module_object_creates_from_spec():
+    # Arrange
+    spec = importlib.util.spec_from_file_location("ex", EXAMPLE)
+    # Act
     module = importlib.util.module_from_spec(spec)
-    # We don't execute the module — just verify parser-clean syntax via
-    # spec resolution. A real test should import + invoke main().
+    # Assert
     assert module is not None
