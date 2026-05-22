@@ -2,7 +2,7 @@
 
 __all__ = ["LinkedIn"]
 
-from typing import Optional
+from typing import Any, Optional
 import requests
 
 from ._base import _Base
@@ -26,11 +26,18 @@ class LinkedIn(_Base):
         access_token: Optional[str] = None,
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
+        *,
+        http: Optional[Any] = None,
     ):
+        # ``http`` is an injectable requests-shaped HTTP client (anything
+        # exposing ``get`` / ``post`` / ``delete``).  Production code leaves
+        # it ``None`` so we use the ``requests`` module.  Tests inject a
+        # hand-rolled fake to assert call shape without hitting the network.
         self.access_token = access_token or get_env("LINKEDIN_ACCESS_TOKEN")
         self.client_id = client_id or get_env("LINKEDIN_CLIENT_ID")
         self.client_secret = client_secret or get_env("LINKEDIN_CLIENT_SECRET")
         self._user_urn: Optional[str] = None
+        self._http = http or requests
 
     def _get_headers(self) -> dict:
         """Get headers for LinkedIn API requests."""
@@ -54,7 +61,7 @@ class LinkedIn(_Base):
             return None
 
         # Try OpenID Connect userinfo endpoint first (requires openid scope)
-        response = requests.get(
+        response = self._http.get(
             self.USERINFO_ENDPOINT,
             headers={"Authorization": f"Bearer {self.access_token}"},
         )
@@ -66,7 +73,7 @@ class LinkedIn(_Base):
                 return self._user_urn
 
         # Fallback to /me endpoint (requires r_liteprofile scope)
-        response = requests.get(self.ME_ENDPOINT, headers=self._get_headers())
+        response = self._http.get(self.ME_ENDPOINT, headers=self._get_headers())
         if response.status_code == 200:
             user_data = response.json()
             self._user_urn = f"urn:li:person:{user_data['id']}"
@@ -109,7 +116,7 @@ class LinkedIn(_Base):
             "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": visibility},
         }
 
-        response = requests.post(
+        response = self._http.post(
             self.UGC_POSTS_ENDPOINT, headers=self._get_headers(), json=post_data
         )
 
@@ -143,7 +150,7 @@ class LinkedIn(_Base):
 
         # LinkedIn delete endpoint
         url = f"{self.UGC_POSTS_ENDPOINT}/{post_id}"
-        response = requests.delete(url, headers=self._get_headers())
+        response = self._http.delete(url, headers=self._get_headers())
 
         if response.status_code in (200, 204):
             return {"success": True, "deleted": True}
@@ -158,7 +165,7 @@ class LinkedIn(_Base):
         if not self.validate_credentials():
             return {"valid": False, "error": "No access token"}
 
-        response = requests.get(self.ME_ENDPOINT, headers=self._get_headers())
+        response = self._http.get(self.ME_ENDPOINT, headers=self._get_headers())
         if response.status_code == 200:
             return {"valid": True, "user": response.json()}
         else:
@@ -175,7 +182,7 @@ class LinkedIn(_Base):
             return {"success": False, "error": "Missing access token"}
 
         # Try userinfo endpoint first
-        response = requests.get(
+        response = self._http.get(
             self.USERINFO_ENDPOINT,
             headers={"Authorization": f"Bearer {self.access_token}"},
         )
@@ -192,7 +199,7 @@ class LinkedIn(_Base):
             }
 
         # Fallback to /me endpoint
-        response = requests.get(self.ME_ENDPOINT, headers=self._get_headers())
+        response = self._http.get(self.ME_ENDPOINT, headers=self._get_headers())
         if response.status_code == 200:
             data = response.json()
             name = f"{data.get('localizedFirstName', '')} {data.get('localizedLastName', '')}".strip()
@@ -232,7 +239,7 @@ class LinkedIn(_Base):
             "count": limit,
         }
 
-        response = requests.get(
+        response = self._http.get(
             self.SHARES_ENDPOINT,
             headers=self._get_headers(),
             params=params,
