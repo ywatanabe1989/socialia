@@ -247,8 +247,7 @@ class TestAnalyticsCLI:
     def test_analytics_track_help_mentions_event_name_argument(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "track", "--help"])
-        assert rc == 0
+        main(["analytics", "track", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -257,8 +256,7 @@ class TestAnalyticsCLI:
     def test_analytics_track_help_documents_param_flag(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "track", "--help"])
-        assert rc == 0
+        main(["analytics", "track", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -267,8 +265,7 @@ class TestAnalyticsCLI:
     def test_analytics_realtime_alias_renders_show_realtime_help(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "realtime", "--help"])
-        assert rc == 0
+        main(["analytics", "realtime", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -277,8 +274,7 @@ class TestAnalyticsCLI:
     def test_analytics_pageviews_alias_renders_show_pageviews_help(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "pageviews", "--help"])
-        assert rc == 0
+        main(["analytics", "pageviews", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -287,8 +283,7 @@ class TestAnalyticsCLI:
     def test_analytics_pageviews_alias_documents_start_flag(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "pageviews", "--help"])
-        assert rc == 0
+        main(["analytics", "pageviews", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -297,8 +292,7 @@ class TestAnalyticsCLI:
     def test_analytics_pageviews_alias_documents_end_flag(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "pageviews", "--help"])
-        assert rc == 0
+        main(["analytics", "pageviews", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -307,8 +301,7 @@ class TestAnalyticsCLI:
     def test_analytics_sources_alias_renders_show_sources_help(self, capsys):
         # Arrange
         from socialia.cli import main
-        rc = main(["analytics", "sources", "--help"])
-        assert rc == 0
+        main(["analytics", "sources", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert

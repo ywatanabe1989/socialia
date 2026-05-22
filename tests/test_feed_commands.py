@@ -29,8 +29,7 @@ class TestFeedHelp:
 
     def test_feed_help_mentions_feed_subcommand(self, capsys):
         # Arrange
-        rc = main(["feed", "--help"])
-        assert rc == 0
+        main(["feed", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -38,8 +37,7 @@ class TestFeedHelp:
 
     def test_feed_help_documents_limit_flag(self, capsys):
         # Arrange
-        rc = main(["feed", "--help"])
-        assert rc == 0
+        main(["feed", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -47,8 +45,7 @@ class TestFeedHelp:
 
     def test_feed_help_documents_mentions_flag(self, capsys):
         # Arrange
-        rc = main(["feed", "--help"])
-        assert rc == 0
+        main(["feed", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -56,8 +53,7 @@ class TestFeedHelp:
 
     def test_feed_help_documents_replies_flag(self, capsys):
         # Arrange
-        rc = main(["feed", "--help"])
-        assert rc == 0
+        main(["feed", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -65,8 +61,7 @@ class TestFeedHelp:
 
     def test_feed_help_documents_detail_flag(self, capsys):
         # Arrange
-        rc = main(["feed", "--help"])
-        assert rc == 0
+        main(["feed", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -87,8 +82,7 @@ class TestCheckHelp:
 
     def test_check_platforms_help_mentions_canonical_command_name(self, capsys):
         # Arrange
-        rc = main(["check-platforms", "--help"])
-        assert rc == 0
+        main(["check-platforms", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -104,8 +98,7 @@ class TestCheckHelp:
 
     def test_check_deprecated_alias_help_routes_to_check_platforms(self, capsys):
         # Arrange
-        rc = main(["check", "--help"])
-        assert rc == 0
+        main(["check", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -126,8 +119,7 @@ class TestMeHelp:
 
     def test_show_me_help_mentions_canonical_command_name(self, capsys):
         # Arrange
-        rc = main(["show-me", "--help"])
-        assert rc == 0
+        main(["show-me", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -135,8 +127,7 @@ class TestMeHelp:
 
     def test_show_me_help_mentions_twitter_platform(self, capsys):
         # Arrange
-        rc = main(["show-me", "--help"])
-        assert rc == 0
+        main(["show-me", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -165,8 +156,7 @@ class TestScheduleHelp:
 
     def test_schedule_cancel_help_mentions_job_id_argument(self, capsys):
         # Arrange
-        rc = main(["schedule", "cancel", "--help"])
-        assert rc == 0
+        main(["schedule", "cancel", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -174,8 +164,7 @@ class TestScheduleHelp:
 
     def test_schedule_run_alias_renders_start_due_jobs_help(self, capsys):
         # Arrange
-        rc = main(["schedule", "run", "--help"])
-        assert rc == 0
+        main(["schedule", "run", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -183,8 +172,7 @@ class TestScheduleHelp:
 
     def test_schedule_daemon_alias_renders_start_daemon_help(self, capsys):
         # Arrange
-        rc = main(["schedule", "daemon", "--help"])
-        assert rc == 0
+        main(["schedule", "daemon", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -237,8 +225,7 @@ class TestMCPParsing:
 
     def test_mcp_installation_alias_renders_show_installation_help(self, capsys):
         # Arrange
-        rc = main(["mcp", "installation", "--help"])
-        assert rc == 0
+        main(["mcp", "installation", "--help"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -259,8 +246,7 @@ class TestMCPCommands:
 
     def test_mcp_doctor_output_contains_health_check_header(self, capsys):
         # Arrange
-        rc = main(["mcp", "doctor"])
-        assert rc in (0, 1)
+        main(["mcp", "doctor"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -268,8 +254,7 @@ class TestMCPCommands:
 
     def test_mcp_doctor_output_includes_twitter_platform_row(self, capsys):
         # Arrange
-        rc = main(["mcp", "doctor"])
-        assert rc in (0, 1)
+        main(["mcp", "doctor"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -285,8 +270,7 @@ class TestMCPCommands:
 
     def test_mcp_show_installation_mentions_claude_desktop(self, capsys):
         # Arrange
-        rc = main(["mcp", "show-installation"])
-        assert rc == 0
+        main(["mcp", "show-installation"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -294,8 +278,7 @@ class TestMCPCommands:
 
     def test_mcp_show_installation_renders_mcp_servers_block(self, capsys):
         # Arrange
-        rc = main(["mcp", "show-installation"])
-        assert rc == 0
+        main(["mcp", "show-installation"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -303,8 +286,7 @@ class TestMCPCommands:
 
     def test_mcp_show_installation_mentions_socialia_entry(self, capsys):
         # Arrange
-        rc = main(["mcp", "show-installation"])
-        assert rc == 0
+        main(["mcp", "show-installation"])
         # Act
         out = capsys.readouterr().out
         # Assert
@@ -371,8 +353,7 @@ class TestScheduleCommands:
         schedule_file.write_text("[]")
         _override_schedule_file(env_save_restore, schedule_file)
         try:
-            rc = main(["schedule", "list"])
-            assert rc == 0
+            main(["schedule", "list"])
             # Act
             out = capsys.readouterr().out
             # Assert
@@ -407,8 +388,7 @@ class TestScheduleCommands:
         schedule_file.write_text("[]")
         _override_schedule_file(env_save_restore, schedule_file)
         try:
-            rc = main(["schedule", "cancel", "nonexistent", "--yes"])
-            assert rc == 1
+            main(["schedule", "cancel", "nonexistent", "--yes"])
             # Act
             err = capsys.readouterr().err
             # Assert

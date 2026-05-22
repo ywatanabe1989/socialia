@@ -9,7 +9,8 @@ import shutil
 import pytest
 
 
-def test_audit_all_clean():
+def test_audit_all_clean_for_socialia_package():
+    # Arrange
     if shutil.which("scitex-dev") is None:
         pytest.skip(
             "scitex-dev not installed — add `scitex-dev[cli-audit]` "
@@ -17,6 +18,8 @@ def test_audit_all_clean():
         )
     from scitex_dev.testing import audit_all_for_package
 
+    # Act
+    # Assert
     audit_all_for_package(
         "socialia",
         skip_rules=(
