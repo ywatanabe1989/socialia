@@ -1,7 +1,6 @@
 """Tests for socialia base module."""
 
 import pytest
-from unittest.mock import patch
 
 from socialia._base import _Base
 
@@ -21,132 +20,180 @@ class ConcretePoster(_Base):
 class TestBase:
     """Test _Base base class."""
 
-    def test_base_is_abstract(self):
-        """Test that _Base cannot be instantiated directly."""
-        with pytest.raises(TypeError):
+    def test_base_class_is_abstract_and_blocks_direct_instantiation(self):
+        # Arrange
+        ctx = pytest.raises(TypeError)
+        # Act
+        # (entering the context is the assert step below)
+        # Assert
+        with ctx:
             _Base()
 
-    def test_concrete_poster_works(self):
-        """Test concrete implementation works."""
+    def test_concrete_subclass_post_reports_success_true(self):
+        # Arrange
         poster = ConcretePoster()
+        # Act
         result = poster.post("test")
+        # Assert
         assert result["success"] is True
 
-    def test_feed_default_implementation(self):
-        """Test default feed returns not implemented."""
+    def test_default_feed_returns_success_false(self):
+        # Arrange
         poster = ConcretePoster()
+        # Act
         result = poster.feed()
+        # Assert
         assert result["success"] is False
+
+    def test_default_feed_error_message_says_not_implemented(self):
+        # Arrange
+        poster = ConcretePoster()
+        # Act
+        result = poster.feed()
+        # Assert
         assert "not implemented" in result["error"].lower()
 
-    def test_mentions_default_implementation(self):
-        """Test default mentions returns not implemented."""
+    def test_default_mentions_returns_success_false(self):
+        # Arrange
         poster = ConcretePoster()
+        # Act
         result = poster.mentions()
+        # Assert
         assert result["success"] is False
 
-    def test_me_default_implementation(self):
-        """Test default me returns not implemented."""
+    def test_default_me_returns_success_false(self):
+        # Arrange
         poster = ConcretePoster()
+        # Act
         result = poster.me()
+        # Assert
         assert result["success"] is False
 
-    def test_check_default_implementation(self):
-        """Test default check uses me()."""
+    def test_default_check_reports_subclass_platform_name(self):
+        # Arrange
         poster = ConcretePoster()
+        # Act
         result = poster.check()
-        # Should fail because me() returns not implemented
+        # Assert
         assert result["platform"] == "test"
 
 
 class TestBranding:
     """Test branding module."""
 
-    def test_get_env_var_name_format(self):
-        """Test env var naming format."""
+    def test_get_env_var_name_uses_current_env_prefix(self):
+        # Arrange
         from socialia._branding import get_env_var_name, ENV_PREFIX
-
+        # Act
         result = get_env_var_name("X_CONSUMER_KEY")
-        # Should be PREFIX_KEY format using current ENV_PREFIX
+        # Assert
         assert result == f"{ENV_PREFIX}_X_CONSUMER_KEY"
-        assert "X_CONSUMER_KEY" in result
 
-    def test_get_env_default(self):
-        """Test getting env var with default."""
+    def test_get_env_returns_default_when_var_unset(self):
+        # Arrange
         from socialia._branding import get_env
-
-        # Use a unique var name that won't exist
-        result = get_env("TOTALLY_UNIQUE_NONEXISTENT_VAR_XYZ123", "default_value")
+        # Act
+        result = get_env(
+            "TOTALLY_UNIQUE_NONEXISTENT_VAR_XYZ123",
+            "default_value",
+        )
+        # Assert
         assert result == "default_value"
 
-    def test_get_env_with_value(self):
-        """Test getting env var with SOCIALIA prefix."""
+    def test_get_env_reads_socialia_prefixed_var(self, env_save_restore):
+        # Arrange
         from socialia._branding import get_env
+        env_save_restore.set("SOCIALIA_TEST_UNIQUE_VAR", "test_value")
+        # Act
+        result = get_env("TEST_UNIQUE_VAR")
+        # Assert
+        assert result == "test_value"
 
-        with patch.dict("os.environ", {"SOCIALIA_TEST_UNIQUE_VAR": "test_value"}):
-            result = get_env("TEST_UNIQUE_VAR")
-            assert result == "test_value"
-
-    def test_get_mcp_server_name(self):
-        """Test MCP server name generation."""
+    def test_get_mcp_server_name_returns_nonempty_string(self):
+        # Arrange
         from socialia._branding import get_mcp_server_name
-
+        # Act
         name = get_mcp_server_name()
-        assert isinstance(name, str)
-        assert len(name) > 0
+        # Assert
+        assert isinstance(name, str) and len(name) > 0
 
 
 class TestPlatformImports:
     """Test that all platform classes can be imported."""
 
-    def test_import_twitter(self):
-        """Test Twitter import."""
+    def test_top_level_module_exports_twitter_symbol(self):
+        # Arrange
         from socialia import Twitter
+        # Act
+        klass = Twitter
+        # Assert
+        assert klass is not None
 
-        assert Twitter is not None
-
-    def test_import_linkedin(self):
-        """Test LinkedIn import."""
+    def test_top_level_module_exports_linkedin_symbol(self):
+        # Arrange
         from socialia import LinkedIn
+        # Act
+        klass = LinkedIn
+        # Assert
+        assert klass is not None
 
-        assert LinkedIn is not None
-
-    def test_import_reddit(self):
-        """Test Reddit import."""
+    def test_top_level_module_exports_reddit_symbol(self):
+        # Arrange
         from socialia import Reddit
+        # Act
+        klass = Reddit
+        # Assert
+        assert klass is not None
 
-        assert Reddit is not None
-
-    def test_import_youtube(self):
-        """Test YouTube import."""
+    def test_top_level_module_exports_youtube_symbol(self):
+        # Arrange
         from socialia import YouTube
+        # Act
+        klass = YouTube
+        # Assert
+        assert klass is not None
 
-        assert YouTube is not None
-
-    def test_import_google_analytics(self):
-        """Test GoogleAnalytics import."""
+    def test_top_level_module_exports_google_analytics_symbol(self):
+        # Arrange
         from socialia import GoogleAnalytics
-
-        assert GoogleAnalytics is not None
+        # Act
+        klass = GoogleAnalytics
+        # Assert
+        assert klass is not None
 
 
 class TestVersion:
     """Test version information."""
 
-    def test_version_exists(self):
-        """Test __version__ is defined."""
+    def test_version_attribute_is_a_string(self):
+        # Arrange
         from socialia import __version__
+        # Act
+        value = __version__
+        # Assert
+        assert isinstance(value, str)
 
-        assert __version__ is not None
-        assert isinstance(__version__, str)
-        assert len(__version__) > 0
-
-    def test_version_format(self):
-        """Test version follows semver-like format."""
+    def test_version_string_is_nonempty(self):
+        # Arrange
         from socialia import __version__
+        # Act
+        length = len(__version__)
+        # Assert
+        assert length > 0
 
+    def test_version_has_at_least_two_dotted_parts(self):
+        # Arrange
+        from socialia import __version__
+        # Act
         parts = __version__.split(".")
+        # Assert
         assert len(parts) >= 2
-        # First two parts should be numeric
-        assert parts[0].isdigit()
-        assert parts[1].isdigit()
+
+    def test_version_major_and_minor_parts_are_numeric(self):
+        # Arrange
+        from socialia import __version__
+        parts = __version__.split(".")
+        # Act
+        both_numeric = parts[0].isdigit() and parts[1].isdigit()
+        # Assert
+        assert both_numeric

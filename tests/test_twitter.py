@@ -1,183 +1,392 @@
-"""Tests for Twitter client."""
+"""Tests for Twitter client.
 
-from unittest.mock import MagicMock
+All collaborators are injected via ``Twitter(session_factory=...)``; tests
+construct a hand-rolled ``FakeOAuthSession`` (see ``conftest.py``) and
+configure ``FakeResponse`` objects ahead of the call.  No mocks.
+"""
+
+import importlib
 
 from socialia.twitter import Twitter
 
+from tests.conftest import FakeResponse
 
-class TestTwitter:
-    """Test Twitter class."""
 
-    def test_init_with_credentials(self, twitter_credentials):
-        """Test initialization with explicit credentials."""
-        client = Twitter(**twitter_credentials)
+# --- Helpers ----------------------------------------------------------------
+
+
+def _clear_twitter_env(env, *, set_socialia_prefix: bool = True):
+    """Clear every Twitter credential env var across known prefixes.
+
+    Tests that exercise the credential-fallback paths need a clean slate;
+    this helper centralises the brand-prefix bookkeeping so the per-test
+    bodies stay focused on a single Act + Assert.
+    """
+    env.delete("SOCIALIA_ENV_PREFIX")
+    for prefix in ("SOCIALIA", "SCITEX", "SCITEX_SOCIAL"):
+        for suffix in (
+            "X_CONSUMER_KEY",
+            "X_CONSUMER_KEY_SECRET",
+            "X_ACCESSTOKEN",
+            "X_ACCESSTOKEN_SECRET",
+        ):
+            env.delete(f"{prefix}_{suffix}")
+    # Reload branding so prefix changes take effect.
+    from socialia import _branding
+
+    importlib.reload(_branding)
+
+
+# --- Initialisation ---------------------------------------------------------
+
+
+class TestTwitterInit:
+    def test_init_with_credentials_records_consumer_key(self, twitter_credentials):
+        # Arrange
+        creds = twitter_credentials
+        # Act
+        client = Twitter(**creds)
+        # Assert
         assert client.consumer_key == "test_consumer_key"
+
+    def test_init_with_credentials_records_consumer_secret(
+        self, twitter_credentials
+    ):
+        # Arrange
+        creds = twitter_credentials
+        # Act
+        client = Twitter(**creds)
+        # Assert
         assert client.consumer_secret == "test_consumer_secret"
+
+    def test_init_with_credentials_records_access_token(self, twitter_credentials):
+        # Arrange
+        creds = twitter_credentials
+        # Act
+        client = Twitter(**creds)
+        # Assert
         assert client.access_token == "test_access_token"
+
+    def test_init_with_credentials_records_access_token_secret(
+        self, twitter_credentials
+    ):
+        # Arrange
+        creds = twitter_credentials
+        # Act
+        client = Twitter(**creds)
+        # Assert
         assert client.access_token_secret == "test_access_token_secret"
 
-    def test_init_from_environment(self, monkeypatch):
-        """Test initialization from environment variables."""
-        # Clear branding to use default SOCIALIA_ prefix
-        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
-        # Clear any existing env vars first
-        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN_SECRET", raising=False)
-
-        monkeypatch.setenv("SOCIALIA_X_CONSUMER_KEY", "env_consumer_key")
-        monkeypatch.setenv("SOCIALIA_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
-        monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN", "env_access_token")
-        monkeypatch.setenv("SOCIALIA_X_ACCESSTOKEN_SECRET", "env_access_secret")
-
-        # Reload branding module to pick up cleared prefix
-        import importlib
-        from socialia import _branding
-
-        importlib.reload(_branding)
-
+    def test_init_from_environment_reads_consumer_key(self, env_save_restore):
+        # Arrange
+        _clear_twitter_env(env_save_restore)
+        env_save_restore.set("SOCIALIA_X_CONSUMER_KEY", "env_consumer_key")
+        env_save_restore.set("SOCIALIA_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
+        env_save_restore.set("SOCIALIA_X_ACCESSTOKEN", "env_access_token")
+        env_save_restore.set("SOCIALIA_X_ACCESSTOKEN_SECRET", "env_access_secret")
+        # Act
         client = Twitter()
+        # Assert
         assert client.consumer_key == "env_consumer_key"
+
+    def test_init_from_environment_reads_consumer_secret(self, env_save_restore):
+        # Arrange
+        _clear_twitter_env(env_save_restore)
+        env_save_restore.set("SOCIALIA_X_CONSUMER_KEY", "env_consumer_key")
+        env_save_restore.set("SOCIALIA_X_CONSUMER_KEY_SECRET", "env_consumer_secret")
+        env_save_restore.set("SOCIALIA_X_ACCESSTOKEN", "env_access_token")
+        env_save_restore.set("SOCIALIA_X_ACCESSTOKEN_SECRET", "env_access_secret")
+        # Act
+        client = Twitter()
+        # Assert
         assert client.consumer_secret == "env_consumer_secret"
 
-    def test_validate_credentials_valid(self, twitter_credentials):
-        """Test credential validation with valid credentials."""
+
+# --- Validation -------------------------------------------------------------
+
+
+class TestTwitterValidateCredentials:
+    def test_validate_credentials_returns_true_when_all_set(
+        self, twitter_credentials
+    ):
+        # Arrange
         client = Twitter(**twitter_credentials)
-        assert client.validate_credentials() is True
+        # Act
+        ok = client.validate_credentials()
+        # Assert
+        assert ok is True
 
-    def test_validate_credentials_missing(self, monkeypatch):
-        """Test credential validation with missing credentials."""
-        # Clear branding to use default SOCIALIA_ prefix
-        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
-        # Clear environment variables for all prefixes
-        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN_SECRET", raising=False)
-
-        # Reload branding module to pick up cleared prefix
-        import importlib
-        from socialia import _branding
-
-        importlib.reload(_branding)
-
+    def test_validate_credentials_returns_false_when_only_one_set(
+        self, env_save_restore
+    ):
+        # Arrange
+        _clear_twitter_env(env_save_restore)
         client = Twitter(consumer_key="only_one")
-        assert client.validate_credentials() is False
+        # Act
+        ok = client.validate_credentials()
+        # Assert
+        assert ok is False
 
-    def test_post_missing_credentials(self, monkeypatch):
-        """Test post fails with missing credentials."""
-        # Clear branding to use default SOCIALIA_ prefix
-        monkeypatch.delenv("SOCIALIA_ENV_PREFIX", raising=False)
-        # Clear environment variables for all prefixes
-        for prefix in ["SOCIALIA_", "SCITEX_", "SCITEX_SOCIAL_"]:
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY", raising=False)
-            monkeypatch.delenv(f"{prefix}X_CONSUMER_KEY_SECRET", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN", raising=False)
-            monkeypatch.delenv(f"{prefix}X_ACCESSTOKEN_SECRET", raising=False)
 
-        # Reload branding module to pick up cleared prefix
-        import importlib
-        from socialia import _branding
+# --- Posting ---------------------------------------------------------------
 
-        importlib.reload(_branding)
 
+class TestTwitterPost:
+    def test_post_without_credentials_reports_success_false(self, env_save_restore):
+        # Arrange
+        _clear_twitter_env(env_save_restore)
         client = Twitter()
+        # Act
         result = client.post("Test")
+        # Assert
         assert result["success"] is False
+
+    def test_post_without_credentials_error_mentions_credentials(
+        self, env_save_restore
+    ):
+        # Arrange
+        _clear_twitter_env(env_save_restore)
+        client = Twitter()
+        # Act
+        result = client.post("Test")
+        # Assert
         assert "credentials" in result["error"].lower()
 
-    def test_post_success(self, twitter_credentials, mock_oauth_session):
-        """Test successful post."""
-        mock_oauth_session.post.return_value = MagicMock(
-            status_code=201,
-            json=lambda: {"data": {"id": "12345"}},
+    def test_post_success_returns_success_true(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=201, json_data={"data": {"id": "12345"}}
         )
-
-        client = Twitter(**twitter_credentials)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.post("Hello World!")
-
+        # Assert
         assert result["success"] is True
+
+    def test_post_success_returns_id_from_api_response(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=201, json_data={"data": {"id": "12345"}}
+        )
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post("Hello World!")
+        # Assert
         assert result["id"] == "12345"
+
+    def test_post_success_returns_x_com_url(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=201, json_data={"data": {"id": "12345"}}
+        )
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post("Hello World!")
+        # Assert
         assert "x.com" in result["url"]
 
-    def test_post_failure(self, twitter_credentials, mock_oauth_session):
-        """Test failed post."""
-        mock_oauth_session.post.return_value = MagicMock(
-            status_code=403,
-            text="Forbidden",
+    def test_post_failure_returns_success_false(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=403, text="Forbidden"
         )
-
-        client = Twitter(**twitter_credentials)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.post("Hello World!")
-
+        # Assert
         assert result["success"] is False
+
+    def test_post_failure_includes_status_code_in_error(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=403, text="Forbidden"
+        )
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post("Hello World!")
+        # Assert
         assert "403" in result["error"]
 
-    def test_post_with_reply(self, twitter_credentials, mock_oauth_session):
-        """Test post with reply_to."""
-        mock_oauth_session.post.return_value = MagicMock(
-            status_code=201,
-            json=lambda: {"data": {"id": "67890"}},
+    def test_post_with_reply_to_sends_reply_payload_field(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_response = FakeResponse(
+            status_code=201, json_data={"data": {"id": "67890"}}
         )
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        client.post("Reply text", reply_to="12345")
+        # Assert
+        assert "reply" in fake_oauth_session.calls[0].kwargs["json"]
 
-        client = Twitter(**twitter_credentials)
-        result = client.post("Reply text", reply_to="12345")
 
-        assert result["success"] is True
-        call_args = mock_oauth_session.post.call_args
-        assert "reply" in call_args.kwargs["json"]
+# --- Deleting --------------------------------------------------------------
 
-    def test_delete_success(self, twitter_credentials, mock_oauth_session):
-        """Test successful delete."""
-        mock_oauth_session.delete.return_value = MagicMock(status_code=200)
 
-        client = Twitter(**twitter_credentials)
+class TestTwitterDelete:
+    def test_delete_success_returns_success_true(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.delete_response = FakeResponse(status_code=200)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.delete("12345")
-
+        # Assert
         assert result["success"] is True
+
+    def test_delete_success_marks_deleted_true(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.delete_response = FakeResponse(status_code=200)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.delete("12345")
+        # Assert
         assert result["deleted"] is True
 
-    def test_delete_failure(self, twitter_credentials, mock_oauth_session):
-        """Test failed delete."""
-        mock_oauth_session.delete.return_value = MagicMock(
-            status_code=404,
-            text="Not Found",
+    def test_delete_failure_returns_success_false(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.delete_response = FakeResponse(
+            status_code=404, text="Not Found"
         )
-
-        client = Twitter(**twitter_credentials)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.delete("invalid_id")
-
+        # Assert
         assert result["success"] is False
+
+    def test_delete_failure_includes_status_code_in_error(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.delete_response = FakeResponse(
+            status_code=404, text="Not Found"
+        )
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.delete("invalid_id")
+        # Assert
         assert "404" in result["error"]
 
-    def test_post_thread_success(self, twitter_credentials, mock_oauth_session):
-        """Test successful thread posting."""
-        mock_oauth_session.post.side_effect = [
-            MagicMock(status_code=201, json=lambda: {"data": {"id": "1"}}),
-            MagicMock(status_code=201, json=lambda: {"data": {"id": "2"}}),
-            MagicMock(status_code=201, json=lambda: {"data": {"id": "3"}}),
+
+# --- Threads ---------------------------------------------------------------
+
+
+class TestTwitterThread:
+    def test_post_thread_success_marks_success_true(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_sequence = [
+            FakeResponse(status_code=201, json_data={"data": {"id": "1"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "2"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "3"}}),
         ]
-
-        client = Twitter(**twitter_credentials)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.post_thread(["First", "Second", "Third"])
-
+        # Assert
         assert result["success"] is True
+
+    def test_post_thread_success_returns_one_id_per_tweet(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_sequence = [
+            FakeResponse(status_code=201, json_data={"data": {"id": "1"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "2"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "3"}}),
+        ]
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post_thread(["First", "Second", "Third"])
+        # Assert
         assert len(result["ids"]) == 3
+
+    def test_post_thread_success_returns_one_url_per_tweet(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_sequence = [
+            FakeResponse(status_code=201, json_data={"data": {"id": "1"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "2"}}),
+            FakeResponse(status_code=201, json_data={"data": {"id": "3"}}),
+        ]
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post_thread(["First", "Second", "Third"])
+        # Assert
         assert len(result["urls"]) == 3
 
-    def test_post_thread_partial_failure(self, twitter_credentials, mock_oauth_session):
-        """Test thread posting with partial failure."""
-        mock_oauth_session.post.side_effect = [
-            MagicMock(status_code=201, json=lambda: {"data": {"id": "1"}}),
-            MagicMock(status_code=403, text="Rate limited"),
+    def test_post_thread_partial_failure_reports_success_false(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_sequence = [
+            FakeResponse(status_code=201, json_data={"data": {"id": "1"}}),
+            FakeResponse(status_code=403, text="Rate limited"),
         ]
-
-        client = Twitter(**twitter_credentials)
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
         result = client.post_thread(["First", "Second", "Third"])
-
+        # Assert
         assert result["success"] is False
-        assert "partial_ids" in result
+
+    def test_post_thread_partial_failure_returns_partial_ids_list(
+        self, twitter_credentials, fake_oauth_session, twitter_session_factory
+    ):
+        # Arrange
+        fake_oauth_session.post_sequence = [
+            FakeResponse(status_code=201, json_data={"data": {"id": "1"}}),
+            FakeResponse(status_code=403, text="Rate limited"),
+        ]
+        client = Twitter(
+            **twitter_credentials, session_factory=twitter_session_factory
+        )
+        # Act
+        result = client.post_thread(["First", "Second", "Third"])
+        # Assert
         assert len(result["partial_ids"]) == 1
