@@ -12,6 +12,16 @@ SCHEDULE_DIR = Path.home() / ".socialia"
 SCHEDULE_FILE = SCHEDULE_DIR / "scheduled.json"
 
 
+def _resolve_schedule_file(schedule_file=None) -> Path:
+    """Resolve the schedule-file path used by a public API call.
+
+    Production callers leave ``schedule_file=None`` and we use the
+    module-level ``SCHEDULE_FILE`` (``~/.socialia/scheduled.json``).  Tests
+    pass an explicit ``tmp_path`` so they don't mutate the user's home.
+    """
+    return Path(schedule_file) if schedule_file is not None else SCHEDULE_FILE
+
+
 def add_human_fluctuation(
     dt: datetime,
     max_minutes: int = 15,
@@ -40,26 +50,28 @@ def add_human_fluctuation(
     return dt + timedelta(minutes=offset)
 
 
-def _ensure_schedule_file():
+def _ensure_schedule_file(schedule_file=None):
     """Ensure schedule directory and file exist."""
-    SCHEDULE_DIR.mkdir(parents=True, exist_ok=True)
-    if not SCHEDULE_FILE.exists():
-        SCHEDULE_FILE.write_text("[]")
+    sf = _resolve_schedule_file(schedule_file)
+    sf.parent.mkdir(parents=True, exist_ok=True)
+    if not sf.exists():
+        sf.write_text("[]")
+    return sf
 
 
-def _load_schedule() -> list:
+def _load_schedule(schedule_file=None) -> list:
     """Load scheduled jobs."""
-    _ensure_schedule_file()
+    sf = _ensure_schedule_file(schedule_file)
     try:
-        return json.loads(SCHEDULE_FILE.read_text())
+        return json.loads(sf.read_text())
     except (json.JSONDecodeError, FileNotFoundError):
         return []
 
 
-def _save_schedule(jobs: list):
+def _save_schedule(jobs: list, schedule_file=None):
     """Save scheduled jobs."""
-    _ensure_schedule_file()
-    SCHEDULE_FILE.write_text(json.dumps(jobs, indent=2))
+    sf = _ensure_schedule_file(schedule_file)
+    sf.write_text(json.dumps(jobs, indent=2))
 
 
 def parse_schedule_time(time_str: str) -> datetime:
@@ -181,6 +193,8 @@ def schedule_post(
     schedule_time: str,
     fluctuation: int = 0,
     fluctuation_bias: str = "none",
+    *,
+    schedule_file=None,
     **kwargs,
 ) -> dict:
     """
@@ -233,9 +247,9 @@ def schedule_post(
         job["original_time"] = original_dt.isoformat()
         job["fluctuation_applied"] = (scheduled_dt - original_dt).total_seconds() / 60
 
-    jobs = _load_schedule()
+    jobs = _load_schedule(schedule_file)
     jobs.append(job)
-    _save_schedule(jobs)
+    _save_schedule(jobs, schedule_file)
 
     result = {
         "success": True,
@@ -270,18 +284,18 @@ def _cancel_orphaned_jobs(jobs: list) -> bool:
     return cancelled
 
 
-def list_scheduled(full: bool = False) -> list:
+def list_scheduled(full: bool = False, *, schedule_file=None) -> list:
     """List scheduled jobs.
 
     Args:
         full: If True, return all jobs including cancelled/completed.
               If False (default), return only pending jobs.
     """
-    jobs = _load_schedule()
+    jobs = _load_schedule(schedule_file)
 
     # Cancel jobs whose source file is gone
     if _cancel_orphaned_jobs(jobs):
-        _save_schedule(jobs)
+        _save_schedule(jobs, schedule_file)
 
     if full:
         # Return all jobs sorted by scheduled time
@@ -292,9 +306,9 @@ def list_scheduled(full: bool = False) -> list:
     return sorted(pending, key=lambda j: j.get("scheduled_for", ""))
 
 
-def cancel_scheduled(job_id: str) -> dict:
+def cancel_scheduled(job_id: str, *, schedule_file=None) -> dict:
     """Cancel a scheduled job. Supports prefix matching like screen -r."""
-    jobs = _load_schedule()
+    jobs = _load_schedule(schedule_file)
 
     # Find matching jobs (prefix match)
     matches = [
@@ -313,7 +327,7 @@ def cancel_scheduled(job_id: str) -> dict:
     # Single match - cancel it
     job = matches[0]
     job["status"] = "cancelled"
-    _save_schedule(jobs)
+    _save_schedule(jobs, schedule_file)
     return {"success": True, "cancelled": job["id"]}
 
 
@@ -347,7 +361,7 @@ def _run_grow_job(job: dict) -> dict:
     return result
 
 
-def run_due_jobs() -> list:
+def run_due_jobs(*, schedule_file=None) -> list:
     """Run all jobs that are due. Returns list of results."""
     from .twitter import Twitter
     from .linkedin import LinkedIn
@@ -366,7 +380,7 @@ def run_due_jobs() -> list:
             return YouTube()
         raise ValueError(f"Unknown platform: {platform}")
 
-    jobs = _load_schedule()
+    jobs = _load_schedule(schedule_file)
     results = []
     now = datetime.now()
     completed_files = set()
@@ -439,7 +453,7 @@ def run_due_jobs() -> list:
 
     # Add new repeat jobs
     jobs.extend(new_jobs)
-    _save_schedule(jobs)
+    _save_schedule(jobs, schedule_file)
 
     # Move completed source files to posted/ if all jobs for that file are done
     for source_file in completed_files:
@@ -453,7 +467,7 @@ def run_due_jobs() -> list:
                     # Update source_file paths in jobs
                     for j in file_jobs:
                         j["source_file"] = str(new_path)
-                    _save_schedule(jobs)
+                    _save_schedule(jobs, schedule_file)
 
     return results
 

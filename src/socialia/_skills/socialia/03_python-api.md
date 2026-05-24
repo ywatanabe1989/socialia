@@ -1,7 +1,8 @@
 ---
-description: Python API reference — platform client classes, methods, and utility functions.
-name: python-api
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Python Api
+  [DETAILS] Python API reference — platform client classes, methods, and utility functions.
+tags: [socialia-python-api]
 ---
 
 # Python API

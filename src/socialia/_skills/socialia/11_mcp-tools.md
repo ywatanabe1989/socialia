@@ -1,7 +1,8 @@
 ---
-description: MCP tools for social media management and analytics.
-name: mcp-tools
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Mcp Tools
+  [DETAILS] MCP tools for social media management and analytics.
+tags: [socialia-mcp-tools]
 ---
 
 # MCP Tools

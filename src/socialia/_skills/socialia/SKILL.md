@@ -1,5 +1,10 @@
 ---
-description: Unified posting + analytics client for 6 platforms — `Twitter` (X), `LinkedIn`, `Reddit`, `Slack`, `YouTube`, `GoogleAnalytics`. Python API — per-platform classes (each with post / delete / check / feed methods where applicable), scheduled-post file helpers (`move_to_scheduled`, `move_to_posted`, `ensure_project_dirs`), and `PLATFORM_STRATEGIES` for per-platform content rules (length limits, hashtag style, thread handling). 9 MCP tools — `social_post`, `social_delete`, `social_status`, `social_check`, `social_feed`, plus GA4 analytics `social_analytics_track` / `_pageviews` / `_sources` / `_realtime`. Drop-in replacement for `tweepy`, `linkedin-api`, `praw` (Reddit), `slack_sdk`, `google-api-python-client` for YouTube / GA4 — unified under one interface so you write one post and fan out. Use whenever the user asks to "post to Twitter / X / LinkedIn / Reddit / Slack / YouTube", "schedule a post", "check post status", "delete a tweet / LinkedIn post", "get GA4 realtime users", "pull GA4 pageviews or traffic sources", "track a GA4 event", "move scheduled posts to posted", "announce my paper on social", or mentions Twitter API, LinkedIn API, Reddit praw, Slack webhook, YouTube Data API, Google Analytics 4.
+name: socialia
+description: |
+  [WHAT] Unified posting + analytics client for 6 platforms — `Twitter` (X), `LinkedIn`, `Reddit`, `Slack`, `YouTube`, `GoogleAnalytics`. Python API — per-platform classes (each with post / delete / check / feed methods where applicable), scheduled-post file helpers (`move_to_scheduled`, `move_to_posted`, `ensure_project_dirs`), and `PLATFORM_STRATEGIES` for per-platform content rules (length limits…
+  [WHEN] Use whenever the user asks to "post to Twitter / X / LinkedIn / Reddit / Slack / YouTube", "schedule a post", "check post status", "delete a tweet / LinkedIn post", "get GA4 realtime users", "pull GA4 pageviews or traffic sources", "track a GA4 event", "move scheduled posts to posted", "announce my paper on social", or mentions Twitter API, LinkedIn API, Reddit praw, Slack webhook, YouTube Data…
+  [HOW] See sub-skills index for entry points.
+tags: [socialia]
 allowed-tools: mcp__scitex__social_*
 primary_interface: mcp
 interfaces:
@@ -7,10 +12,7 @@ interfaces:
   cli: 1
   mcp: 3
   skills: 2
-  hook: 0
   http: 0
-name: socialia
-tags: [socialia, scitex-package]
 ---
 
 # socialia
@@ -42,13 +44,14 @@ rule and empirical verification table.
 ## Sub-skills
 
 ### Core
-- [01_quick-start.md](01_quick-start.md) — Basic usage
-- [02_platforms.md](02_platforms.md) — Supported platforms
+- [01_installation.md](01_installation.md) — pip install + per-platform extras
+- [02_quick-start.md](02_quick-start.md) — Basic usage
 - [03_python-api.md](03_python-api.md) — Python API reference (classes, methods, utilities)
+- [04_cli-reference.md](04_cli-reference.md) — `socialia` CLI commands
 
 ### Workflows
-- [10_cli-reference.md](10_cli-reference.md) — CLI commands
 - [11_mcp-tools.md](11_mcp-tools.md) — MCP tools for AI agents
+- [12_platforms.md](12_platforms.md) — Supported platforms (per-platform notes)
 
 ### Standards
 - [20_environment.md](20_environment.md) — Environment variables for all platforms

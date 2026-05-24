@@ -2,9 +2,9 @@ API Reference
 =============
 
 .. automodule:: socialia
-   :members:
-   :undoc-members:
+   :no-members:
    :show-inheritance:
+   :no-index:
 
 Platform Clients
 ----------------

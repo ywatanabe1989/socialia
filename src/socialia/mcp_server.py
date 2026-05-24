@@ -17,13 +17,11 @@ For new code, use:
 from __future__ import annotations
 
 # Check if FastMCP is available
-try:
-    import fastmcp  # noqa: F401
+from scitex_dev import try_import_optional
 
-    HAS_MCP = True
-    del fastmcp
-except ImportError:
-    HAS_MCP = False
+fastmcp = try_import_optional("fastmcp", extra="mcp", pkg="fastmcp")
+HAS_MCP = fastmcp is not None
+del fastmcp
 
 # Re-export from new location for backwards compatibility
 if HAS_MCP:

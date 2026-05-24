@@ -1,7 +1,8 @@
 ---
-description: Basic social media posting — Twitter, LinkedIn, Reddit.
-name: quick-start
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Quick Start
+  [DETAILS] Basic social media posting — Twitter, LinkedIn, Reddit.
+tags: [socialia-quick-start]
 ---
 
 # Quick Start

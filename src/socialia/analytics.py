@@ -4,25 +4,26 @@ __all__ = ["GoogleAnalytics"]
 
 import os
 import requests
-from typing import Optional
+from typing import Any, Optional
 from datetime import datetime
 
 from ._branding import get_env
 
 
 class GoogleAnalytics:
-    """
-    Google Analytics 4 integration.
+    """Google Analytics 4 integration.
 
     Supports:
+
     - Measurement Protocol (sending events)
     - Data API (retrieving metrics) - requires service account
 
-    Environment Variables (use branded prefix, e.g., SOCIALIA_):
-        GOOGLE_ANALYTICS_MEASUREMENT_ID: GA4 Measurement ID (G-XXXXXXXXXX)
-        GOOGLE_ANALYTICS_API_SECRET: Measurement Protocol API secret
-        GOOGLE_ANALYTICS_PROPERTY_ID: Property ID (numeric, for Data API)
-        GOOGLE_APPLICATION_CREDENTIALS: Path to service account JSON (for Data API)
+    Environment Variables (use branded prefix, e.g. ``SOCIALIA_``):
+
+    - ``GOOGLE_ANALYTICS_MEASUREMENT_ID`` -- GA4 Measurement ID (G-XXXXXXXXXX)
+    - ``GOOGLE_ANALYTICS_API_SECRET`` -- Measurement Protocol API secret
+    - ``GOOGLE_ANALYTICS_PROPERTY_ID`` -- Property ID (numeric, for Data API)
+    - ``GOOGLE_APPLICATION_CREDENTIALS`` -- Path to service account JSON (for Data API)
     """
 
     def __init__(
@@ -30,6 +31,8 @@ class GoogleAnalytics:
         measurement_id: Optional[str] = None,
         api_secret: Optional[str] = None,
         property_id: Optional[str] = None,
+        *,
+        http: Optional[Any] = None,
     ):
         """
         Initialize Google Analytics client.
@@ -38,7 +41,11 @@ class GoogleAnalytics:
             measurement_id: GA4 Measurement ID (G-XXXXXXXXXX)
             api_secret: Measurement Protocol API secret
             property_id: GA4 Property ID (numeric, for Data API)
+            http: Injectable requests-shaped HTTP client (exposes ``post``);
+                production code leaves this ``None`` and the ``requests``
+                module is used. Tests pass a hand-rolled fake.
         """
+        self._http = http or requests
         # Google Analytics credentials (use branding-aware get_env)
         self.measurement_id = measurement_id or (
             get_env("GOOGLE_ANALYTICS_MEASUREMENT_ID") or get_env("GA_MEASUREMENT_ID")
@@ -76,8 +83,7 @@ class GoogleAnalytics:
         client_id: Optional[str] = None,
         user_id: Optional[str] = None,
     ) -> dict:
-        """
-        Send event to Google Analytics via Measurement Protocol.
+        """Send event to Google Analytics via Measurement Protocol.
 
         Args:
             name: Event name (e.g., 'social_post', 'social_share')
@@ -89,11 +95,14 @@ class GoogleAnalytics:
             dict with 'success' and details
 
         Example:
-            ga.track_event('social_post', {
-                'platform': 'twitter',
-                'post_id': '123456',
-                'content_length': 280,
-            })
+
+            .. code-block:: python
+
+                ga.track_event('social_post', {
+                    'platform': 'twitter',
+                    'post_id': '123456',
+                    'content_length': 280,
+                })
         """
         if not self.measurement_id or not self.api_secret:
             return {
@@ -126,7 +135,7 @@ class GoogleAnalytics:
 
         try:
             url = f"{self.mp_endpoint}?measurement_id={self.measurement_id}&api_secret={self.api_secret}"
-            response = requests.post(url, json=payload, timeout=10)
+            response = self._http.post(url, json=payload, timeout=10)
 
             # Measurement Protocol returns 204 on success (no content)
             if response.status_code in (200, 204):

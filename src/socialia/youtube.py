@@ -8,16 +8,39 @@ from typing import Optional
 from ._branding import get_env
 from ._base import _Base
 
-try:
-    from google.oauth2.credentials import Credentials
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from google.auth.transport.requests import Request
-    from googleapiclient.discovery import build
-    from googleapiclient.http import MediaFileUpload
+from scitex_dev import try_import_optional
 
-    HAS_YOUTUBE = True
-except ImportError:
-    HAS_YOUTUBE = False
+Credentials = try_import_optional(
+    "google.oauth2.credentials", attr="Credentials", extra="youtube", pkg="google-auth"
+)
+InstalledAppFlow = try_import_optional(
+    "google_auth_oauthlib.flow",
+    attr="InstalledAppFlow",
+    extra="youtube",
+    pkg="google-auth-oauthlib",
+)
+Request = try_import_optional(
+    "google.auth.transport.requests",
+    attr="Request",
+    extra="youtube",
+    pkg="google-auth",
+)
+build = try_import_optional(
+    "googleapiclient.discovery",
+    attr="build",
+    extra="youtube",
+    pkg="google-api-python-client",
+)
+MediaFileUpload = try_import_optional(
+    "googleapiclient.http",
+    attr="MediaFileUpload",
+    extra="youtube",
+    pkg="google-api-python-client",
+)
+HAS_YOUTUBE = all(
+    x is not None
+    for x in (Credentials, InstalledAppFlow, Request, build, MediaFileUpload)
+)
 
 
 # OAuth scopes for YouTube

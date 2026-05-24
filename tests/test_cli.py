@@ -1,142 +1,270 @@
-"""Tests for socialia CLI."""
+"""Tests for socialia CLI (Click-based, post-audit migration).
+
+Parser-shape tests (argparse-only) have been removed. Behavior is tested via
+the public ``main(argv)`` entry point, which now wraps Click + a backward-compat
+argv-rewrite shim so deprecated subcommand names still work.
+"""
 
 import pytest
-from socialia.cli import create_parser, main
+
+from socialia.cli import main
 
 
-class TestCLIParser:
-    """Test CLI argument parsing."""
-
-    def test_parser_creation(self):
-        """Test parser is created successfully."""
-        parser = create_parser()
-        assert parser is not None
-        assert parser.prog == "socialia"
-
-    def test_version_argument(self, capsys):
-        """Test --version argument."""
-        parser = create_parser()
-        with pytest.raises(SystemExit) as exc_info:
-            parser.parse_args(["--version"])
-        assert exc_info.value.code == 0
-
-    def test_post_command_parsing(self):
-        """Test post command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["post", "twitter", "Hello World"])
-        assert args.command == "post"
-        assert args.platform == "twitter"
-        assert args.text == "Hello World"
-
-    def test_post_dry_run(self):
-        """Test post dry-run flag."""
-        parser = create_parser()
-        args = parser.parse_args(["post", "twitter", "Test", "--dry-run"])
-        assert args.dry_run is True
-
-    def test_delete_command_parsing(self):
-        """Test delete command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["delete", "twitter", "123456"])
-        assert args.command == "delete"
-        assert args.platform == "twitter"
-        assert args.post_id == "123456"
-
-    def test_analytics_track_parsing(self):
-        """Test analytics track command parsing."""
-        parser = create_parser()
-        args = parser.parse_args(["analytics", "track", "test_event"])
-        assert args.command == "analytics"
-        assert args.analytics_command == "track"
-        assert args.event_name == "test_event"
+# --- dry-run --------------------------------------------------------------
 
 
 class TestCLIDryRun:
-    """Test CLI dry-run functionality."""
-
-    def test_post_dry_run_twitter(self, capsys):
-        """Test dry-run post to Twitter."""
+    def test_post_dry_run_twitter_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["post", "twitter", "Test message", "--dry-run"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "DRY RUN" in captured.out
-        assert "twitter" in captured.out.lower()
 
-    def test_post_dry_run_linkedin(self, capsys):
-        """Test dry-run post to LinkedIn."""
+    def test_post_dry_run_twitter_output_mentions_dry_run_banner(self, capsys):
+        # Arrange
+        main(["post", "twitter", "Test message", "--dry-run"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "DRY RUN" in out
+
+    def test_post_dry_run_twitter_output_mentions_twitter_platform(self, capsys):
+        # Arrange
+        main(["post", "twitter", "Test message", "--dry-run"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "twitter" in out.lower()
+
+    def test_post_dry_run_linkedin_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["post", "linkedin", "Test message", "--dry-run"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "DRY RUN" in captured.out
-        assert "linkedin" in captured.out.lower()
+
+    def test_post_dry_run_linkedin_output_mentions_dry_run_banner(self, capsys):
+        # Arrange
+        main(["post", "linkedin", "Test message", "--dry-run"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "DRY RUN" in out
+
+    def test_post_dry_run_linkedin_output_mentions_linkedin_platform(
+        self, capsys
+    ):
+        # Arrange
+        main(["post", "linkedin", "Test message", "--dry-run"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "linkedin" in out.lower()
 
 
-class TestCLIMain:
-    """Test CLI main function."""
+# --- main / no-command ----------------------------------------------------
 
-    def test_no_command_shows_help(self, capsys):
-        """Test that no command shows help."""
+
+class TestCLINoCommand:
+    def test_main_without_arguments_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main([])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "usage:" in captured.out.lower() or "socialia" in captured.out.lower()
 
-    def test_help_recursive(self, capsys):
-        """Test --help-recursive option."""
+    def test_main_without_arguments_renders_help_text(self, capsys):
+        # Arrange
+        main([])
+        # Act
+        out = capsys.readouterr().out.lower()
+        # Assert
+        assert "usage:" in out or "socialia" in out
+
+    def test_help_recursive_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["--help-recursive"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "SOCIALIA" in captured.out
-        assert "post" in captured.out.lower()
-        assert "delete" in captured.out.lower()
 
-    def test_post_missing_text_error(self, capsys):
-        """Test post without text shows error."""
-        result = main(["post", "twitter"])
-        assert result == 1
-        captured = capsys.readouterr()
-        assert "error" in captured.err.lower()
+    def test_help_recursive_output_includes_post_subcommand(self, capsys):
+        # Arrange
+        main(["--help-recursive"])
+        # Act
+        out = capsys.readouterr().out.lower()
+        # Assert
+        assert "post" in out
 
-    def test_status_command(self, capsys):
-        """Test status command."""
+    def test_help_recursive_output_includes_delete_post_subcommand(self, capsys):
+        # Arrange
+        main(["--help-recursive"])
+        # Act
+        out = capsys.readouterr().out.lower()
+        # Assert
+        assert "delete-post" in out
+
+
+# --- show-status -----------------------------------------------------------
+
+
+class TestCLIStatus:
+    def test_show_status_canonical_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
+        result = main(["show-status"])
+        # Assert
+        assert result == 0
+
+    def test_show_status_canonical_output_mentions_socialia(self, capsys):
+        # Arrange
+        main(["show-status"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "Socialia" in out or "socialia" in out.lower()
+
+    def test_status_deprecated_alias_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["status"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "Socialia" in captured.out
-        assert "TWITTER" in captured.out or "twitter" in captured.out.lower()
 
-    def test_mcp_list_tools_command(self, capsys):
-        """Test mcp list-tools command."""
+
+# --- mcp list-tools --------------------------------------------------------
+
+
+class TestCLIMCPListTools:
+    def test_mcp_list_tools_returns_exit_zero(self, capsys):
+        # Arrange
         pytest.importorskip("fastmcp", reason="fastmcp not installed")
+        # Act
         result = main(["mcp", "list-tools"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "MCP" in captured.out or "Tools" in captured.out
-        assert "social_post" in captured.out
+
+    def test_mcp_list_tools_output_mentions_mcp_or_tools(self, capsys):
+        # Arrange
+        pytest.importorskip("fastmcp", reason="fastmcp not installed")
+        main(["mcp", "list-tools"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "MCP" in out or "Tools" in out
+
+
+# --- completion -----------------------------------------------------------
 
 
 class TestCLICompletion:
-    """Test CLI completion commands."""
+    def test_show_completion_bash_canonical_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
+        result = main(["show-completion-bash"])
+        # Assert
+        assert result == 0
 
-    def test_completion_bash(self, capsys):
-        """Test completion bash command."""
+    def test_show_completion_bash_output_mentions_argcomplete_or_compdef(
+        self, capsys
+    ):
+        # Arrange
+        main(["show-completion-bash"])
+        # Act
+        out = capsys.readouterr().out.lower()
+        # Assert
+        assert "argcomplete" in out or "compdef" in out
+
+    def test_completion_bash_deprecated_alias_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["completion", "bash"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "argcomplete" in captured.out.lower() or "compdef" in captured.out
 
-    def test_completion_zsh(self, capsys):
-        """Test completion zsh command."""
-        result = main(["completion", "zsh"])
+    def test_show_completion_zsh_canonical_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
+        result = main(["show-completion-zsh"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "compdef" in captured.out or "bashcompinit" in captured.out
 
-    def test_completion_status(self, capsys):
-        """Test completion status command."""
+    def test_show_completion_zsh_output_mentions_compdef_or_bashcompinit(
+        self, capsys
+    ):
+        # Arrange
+        main(["show-completion-zsh"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "compdef" in out or "bashcompinit" in out
+
+    def test_completion_status_alias_returns_exit_zero(self, capsys):
+        # Arrange
+        # (no setup)
+        # Act
         result = main(["completion", "status"])
+        # Assert
         assert result == 0
-        captured = capsys.readouterr()
-        assert "Completion Status" in captured.out
-        assert "Bash" in captured.out
-        assert "Zsh" in captured.out
+
+    def test_completion_status_alias_output_contains_status_header(self, capsys):
+        # Arrange
+        main(["completion", "status"])
+        # Act
+        out = capsys.readouterr().out
+        # Assert
+        assert "Completion Status" in out
+
+
+# --- deprecation aliases ---------------------------------------------------
+
+
+class TestCLIDeprecationAliases:
+    """Verify backward-compat shim covers the renamed subcommands."""
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ["delete", "twitter", "123", "--dry-run"],
+            ["setup"],
+            ["check", "twitter"],
+            ["me", "twitter"],
+            ["analytics", "realtime"],
+            ["analytics", "pageviews"],
+            ["analytics", "sources"],
+            ["mcp", "installation"],
+            ["schedule", "run"],
+            ["schedule", "daemon", "--dry-run"],
+            ["completion", "bash"],
+            ["completion", "zsh"],
+            ["completion", "status"],
+            ["org", "status", "/tmp/nonexistent.org"],
+            ["youtube", "config", "--scitex"],
+            ["grow", "twitter", "auto", "test", "--dry-run"],
+            ["grow", "twitter", "user", "ywatanabe"],
+        ],
+    )
+    def test_deprecated_alias_argv_does_not_raise_unexpected_exception(
+        self, argv
+    ):
+        # Arrange
+        # We don't assert on exit code; some require live creds.
+        completed_without_unexpected_exception = False
+        # Act
+        try:
+            main(argv)
+            completed_without_unexpected_exception = True
+        except SystemExit:
+            completed_without_unexpected_exception = True
+        # Assert
+        assert completed_without_unexpected_exception

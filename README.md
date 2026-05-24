@@ -22,6 +22,12 @@ Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
 ## Installation
 
+> **Recommended**: `uv pip install socialia[all]` —
+> uv's Rust resolver handles the SciTeX dep set in 1-3 min where
+> pip's serial backtracker can take 30+ min on the full extras.
+> Plain `pip install` still works; the install block below shows both.
+
+
 ```bash
 pip install socialia
 
@@ -31,6 +37,40 @@ pip install socialia[youtube]     # YouTube support
 pip install socialia[analytics]   # Google Analytics Data API
 pip install socialia[all]         # Everything
 ```
+
+## Demo
+
+```bash
+# One-shot post across platforms (uses ~/.scitex/socialia/config.yaml creds)
+socialia post twitter "Hello World!"
+socialia post linkedin --file drafts/announce.md
+
+# Schedule + analytics
+socialia schedule list
+socialia analytics show-pageviews --days 7
+```
+
+![socialia CLI demo](docs/cli-demo.svg)
+
+## Architecture
+
+```
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│ drafts/*.org/.md │   │ projects/*.yaml  │   │ ~/.scitex/socialia/ │
+│ (content source) │   │ (campaign defs)  │   │ (creds, scheduler)  │
+└────────┬─────────┘   └────────┬─────────┘   └────────┬─────────┘
+         │                      │                      │
+         ▼                      ▼                      ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ socialia — Python / CLI / MCP                           │
+   │   post · schedule · analytics · grow · feed             │
+   │   per-platform adapters: twitter · linkedin · reddit ·  │
+   │   youtube · medium · github · google-analytics          │
+   └────────────────────────────────────────────────────────┘
+```
+
+A single Python core dispatches to per-platform adapters; CLI / MCP
+share the same Python API surface.
 
 ## Quick Start
 

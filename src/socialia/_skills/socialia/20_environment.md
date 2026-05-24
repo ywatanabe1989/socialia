@@ -1,7 +1,8 @@
 ---
-description: Environment variables for all supported platforms — Twitter/X, LinkedIn, Reddit, YouTube, Google Analytics.
-name: environment
-tags: [socialia, scitex-package]
+description: |
+  [TOPIC] Environment
+  [DETAILS] Environment variables for all supported platforms — Twitter/X, LinkedIn, Reddit, YouTube, Google Analytics.
+tags: [socialia-environment]
 ---
 
 # Environment Variables
