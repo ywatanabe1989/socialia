@@ -11,18 +11,19 @@ from ._branding import get_env
 
 
 class GoogleAnalytics:
-    """
-    Google Analytics 4 integration.
+    """Google Analytics 4 integration.
 
     Supports:
+
     - Measurement Protocol (sending events)
     - Data API (retrieving metrics) - requires service account
 
-    Environment Variables (use branded prefix, e.g., SOCIALIA_):
-        GOOGLE_ANALYTICS_MEASUREMENT_ID: GA4 Measurement ID (G-XXXXXXXXXX)
-        GOOGLE_ANALYTICS_API_SECRET: Measurement Protocol API secret
-        GOOGLE_ANALYTICS_PROPERTY_ID: Property ID (numeric, for Data API)
-        GOOGLE_APPLICATION_CREDENTIALS: Path to service account JSON (for Data API)
+    Environment Variables (use branded prefix, e.g. ``SOCIALIA_``):
+
+    - ``GOOGLE_ANALYTICS_MEASUREMENT_ID`` -- GA4 Measurement ID (G-XXXXXXXXXX)
+    - ``GOOGLE_ANALYTICS_API_SECRET`` -- Measurement Protocol API secret
+    - ``GOOGLE_ANALYTICS_PROPERTY_ID`` -- Property ID (numeric, for Data API)
+    - ``GOOGLE_APPLICATION_CREDENTIALS`` -- Path to service account JSON (for Data API)
     """
 
     def __init__(
@@ -82,8 +83,7 @@ class GoogleAnalytics:
         client_id: Optional[str] = None,
         user_id: Optional[str] = None,
     ) -> dict:
-        """
-        Send event to Google Analytics via Measurement Protocol.
+        """Send event to Google Analytics via Measurement Protocol.
 
         Args:
             name: Event name (e.g., 'social_post', 'social_share')
@@ -95,11 +95,14 @@ class GoogleAnalytics:
             dict with 'success' and details
 
         Example:
-            ga.track_event('social_post', {
-                'platform': 'twitter',
-                'post_id': '123456',
-                'content_length': 280,
-            })
+
+            .. code-block:: python
+
+                ga.track_event('social_post', {
+                    'platform': 'twitter',
+                    'post_id': '123456',
+                    'content_length': 280,
+                })
         """
         if not self.measurement_id or not self.api_secret:
             return {
