@@ -72,6 +72,29 @@ TWITTER_ACCESS_SECRET=
 TWITTER_BEARER_TOKEN=
 ```
 
+Socialia uses the `SOCIALIA_` prefix for the built-in client:
+
+```bash
+SOCIALIA_X_CONSUMER_KEY=
+SOCIALIA_X_CONSUMER_KEY_SECRET=
+SOCIALIA_X_ACCESSTOKEN=
+SOCIALIA_X_ACCESSTOKEN_SECRET=
+```
+
+For read-heavy workflows, Socialia can route tweet search, user tweets,
+mentions, and replies through a Hermes Tweet/Xquik-compatible read backend.
+Posting, deleting, following, and profile actions continue to use X OAuth.
+
+```bash
+SOCIALIA_X_READ_BACKEND=hermes-tweet
+SOCIALIA_X_READ_USERNAME=your_handle
+XQUIK_API_KEY=xq_...
+XQUIK_BASE_URL=https://xquik.com
+```
+
+`HERMES_TWEET_API_KEY` is also accepted when that name better fits the
+runtime environment.
+
 ## Implementation
 
 See `../src/twitter_poster.py` for full implementation.

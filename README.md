@@ -103,6 +103,11 @@ socialia feed --detail        # Full text with URLs
 socialia feed --mentions      # Get mentions/notifications
 socialia feed --replies       # Get replies to your posts (Twitter)
 
+# Optional Hermes Tweet/Xquik read backend
+SOCIALIA_X_READ_BACKEND=hermes-tweet
+SOCIALIA_X_READ_USERNAME=your_handle
+XQUIK_API_KEY=xq_...
+
 # Get user profile info
 socialia me twitter
 
