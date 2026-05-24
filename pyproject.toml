@@ -50,6 +50,12 @@ dev = [
     "mcp>=1.0.0",
     "praw>=7.7.0",
     "pytest",
+    # pytest-cov is required by the CI's `pytest --cov=src/socialia` invocation
+    # (see .github/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml).
+    "pytest-cov",
+    # pytest-randomly enforces order-independence per the SciTeX migration
+    # playbook (general/05_development_09_ecosystem-tq-migration.md).
+    "pytest-randomly",
     "ruff",
     "scitex-dev>=0.11.7",
     "socialia[docs]",

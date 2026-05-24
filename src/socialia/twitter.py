@@ -2,7 +2,7 @@
 
 __all__ = ["Twitter"]
 
-from typing import Optional
+from typing import Callable, Optional
 
 from requests_oauthlib import OAuth1Session
 
@@ -36,16 +36,26 @@ class Twitter(TwitterGrowthMixin, _Base):
         consumer_secret: Optional[str] = None,
         access_token: Optional[str] = None,
         access_token_secret: Optional[str] = None,
+        *,
+        session_factory: Optional[Callable[[], object]] = None,
     ):
+        # ``session_factory`` is a zero-arg callable that returns the HTTP
+        # session object used to talk to the Twitter API.  Production code
+        # leaves it ``None`` (and we build a real ``OAuth1Session``).  Tests
+        # pass a hand-rolled fake to exercise behaviour without hitting the
+        # network — see ``tests/test_twitter.py``.
         self.consumer_key = consumer_key or get_env("X_CONSUMER_KEY")
         self.consumer_secret = consumer_secret or get_env("X_CONSUMER_KEY_SECRET")
         self.access_token = access_token or get_env("X_ACCESSTOKEN")
         self.access_token_secret = access_token_secret or get_env(
             "X_ACCESSTOKEN_SECRET"
         )
+        self._session_factory = session_factory
 
-    def _get_session(self) -> OAuth1Session:
-        """Create OAuth1 session."""
+    def _get_session(self):
+        """Create OAuth1 session (or the injected fake session)."""
+        if self._session_factory is not None:
+            return self._session_factory()
         return OAuth1Session(
             self.consumer_key,
             client_secret=self.consumer_secret,
