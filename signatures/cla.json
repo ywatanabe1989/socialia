@@ -1,1 +1,12 @@
-{"signedContributors":[]}
+{
+  "signedContributors": [
+    {
+      "name": "kriptoburak",
+      "id": 8755484,
+      "comment_id": 4533349355,
+      "created_at": "2026-05-25T09:59:18Z",
+      "repoId": 1126068315,
+      "pullRequestNo": 37
+    }
+  ]
+}
