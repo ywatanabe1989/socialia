@@ -1,6 +1,6 @@
-"""Tests for the optional Hermes Tweet/Xquik Twitter read backend."""
+"""Tests for the optional Xquik Twitter read backend."""
 
-from socialia._twitter_read_backend import HermesTweetReadBackend
+from socialia._twitter_read_backend import XquikReadBackend
 
 from tests.conftest import FakeResponse
 
@@ -15,10 +15,10 @@ class FakeHTTP:
         return self.response
 
 
-class TestHermesTweetReadBackend:
+class TestXquikReadBackend:
     def test_available_returns_false_without_api_key(self):
         # Arrange
-        backend = HermesTweetReadBackend(api_key="", http=FakeHTTP(FakeResponse(200)))
+        backend = XquikReadBackend(api_key="", http=FakeHTTP(FakeResponse(200)))
         # Act
         available = backend.available()
         # Assert
@@ -40,24 +40,24 @@ class TestHermesTweetReadBackend:
                 },
             )
         )
-        backend = HermesTweetReadBackend(
+        backend = XquikReadBackend(
             api_key="xq_test", base_url="https://x", http=http
         )
         # Act
         backend.search_tweets("agents", limit=3)
         # Assert
-        assert http.calls[0][1]["headers"]["x-api-key"] == "xq_test"
+        assert http.calls[0][1]["headers"]["X-API-Key"] == "xq_test"
 
-    def test_search_uses_bearer_header_for_other_keys(self):
+    def test_search_uses_x_api_key_header_for_other_keys(self):
         # Arrange
         http = FakeHTTP(FakeResponse(200, json_data={"tweets": []}))
-        backend = HermesTweetReadBackend(
+        backend = XquikReadBackend(
             api_key="token", base_url="https://x", http=http
         )
         # Act
         backend.search_tweets("agents")
         # Assert
-        assert http.calls[0][1]["headers"]["authorization"] == "Bearer token"
+        assert http.calls[0][1]["headers"]["X-API-Key"] == "token"
 
     def test_search_normalizes_tweets(self):
         # Arrange
@@ -77,7 +77,7 @@ class TestHermesTweetReadBackend:
                 },
             )
         )
-        backend = HermesTweetReadBackend(
+        backend = XquikReadBackend(
             api_key="xq_test", base_url="https://x", http=http
         )
         # Act
@@ -93,7 +93,7 @@ class TestHermesTweetReadBackend:
     def test_user_tweets_builds_user_tweets_path(self):
         # Arrange
         http = FakeHTTP(FakeResponse(200, json_data={"tweets": []}))
-        backend = HermesTweetReadBackend(
+        backend = XquikReadBackend(
             api_key="xq_test", base_url="https://x", http=http
         )
         # Act
@@ -109,7 +109,7 @@ class TestHermesTweetReadBackend:
         http = FakeHTTP(
             FakeResponse(402, json_data={"error": "credits"}, text="Payment")
         )
-        backend = HermesTweetReadBackend(
+        backend = XquikReadBackend(
             api_key="xq_test", base_url="https://x", http=http
         )
         # Act

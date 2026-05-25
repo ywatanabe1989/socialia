@@ -1,4 +1,4 @@
-"""Optional Hermes Tweet/Xquik-compatible Twitter read backend."""
+"""Optional Xquik-compatible Twitter read backend."""
 
 from __future__ import annotations
 
@@ -88,8 +88,8 @@ def _normalize_tweet(item: dict) -> dict:
     }
 
 
-class HermesTweetReadBackend:
-    """Small adapter for read-only X endpoints exposed through Hermes Tweet."""
+class XquikReadBackend:
+    """Small adapter for read-only X endpoints exposed through Xquik."""
 
     def __init__(
         self,
@@ -97,12 +97,9 @@ class HermesTweetReadBackend:
         base_url: Optional[str] = None,
         http: Optional[Any] = None,
     ) -> None:
-        self.api_key = (
-            api_key or get_env("HERMES_TWEET_API_KEY") or get_env("XQUIK_API_KEY") or ""
-        )
+        self.api_key = api_key or get_env("XQUIK_API_KEY") or ""
         self.base_url = (
             base_url
-            or get_env("HERMES_TWEET_BASE_URL")
             or get_env("XQUIK_BASE_URL")
             or DEFAULT_BASE_URL
         ).rstrip("/")
@@ -112,15 +109,13 @@ class HermesTweetReadBackend:
         return bool(self.api_key)
 
     def _headers(self) -> dict[str, str]:
-        if self.api_key.startswith("xq_"):
-            return {"x-api-key": self.api_key}
-        return {"authorization": f"Bearer {self.api_key}"}
+        return {"X-API-Key": self.api_key}
 
     def _get(self, path: str, params: Optional[dict[str, Any]] = None) -> dict:
         if not self.available():
             return {
                 "success": False,
-                "error": "XQUIK_API_KEY or HERMES_TWEET_API_KEY is not configured.",
+                "error": "XQUIK_API_KEY is not configured.",
             }
         url = urljoin(f"{self.base_url}/", path.lstrip("/"))
         response = self._http.get(

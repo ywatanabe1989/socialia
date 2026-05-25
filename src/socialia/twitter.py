@@ -9,7 +9,7 @@ from requests_oauthlib import OAuth1Session
 from ._branding import get_env
 from ._base import _Base
 from ._twitter_growth import TwitterGrowthMixin
-from ._twitter_read_backend import HermesTweetReadBackend
+from ._twitter_read_backend import XquikReadBackend
 
 
 class Twitter(TwitterGrowthMixin, _Base):
@@ -59,10 +59,10 @@ class Twitter(TwitterGrowthMixin, _Base):
         )
         self._read_backend = read_backend or self._configured_read_backend()
 
-    def _configured_read_backend(self) -> Optional[HermesTweetReadBackend]:
+    def _configured_read_backend(self) -> Optional[XquikReadBackend]:
         backend = (get_env("X_READ_BACKEND") or "").lower().replace("_", "-")
-        if backend in {"hermes", "hermes-tweet", "xquik"}:
-            return HermesTweetReadBackend()
+        if backend == "xquik":
+            return XquikReadBackend()
         return None
 
     def _has_read_backend(self) -> bool:
