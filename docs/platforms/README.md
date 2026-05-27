@@ -93,8 +93,12 @@ YOUTUBE_CLIENT_SECRET=
 ## Implementation Location
 
 Python implementations are in `../src/`:
-- `twitter_poster.py` - Twitter/X posting
-- (More to be added)
+- `twitter.py` - Twitter/X posting
+- `linkedin.py` - LinkedIn posting
+- `reddit.py` - Reddit posting
+- `slack.py` - Slack messaging
+- `youtube.py` - YouTube video uploads
+- `analytics.py` - Google Analytics tracking
 
 ## Recommended Approach
 

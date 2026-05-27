@@ -355,6 +355,7 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 | Twitter/X | Ready | v2 OAuth 1.0a | `pip install socialia` |
 | LinkedIn | Ready | v2 OAuth 2.0 | `pip install socialia` |
 | Reddit | Ready | PRAW | `pip install socialia[reddit]` |
+| Slack | Ready | slack-sdk | `pip install socialia` |
 | YouTube | Ready | Data API v3 | `pip install socialia[youtube]` |
 | Google Analytics | Ready | GA4 + Data API | `pip install socialia[analytics]` |
 
@@ -367,17 +368,26 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 socialia/
 ├── src/socialia/         # Python package
 │   ├── cli/              # CLI with argparse
+│   ├── _mcp/             # MCP tools and handlers
 │   ├── twitter.py        # Twitter/X API
 │   ├── linkedin.py       # LinkedIn API
 │   ├── reddit.py         # Reddit API (PRAW)
 │   ├── youtube.py        # YouTube API
+│   ├── youtube_batch.py  # YouTube batch upload configs
+│   ├── slack.py          # Slack messaging
 │   ├── analytics.py      # Google Analytics
 │   ├── scheduler.py      # Post scheduling system
 │   ├── org.py            # Org mode draft management
+│   ├── org_files.py      # File lifecycle helpers (draft/scheduled/posted)
 │   ├── mcp_server.py     # MCP server (delegates to CLI)
-│   └── base.py           # Base class
+│   ├── _server.py        # Platform-specific content strategies
+│   ├── _base.py          # Base class
+│   ├── _branding.py      # Branding/env prefix resolution
+│   ├── _twitter_growth.py # Twitter follow/growth automation
+│   └── _twitter_media.py  # Twitter media upload
 ├── docs/
 │   ├── platforms/        # Platform API documentation
+│   ├── sphinx/           # Sphinx/ReadTheDocs sources
 │   └── SETUP.md          # Step-by-step setup guide
 ├── examples/             # Usage examples
 ├── Makefile              # Command dispatcher

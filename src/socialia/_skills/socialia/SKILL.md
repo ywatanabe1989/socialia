@@ -77,7 +77,4 @@ socialia status
 | `social_analytics_sources` | Query GA4 traffic sources |
 | `social_analytics_realtime` | Query GA4 realtime active users |
 
-
-## Environment
-
 - [21_env-vars.md](21_env-vars.md) — SCITEX_* env vars read by socialia at runtime
