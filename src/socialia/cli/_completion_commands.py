@@ -6,9 +6,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .._paths import get_completion_dir as _get_completion_dir
 
-BASH_COMPLETION_DIR = Path.home() / ".bash_completion.d"
-ZSH_COMPLETION_DIR = Path.home() / ".zsh/completions"
+
+BASH_COMPLETION_DIR = _get_completion_dir()
+ZSH_COMPLETION_DIR = _get_completion_dir()
 
 
 def _get_bash_script() -> str:
