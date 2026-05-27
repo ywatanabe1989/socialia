@@ -5,6 +5,11 @@ projects/*
 !projects/template-project/
 drafts/
 
+### SciTeX local state — runtime regenerable data (track seed files only) ###
+.scitex/socialia/runtime/*
+!.scitex/socialia/runtime/.gitkeep
+!.scitex/socialia/runtime/README.md
+
 ### Source: /home/ywatanabe/.git-templates/.gitignore-templates/Custom/Claude.gitignore ###
 docs/to_claude
 docs/from_agents

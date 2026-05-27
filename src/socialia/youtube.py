@@ -5,8 +5,9 @@ __all__ = ["YouTube"]
 import os
 from typing import Optional
 
-from ._branding import get_env
 from ._base import _Base
+from ._branding import get_env
+from ._paths import get_youtube_token_file as _get_youtube_token_file
 
 from scitex_dev import try_import_optional
 
@@ -42,8 +43,6 @@ HAS_YOUTUBE = all(
     for x in (Credentials, InstalledAppFlow, Request, build, MediaFileUpload)
 )
 
-
-# OAuth scopes for YouTube
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
@@ -52,18 +51,11 @@ SCOPES = [
 
 
 class YouTube(_Base):
-    """
-    YouTube API client for video uploads and management.
-
-    Supports:
-    - Video uploads with metadata
-    - Update video metadata
-    - Delete videos
-    - Community posts (if channel eligible)
+    """YouTube API client for video uploads and management.
 
     Environment Variables:
         YOUTUBE_CLIENT_SECRETS_FILE: Path to OAuth client secrets JSON
-        YOUTUBE_TOKEN_FILE: Path to store OAuth tokens (default: ~/.youtube_token.json)
+        YOUTUBE_TOKEN_FILE: Path to store OAuth tokens (default: runtime/youtube_token.json)
     """
 
     platform_name = "youtube"
@@ -83,9 +75,8 @@ class YouTube(_Base):
         self.client_secrets_file = client_secrets_file or get_env(
             "YOUTUBE_CLIENT_SECRETS_FILE"
         )
-        self.token_file = token_file or (
-            get_env("YOUTUBE_TOKEN_FILE") or os.path.expanduser("~/.youtube_token.json")
-        )
+        default_token = str(_get_youtube_token_file())
+        self.token_file = token_file or (get_env("YOUTUBE_TOKEN_FILE") or default_token)
         self._youtube = None
         self._credentials = None
 
@@ -93,15 +84,10 @@ class YouTube(_Base):
         """Check if credentials are available."""
         if not HAS_YOUTUBE:
             return False
-
-        # Check for existing token
         if os.path.exists(self.token_file):
             return True
-
-        # Check for client secrets to initiate OAuth
         if self.client_secrets_file and os.path.exists(self.client_secrets_file):
             return True
-
         return False
 
     def _get_credentials(self) -> Optional["Credentials"]:
@@ -110,12 +96,9 @@ class YouTube(_Base):
             return None
 
         creds = None
-
-        # Load existing token
         if os.path.exists(self.token_file):
             creds = Credentials.from_authorized_user_file(self.token_file, SCOPES)
 
-        # Refresh or get new credentials
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
@@ -126,8 +109,6 @@ class YouTube(_Base):
                 creds = flow.run_local_server(port=0)
             else:
                 return None
-
-            # Save credentials
             with open(self.token_file, "w") as f:
                 f.write(creds.to_json())
 
@@ -137,11 +118,9 @@ class YouTube(_Base):
         """Get authenticated YouTube client."""
         if self._youtube:
             return self._youtube
-
         creds = self._get_credentials()
         if not creds:
             return None
-
         self._youtube = build("youtube", "v3", credentials=creds)
         return self._youtube
 
@@ -152,12 +131,11 @@ class YouTube(_Base):
         title: Optional[str] = None,
         description: Optional[str] = None,
         tags: Optional[list] = None,
-        category_id: str = "22",  # People & Blogs
+        category_id: str = "22",
         privacy_status: str = "public",
         thumbnail_path: Optional[str] = None,
     ) -> dict:
-        """
-        Upload a video or create a community post.
+        """Upload a video or create a community post.
 
         Args:
             text: Description text (or community post text if no video)
@@ -185,7 +163,6 @@ class YouTube(_Base):
         if not youtube:
             return {"success": False, "error": "Could not create YouTube client"}
 
-        # Video upload
         if video_path:
             return self._upload_video(
                 youtube,
@@ -198,7 +175,6 @@ class YouTube(_Base):
                 thumbnail_path=thumbnail_path,
             )
 
-        # Community post (text only)
         return self._create_community_post(youtube, text)
 
     def _upload_video(
@@ -232,7 +208,7 @@ class YouTube(_Base):
         try:
             media = MediaFileUpload(
                 video_path,
-                chunksize=1024 * 1024,  # 1MB chunks
+                chunksize=1024 * 1024,
                 resumable=True,
             )
 
@@ -248,7 +224,6 @@ class YouTube(_Base):
 
             video_id = response["id"]
 
-            # Set custom thumbnail if provided
             if thumbnail_path and os.path.exists(thumbnail_path):
                 try:
                     youtube.thumbnails().set(
@@ -256,7 +231,7 @@ class YouTube(_Base):
                         media_body=MediaFileUpload(thumbnail_path),
                     ).execute()
                 except Exception:
-                    pass  # Thumbnail upload is optional
+                    pass
 
             return {
                 "success": True,
@@ -269,25 +244,14 @@ class YouTube(_Base):
             return {"success": False, "error": str(e)}
 
     def _create_community_post(self, youtube, text: str) -> dict:
-        """
-        Create a community post.
-
-        Note: Community posts require channel to be eligible (usually 500+ subscribers).
-        This uses the YouTube Data API's activities endpoint.
-        """
-        try:
-            # Community posts via API have limited support
-            # This is a placeholder - full implementation requires channel eligibility
-            return {
-                "success": False,
-                "error": "Community posts require channel eligibility (500+ subscribers) and manual posting via YouTube Studio",
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Create a community post (placeholder - requires channel eligibility)."""
+        return {
+            "success": False,
+            "error": "Community posts require channel eligibility (500+ subscribers) and manual posting via YouTube Studio",
+        }
 
     def delete(self, video_id: str) -> dict:
-        """
-        Delete a video.
+        """Delete a video by ID.
 
         Args:
             video_id: YouTube video ID
@@ -297,14 +261,11 @@ class YouTube(_Base):
         """
         if not HAS_YOUTUBE:
             return {"success": False, "error": "YouTube libraries not installed"}
-
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
-
         youtube = self._get_client()
         if not youtube:
             return {"success": False, "error": "Could not create YouTube client"}
-
         try:
             youtube.videos().delete(id=video_id).execute()
             return {"success": True, "deleted": True}
@@ -319,8 +280,7 @@ class YouTube(_Base):
         tags: Optional[list] = None,
         privacy_status: Optional[str] = None,
     ) -> dict:
-        """
-        Update video metadata.
+        """Update video metadata.
 
         Args:
             video_id: YouTube video ID
@@ -334,22 +294,13 @@ class YouTube(_Base):
         """
         if not HAS_YOUTUBE:
             return {"success": False, "error": "YouTube libraries not installed"}
-
         youtube = self._get_client()
         if not youtube:
             return {"success": False, "error": "Could not create YouTube client"}
-
         try:
-            # Get current video details
             current = (
-                youtube.videos()
-                .list(
-                    part="snippet,status",
-                    id=video_id,
-                )
-                .execute()
+                youtube.videos().list(part="snippet,status", id=video_id).execute()
             )
-
             if not current.get("items"):
                 return {"success": False, "error": f"Video not found: {video_id}"}
 
@@ -357,7 +308,6 @@ class YouTube(_Base):
             snippet = video["snippet"]
             status = video["status"]
 
-            # Update fields
             if title:
                 snippet["title"] = title
             if description:
@@ -367,14 +317,9 @@ class YouTube(_Base):
             if privacy_status:
                 status["privacyStatus"] = privacy_status
 
-            # Update video
             youtube.videos().update(
                 part="snippet,status",
-                body={
-                    "id": video_id,
-                    "snippet": snippet,
-                    "status": status,
-                },
+                body={"id": video_id, "snippet": snippet, "status": status},
             ).execute()
 
             return {
@@ -382,34 +327,20 @@ class YouTube(_Base):
                 "id": video_id,
                 "url": f"https://www.youtube.com/watch?v={video_id}",
             }
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def get_channel_info(self) -> dict:
-        """
-        Get authenticated user's channel information.
-
-        Returns:
-            dict with channel info or error
-        """
+        """Get authenticated user's channel information."""
         if not HAS_YOUTUBE:
             return {"success": False, "error": "YouTube libraries not installed"}
-
         youtube = self._get_client()
         if not youtube:
             return {"success": False, "error": "Could not create YouTube client"}
-
         try:
             response = (
-                youtube.channels()
-                .list(
-                    part="snippet,statistics",
-                    mine=True,
-                )
-                .execute()
+                youtube.channels().list(part="snippet,statistics", mine=True).execute()
             )
-
             if not response.get("items"):
                 return {"success": False, "error": "No channel found"}
 
@@ -418,19 +349,17 @@ class YouTube(_Base):
                 "success": True,
                 "id": channel["id"],
                 "title": channel["snippet"]["title"],
-                "description": channel["snippet"].get("description", ""),
+                "description": channel["snippet"].get("description", "")[:100],
                 "subscribers": channel["statistics"].get("subscriberCount", "hidden"),
                 "videos": channel["statistics"].get("videoCount", 0),
                 "views": channel["statistics"].get("viewCount", 0),
                 "url": f"https://www.youtube.com/channel/{channel['id']}",
             }
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def list_videos(self, max_results: int = 10) -> dict:
-        """
-        List user's uploaded videos.
+        """List user's uploaded videos.
 
         Args:
             max_results: Maximum number of videos to return
@@ -440,30 +369,19 @@ class YouTube(_Base):
         """
         if not HAS_YOUTUBE:
             return {"success": False, "error": "YouTube libraries not installed"}
-
         youtube = self._get_client()
         if not youtube:
             return {"success": False, "error": "Could not create YouTube client"}
-
         try:
-            # Get uploads playlist ID
             channels = (
-                youtube.channels()
-                .list(
-                    part="contentDetails",
-                    mine=True,
-                )
-                .execute()
+                youtube.channels().list(part="contentDetails", mine=True).execute()
             )
-
             if not channels.get("items"):
                 return {"success": False, "error": "No channel found"}
 
             uploads_id = channels["items"][0]["contentDetails"]["relatedPlaylists"][
                 "uploads"
             ]
-
-            # Get videos from uploads playlist
             videos_response = (
                 youtube.playlistItems()
                 .list(
@@ -488,37 +406,25 @@ class YouTube(_Base):
                     }
                 )
 
-            return {
-                "success": True,
-                "videos": videos,
-                "count": len(videos),
-            }
-
+            return {"success": True, "videos": videos, "count": len(videos)}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def me(self) -> dict:
-        """
-        Get authenticated user's channel information.
-
-        Returns:
-            dict with 'success', channel info or 'error'
-        """
+        """Get authenticated user's channel information."""
         return self.get_channel_info()
 
     def feed(self, limit: int = 10) -> dict:
-        """
-        Get user's recent videos.
+        """Get user's recent videos.
 
         Args:
             limit: Maximum number of videos to return
 
         Returns:
-            dict with 'success', 'posts' (videos) list or 'error'
+            dict with 'success', 'posts' list or 'error'
         """
         result = self.list_videos(max_results=limit)
         if result.get("success"):
-            # Rename 'videos' to 'posts' for consistency
             return {
                 "success": True,
                 "posts": result.get("videos", []),

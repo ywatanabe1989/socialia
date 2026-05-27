@@ -8,16 +8,22 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 
-SCHEDULE_DIR = Path.home() / ".socialia"
-SCHEDULE_FILE = SCHEDULE_DIR / "scheduled.json"
+from ._paths import get_schedule_file as _get_schedule_file
+
+SCHEDULE_FILE: Path = _get_schedule_file()
+"""Path to the scheduled-jobs JSON file (under ``~/.scitex/socialia/runtime/``).
+
+Tests may override this at the module level for isolation — see
+``_resolve_schedule_file``.
+"""
 
 
 def _resolve_schedule_file(schedule_file=None) -> Path:
     """Resolve the schedule-file path used by a public API call.
 
     Production callers leave ``schedule_file=None`` and we use the
-    module-level ``SCHEDULE_FILE`` (``~/.socialia/scheduled.json``).  Tests
-    pass an explicit ``tmp_path`` so they don't mutate the user's home.
+    module-level ``SCHEDULE_FILE`` (under ``~/.scitex/socialia/runtime/``).
+    Tests pass an explicit ``tmp_path`` so they don't mutate the user's home.
     """
     return Path(schedule_file) if schedule_file is not None else SCHEDULE_FILE
 
