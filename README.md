@@ -4,7 +4,7 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Documentation Status](https://readthedocs.org/projects/socialia/badge/?version=latest)](https://socialia.readthedocs.io/en/latest/?badge=latest)
-[![CI](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml)
+[![CI](https://github.com/ywatanabe1989/socialia/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml/badge.svg)](https://github.com/ywatanabe1989/socialia/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml)
 
 Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
@@ -102,6 +102,11 @@ socialia feed
 socialia feed --detail        # Full text with URLs
 socialia feed --mentions      # Get mentions/notifications
 socialia feed --replies       # Get replies to your posts (Twitter)
+
+# Optional Xquik read backend
+SOCIALIA_X_READ_BACKEND=xquik
+SOCIALIA_X_READ_USERNAME=your_handle
+XQUIK_API_KEY=xq_...
 
 # Get user profile info
 socialia me twitter

@@ -2,13 +2,14 @@
 
 __all__ = ["Twitter"]
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from requests_oauthlib import OAuth1Session
 
 from ._branding import get_env
 from ._base import _Base
 from ._twitter_growth import TwitterGrowthMixin
+from ._twitter_read_backend import XquikReadBackend
 
 
 class Twitter(TwitterGrowthMixin, _Base):
@@ -38,6 +39,8 @@ class Twitter(TwitterGrowthMixin, _Base):
         access_token_secret: Optional[str] = None,
         *,
         session_factory: Optional[Callable[[], object]] = None,
+        read_backend: Optional[Any] = None,
+        read_username: Optional[str] = None,
     ):
         # ``session_factory`` is a zero-arg callable that returns the HTTP
         # session object used to talk to the Twitter API.  Production code
@@ -51,6 +54,37 @@ class Twitter(TwitterGrowthMixin, _Base):
             "X_ACCESSTOKEN_SECRET"
         )
         self._session_factory = session_factory
+        self.read_username = (read_username or get_env("X_READ_USERNAME") or "").lstrip(
+            "@"
+        )
+        self._read_backend = read_backend or self._configured_read_backend()
+
+    def _configured_read_backend(self) -> Optional[XquikReadBackend]:
+        backend = (get_env("X_READ_BACKEND") or "").lower().replace("_", "-")
+        if backend == "xquik":
+            return XquikReadBackend()
+        return None
+
+    def _has_read_backend(self) -> bool:
+        if self._read_backend is None:
+            return False
+        available = getattr(self._read_backend, "available", None)
+        if callable(available):
+            return bool(available())
+        return True
+
+    def _read_backend_call(self, method_name: str, *args, **kwargs) -> Optional[dict]:
+        if not self._has_read_backend():
+            return None
+        method = getattr(self._read_backend, method_name, None)
+        if callable(method):
+            return method(*args, **kwargs)
+        return None
+
+    def _read_backend_user_call(self, method_name: str, **kwargs) -> Optional[dict]:
+        if not self.read_username:
+            return None
+        return self._read_backend_call(method_name, self.read_username, **kwargs)
 
     def _get_session(self):
         """Create OAuth1 session (or the injected fake session)."""
@@ -72,6 +106,12 @@ class Twitter(TwitterGrowthMixin, _Base):
                 self.access_token,
                 self.access_token_secret,
             ]
+        )
+
+    def validate_read_credentials(self) -> bool:
+        """Check if read operations can use OAuth or the optional read backend."""
+        return self.validate_credentials() or (
+            self._has_read_backend() and bool(self.read_username)
         )
 
     def upload_media(self, file_path: str) -> dict:
@@ -252,6 +292,10 @@ class Twitter(TwitterGrowthMixin, _Base):
         Returns:
             dict with 'success', 'tweets' list or 'error'
         """
+        backend_result = self._read_backend_user_call("user_tweets", limit=limit)
+        if backend_result is not None:
+            return backend_result
+
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 
@@ -299,6 +343,10 @@ class Twitter(TwitterGrowthMixin, _Base):
         Returns:
             dict with 'success', 'mentions' list or 'error'
         """
+        backend_result = self._read_backend_user_call("mentions", limit=limit)
+        if backend_result is not None:
+            return backend_result
+
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 
@@ -353,6 +401,10 @@ class Twitter(TwitterGrowthMixin, _Base):
         Returns:
             dict with 'success', 'replies' list or 'error'
         """
+        backend_result = self._read_backend_user_call("replies", limit=limit)
+        if backend_result is not None:
+            return backend_result
+
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 
