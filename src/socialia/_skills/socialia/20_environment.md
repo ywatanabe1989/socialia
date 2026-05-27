@@ -31,11 +31,19 @@ tags: [socialia-environment]
 | `SOCIALIA_REDDIT_USERNAME` | Reddit username |
 | `SOCIALIA_REDDIT_PASSWORD` | Reddit password |
 
+## Slack
+
+| Variable | Purpose |
+|----------|---------|
+| `SOCIALIA_SLACK_BOT_TOKEN` | Slack bot OAuth token |
+| `SOCIALIA_SLACK_DEFAULT_CHANNEL` | Default Slack channel for posts |
+
 ## YouTube
 
 | Variable | Purpose |
 |----------|---------|
 | `SOCIALIA_YOUTUBE_CLIENT_SECRETS_FILE` | Path to YouTube OAuth client secrets |
+| `SOCIALIA_YOUTUBE_TOKEN_FILE` | Path to YouTube OAuth token (optional, default: runtime/youtube_token.json) |
 
 ## Google Analytics
 
