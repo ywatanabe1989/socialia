@@ -92,6 +92,15 @@ XQUIK_API_KEY=xq_...
 XQUIK_BASE_URL=https://xquik.com
 ```
 
+Alternatively, the same read surface can be routed through GetXAPI:
+
+```bash
+SOCIALIA_X_READ_BACKEND=getxapi
+SOCIALIA_X_READ_USERNAME=your_handle
+GETXAPI_API_KEY=...
+GETXAPI_BASE_URL=https://api.getxapi.com
+```
+
 ## Implementation
 
 See `../src/twitter_poster.py` for full implementation.

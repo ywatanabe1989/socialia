@@ -108,6 +108,11 @@ SOCIALIA_X_READ_BACKEND=xquik
 SOCIALIA_X_READ_USERNAME=your_handle
 XQUIK_API_KEY=xq_...
 
+# Optional GetXAPI read backend
+SOCIALIA_X_READ_BACKEND=getxapi
+SOCIALIA_X_READ_USERNAME=your_handle
+GETXAPI_API_KEY=...
+
 # Get user profile info
 socialia me twitter
 
