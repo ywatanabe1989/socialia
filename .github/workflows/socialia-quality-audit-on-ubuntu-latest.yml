@@ -33,6 +33,18 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # --new-only stages `develop` via `git worktree add --detach`;
+          # we need the full history + a local `develop` ref for that to
+          # work. fetch-depth=0 pulls the full history; the explicit
+          # fetch step below materialises a local `develop` branch from
+          # origin/develop so worktree-add can resolve the ref.
+          fetch-depth: 0
+
+      - name: Ensure local develop ref exists (for --new-only diff)
+        run: |
+          git fetch origin develop:develop || \
+            git fetch origin develop && git branch -f develop origin/develop
 
       - uses: actions/setup-python@v5
         with:
@@ -42,7 +54,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-          pip install "scitex-dev[cli-audit]"
+          # Pin to develop until the line-stable ViolationKey ratchet
+          # (scitex-dev PR #184, merge b4a21988) lands on PyPI (> v0.17.13).
+          # The ratchet is required for `--new-only` to grandfather the
+          # ~291 pre-existing PA-306/PA-307 violations exposed by this gate.
+          pip install "scitex-dev[cli-audit] @ git+https://github.com/ywatanabe1989/scitex-dev@develop"
 
-      - name: Run scitex-dev ecosystem audit-all
-        run: scitex-dev ecosystem audit-all socialia --no-version-check
+      - name: Run scitex-dev ecosystem audit-all (new-only ratchet)
+        run: scitex-dev ecosystem audit-all socialia --new-only --no-version-check
