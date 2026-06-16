@@ -10,6 +10,7 @@ from ._branding import get_env
 from ._base import _Base
 from ._twitter_growth import TwitterGrowthMixin
 from ._twitter_read_backend import XquikReadBackend
+from ._twitter_read_backend_getxapi import GetXAPIReadBackend
 
 
 class Twitter(TwitterGrowthMixin, _Base):
@@ -59,10 +60,12 @@ class Twitter(TwitterGrowthMixin, _Base):
         )
         self._read_backend = read_backend or self._configured_read_backend()
 
-    def _configured_read_backend(self) -> Optional[XquikReadBackend]:
+    def _configured_read_backend(self) -> Optional[Any]:
         backend = (get_env("X_READ_BACKEND") or "").lower().replace("_", "-")
         if backend == "xquik":
             return XquikReadBackend()
+        if backend == "getxapi":
+            return GetXAPIReadBackend()
         return None
 
     def _has_read_backend(self) -> bool:
