@@ -267,6 +267,15 @@ class TwitterGrowthMixin:
         Returns:
             dict with 'success', 'tweets' list or 'error'
         """
+        backend_result = self._read_backend_call(
+            "search_tweets",
+            query,
+            limit=limit,
+            include_users=include_users,
+        )
+        if backend_result is not None:
+            return backend_result
+
         if not self.validate_credentials():
             return {"success": False, "error": "Missing credentials"}
 

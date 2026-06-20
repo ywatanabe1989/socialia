@@ -25,7 +25,7 @@ from socialia.scheduler import (
 @pytest.fixture
 def schedule_file(tmp_path):
     """Per-test scheduler JSON file under tmp_path."""
-    sf = tmp_path / ".socialia" / "scheduled.json"
+    sf = tmp_path / "scheduled.json"
     sf.parent.mkdir(parents=True, exist_ok=True)
     sf.write_text("[]")
     return sf
@@ -141,9 +141,7 @@ class TestSchedulePost:
         # Assert
         assert "job_id" in result
 
-    def test_schedule_post_with_valid_time_returns_scheduled_for(
-        self, schedule_file
-    ):
+    def test_schedule_post_with_valid_time_returns_scheduled_for(self, schedule_file):
         # Arrange
         # (schedule_file fixture sets up an empty scheduled.json)
         # Act
@@ -153,9 +151,7 @@ class TestSchedulePost:
         # Assert
         assert "scheduled_for" in result
 
-    def test_schedule_post_with_invalid_time_marks_success_false(
-        self, schedule_file
-    ):
+    def test_schedule_post_with_invalid_time_marks_success_false(self, schedule_file):
         # Arrange
         # (schedule_file fixture sets up an empty scheduled.json)
         # Act
@@ -165,9 +161,7 @@ class TestSchedulePost:
         # Assert
         assert result["success"] is False
 
-    def test_schedule_post_with_invalid_time_returns_error_key(
-        self, schedule_file
-    ):
+    def test_schedule_post_with_invalid_time_returns_error_key(self, schedule_file):
         # Arrange
         # (schedule_file fixture sets up an empty scheduled.json)
         # Act
@@ -190,9 +184,7 @@ class TestListScheduled:
         # Assert
         assert result == []
 
-    def test_list_returns_one_entry_when_one_pending_job_exists(
-        self, schedule_file
-    ):
+    def test_list_returns_one_entry_when_one_pending_job_exists(self, schedule_file):
         # Arrange
         jobs = [
             {
@@ -270,9 +262,7 @@ class TestCancelScheduled:
         # Assert
         assert result["success"] is True
 
-    def test_cancel_existing_job_removes_it_from_pending_listing(
-        self, schedule_file
-    ):
+    def test_cancel_existing_job_removes_it_from_pending_listing(self, schedule_file):
         # Arrange
         jobs = [
             {
@@ -297,9 +287,7 @@ class TestCancelScheduled:
 
 
 class TestRunDueJobs:
-    def test_run_due_jobs_returns_empty_list_when_no_jobs_recorded(
-        self, schedule_file
-    ):
+    def test_run_due_jobs_returns_empty_list_when_no_jobs_recorded(self, schedule_file):
         # Arrange
         # (schedule_file already contains "[]")
         # Act
@@ -307,9 +295,7 @@ class TestRunDueJobs:
         # Assert
         assert results == []
 
-    def test_run_due_jobs_skips_jobs_scheduled_for_the_future(
-        self, schedule_file
-    ):
+    def test_run_due_jobs_skips_jobs_scheduled_for_the_future(self, schedule_file):
         # Arrange
         future_time = (datetime.now() + timedelta(hours=24)).isoformat()
         jobs = [
@@ -329,9 +315,7 @@ class TestRunDueJobs:
         # Assert
         assert results == []
 
-    def test_run_due_jobs_leaves_future_jobs_in_pending_listing(
-        self, schedule_file
-    ):
+    def test_run_due_jobs_leaves_future_jobs_in_pending_listing(self, schedule_file):
         # Arrange
         future_time = (datetime.now() + timedelta(hours=24)).isoformat()
         jobs = [

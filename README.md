@@ -4,7 +4,7 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Documentation Status](https://readthedocs.org/projects/socialia/badge/?version=latest)](https://socialia.readthedocs.io/en/latest/?badge=latest)
-[![CI](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/socialia/actions/workflows/ci.yml)
+[![CI](https://github.com/ywatanabe1989/socialia/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml/badge.svg)](https://github.com/ywatanabe1989/socialia/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml)
 
 Part of [**SciTeX**](https://scitex.ai) for scientific research automation.
 
@@ -102,6 +102,11 @@ socialia feed
 socialia feed --detail        # Full text with URLs
 socialia feed --mentions      # Get mentions/notifications
 socialia feed --replies       # Get replies to your posts (Twitter)
+
+# Optional Xquik read backend
+SOCIALIA_X_READ_BACKEND=xquik
+SOCIALIA_X_READ_USERNAME=your_handle
+XQUIK_API_KEY=xq_...
 
 # Get user profile info
 socialia me twitter
@@ -355,6 +360,7 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 | Twitter/X | Ready | v2 OAuth 1.0a | `pip install socialia` |
 | LinkedIn | Ready | v2 OAuth 2.0 | `pip install socialia` |
 | Reddit | Ready | PRAW | `pip install socialia[reddit]` |
+| Slack | Ready | slack-sdk | `pip install socialia` |
 | YouTube | Ready | Data API v3 | `pip install socialia[youtube]` |
 | Google Analytics | Ready | GA4 + Data API | `pip install socialia[analytics]` |
 
@@ -367,17 +373,26 @@ export SOCIALIA_GOOGLE_ANALYTICS_PROPERTY_ID="123456789"  # Optional, for Data A
 socialia/
 ├── src/socialia/         # Python package
 │   ├── cli/              # CLI with argparse
+│   ├── _mcp/             # MCP tools and handlers
 │   ├── twitter.py        # Twitter/X API
 │   ├── linkedin.py       # LinkedIn API
 │   ├── reddit.py         # Reddit API (PRAW)
 │   ├── youtube.py        # YouTube API
+│   ├── youtube_batch.py  # YouTube batch upload configs
+│   ├── slack.py          # Slack messaging
 │   ├── analytics.py      # Google Analytics
 │   ├── scheduler.py      # Post scheduling system
 │   ├── org.py            # Org mode draft management
+│   ├── org_files.py      # File lifecycle helpers (draft/scheduled/posted)
 │   ├── mcp_server.py     # MCP server (delegates to CLI)
-│   └── base.py           # Base class
+│   ├── _server.py        # Platform-specific content strategies
+│   ├── _base.py          # Base class
+│   ├── _branding.py      # Branding/env prefix resolution
+│   ├── _twitter_growth.py # Twitter follow/growth automation
+│   └── _twitter_media.py  # Twitter media upload
 ├── docs/
 │   ├── platforms/        # Platform API documentation
+│   ├── sphinx/           # Sphinx/ReadTheDocs sources
 │   └── SETUP.md          # Step-by-step setup guide
 ├── examples/             # Usage examples
 ├── Makefile              # Command dispatcher

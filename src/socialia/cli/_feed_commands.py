@@ -45,7 +45,13 @@ def cmd_feed(args, output_json: bool = False) -> int:
 
     for platform in platforms:
         client = get_client(platform)
-        if not client.validate_credentials():
+        validate_read = getattr(client, "validate_read_credentials", None)
+        can_read = (
+            validate_read()
+            if callable(validate_read)
+            else client.validate_credentials()
+        )
+        if not can_read:
             # Skip unconfigured platforms silently (unless specifically requested)
             if hasattr(args, "platform") and args.platform:
                 results[platform] = {"success": False, "error": "Not configured"}

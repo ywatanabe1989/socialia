@@ -9,12 +9,12 @@ tags: [socialia-platforms]
 
 | Platform | Class | Features |
 |----------|-------|----------|
-| Twitter/X | `Twitter` | Post, thread, media |
+| Twitter/X | `Twitter` | Post, thread, media, follow/grow |
 | LinkedIn | `LinkedIn` | Post, articles |
-| Reddit | `Reddit` | Post, subreddit targeting |
-| Slack | `Slack` | Channel messages |
-| YouTube | `YouTube` | Video metadata |
-| Google Analytics | `GoogleAnalytics` | Analytics data |
+| Reddit | `Reddit` | Post, subreddit targeting, feed |
+| Slack | `Slack` | Channel messages, threads |
+| YouTube | `YouTube` | Video upload, metadata, community posts |
+| Google Analytics | `GoogleAnalytics` | Event tracking, pageviews, sources, realtime |
 
 ## Org-file Workflow
 
